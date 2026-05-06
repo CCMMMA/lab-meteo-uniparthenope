@@ -1,0 +1,29 @@
+services:
+  jupyterhub:
+    build: ./jupyterhub
+    container_name: wxhub-jupyterhub
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
+      -  jupyterhub-data:/srv/jupyterhub/data
+      - ./templates:/srv/templates:ro
+      - /opt/weather/data/raw/sensors:/srv/data/raw/sensors:ro
+      - /opt/weather/data/raw/models:/srv/data/raw/models:ro
+      - /opt/weather/data/curated:/srv/data/curated
+    environment:
+      DOCKER_NOTEBOOK_IMAGE: wxhub-singleuser:latest
+      PUBLIC_HOST: http://localhost:8000
+    networks:
+      - wxhub-net
+
+networks:
+  wxhub-net:
+    name: wxhub-net
+
+volumes:
+   jupyterhub-data:
+
+
