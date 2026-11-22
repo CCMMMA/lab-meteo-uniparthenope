@@ -14,5 +14,4 @@ cmocean
 seaborn
 jupyterlab-git
 ipywidgets
-
-
+papermill

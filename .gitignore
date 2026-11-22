@@ -1,5 +1,6 @@
-__pycache__/
-*.pyc
-.env
-data/
-*.log
+data/raw/**/*
+data/curated/**/*
+!data/**/.gitkeep
+misure/
+**/.ipynb_checkpoints/
+outputs/

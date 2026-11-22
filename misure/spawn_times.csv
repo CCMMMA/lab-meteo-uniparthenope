@@ -1,0 +1,33 @@
+run,utenti_concorrenti,utente,tempo_avvio_s,esito
+1,1,bench01,,HTTP 403
+2,1,bench01,,HTTP 403
+3,1,bench01,,HTTP 403
+4,1,bench01,,HTTP 403
+5,1,bench01,,HTTP 403
+1,1,bench01,,HTTP 404
+2,1,bench01,,HTTP 404
+3,1,bench01,,HTTP 404
+4,1,bench01,,HTTP 404
+5,1,bench01,,HTTP 404
+1,1,bench01,22.91,ok
+2,1,bench01,17.26,ok
+3,1,bench01,14.12,ok
+4,1,bench01,14.17,ok
+5,1,bench01,11.78,ok
+1,2,bench01,29.78,ok
+1,2,bench02,31.17,ok
+2,2,bench01,21.9,ok
+2,2,bench02,19.21,ok
+3,2,bench01,18.49,ok
+3,2,bench02,21.98,ok
+1,3,bench01,,timeout
+1,3,bench02,,timeout
+1,3,bench03,,timeout
+2,3,bench01,,timeout
+2,3,bench02,,timeout
+2,3,bench03,,timeout
+3,3,bench01,20.12,ok
+3,3,bench02,18.83,ok
+3,3,bench03,18.77,ok
+1,2,bench01,26.58,ok
+1,2,bench02,28.69,ok

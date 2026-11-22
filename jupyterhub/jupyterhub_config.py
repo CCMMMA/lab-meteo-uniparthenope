@@ -11,6 +11,8 @@ c.JupyterHub.bind_url = "http://0.0.0.0:8000"
 c.JupyterHub.hub_ip = "0.0.0.0"
 c.JupyterHub.hub_connect_ip = os.environ.get("HUB_IP", "jupyterhub")
 c.JupyterHub.db_url = "sqlite:///data/jupyterhub.sqlite"
+# [NUOVO] segreto dei cookie nel volume persistente: le sessioni sopravvivono al riavvio
+c.JupyterHub.cookie_secret_file = "/srv/jupyterhub/data/jupyterhub_cookie_secret"
 
 #-----------------------------------------------------------------------------
 # Authentication
@@ -23,7 +25,8 @@ c.JupyterHub.template_paths = [
 c.NativeAuthenticator.open_signup = True
 c.Authenticator.admin_users = {"admin"}
 
-c.Authenticator.allowed_users = {'admin', 'aulainfo'}
+# [MODIFICATO] aggiunti due utenti di prova per i test T02 e T16
+c.Authenticator.allowed_users = {'admin', 'aulainfo', 'utente1', 'utente2'}
 
 #----------------------------------------------------------------------------------
 # Spawner
@@ -49,17 +52,16 @@ c.Spawner.cmd = ["jupyterhub-singleuser"]
 #Per-user persistent workspace
 notebook_dir = "/home/jovyan/work"
 c.DockerSpawner.notebook_dir = notebook_dir
-#c.DockerSpawner.volumes = {
-    #"jupyterhub-user-{username}": notebook_dir,
-#}
 
+# [MODIFICATO] I percorsi a sinistra sono percorsi dell'HOST (la VM), perché i mount
+# li esegue il Docker Engine dell'host, non il container dell'Hub.
+# Le aree condivise sono in sola lettura ("mode": "ro").
 c.DockerSpawner.volumes = {
     "jupyterhub-user-{username}": "/home/jovyan/work",
-
-    "/srv/templates": "/home/jovyan/templates",
-    "/srv/data/raw/sensors": "/home/jovyan/data/raw/sensors",
-    "/srv/data/raw/models": "/home/jovyan/data/raw/models",
-    "/home/aulainfo/wxhub/data/curated": "/home/jovyan/data/curated",
+    "/home/aulainfo/wxhub/templates": {"bind": "/home/jovyan/templates", "mode": "ro"},
+    "/opt/weather/data/raw/sensors": {"bind": "/home/jovyan/data/raw/sensors", "mode": "ro"},
+    "/opt/weather/data/raw/models": {"bind": "/home/jovyan/data/raw/models", "mode": "ro"},
+    "/opt/weather/data/curated": {"bind": "/home/jovyan/data/curated", "mode": "ro"},
 }
 
 #Useful environment variables inside user servers
@@ -76,5 +78,3 @@ c.JupyterHub.default_url = "/hub/home"
 #------------------------------------------------------------------------------
 #Idle cleanup left out for Phase 1 to keep the pilot simple
 #---------------------------------------------------------------------------------
-
-
