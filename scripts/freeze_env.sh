@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Congela le versioni effettive delle librerie installate nell'immagine utente.
+# Record the effective package versions and image identifier for audit purposes.
 set -euo pipefail
 docker run --rm --entrypoint pip wxhub-singleuser:latest freeze > image/requirements.lock
 docker image inspect wxhub-singleuser:latest --format '{{.Id}}' > image/IMAGE_ID
-echo "Creati image/requirements.lock e image/IMAGE_ID"
+echo "Created image/requirements.lock and image/IMAGE_ID"

@@ -1,6 +1,6 @@
 data/raw/**/*
 data/curated/**/*
 !data/**/.gitkeep
-misure/
+measurements/
 **/.ipynb_checkpoints/
 outputs/

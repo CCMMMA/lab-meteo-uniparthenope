@@ -1,84 +1,130 @@
-# wxhub – ambiente interattivo JupyterHub per dati meteo-marini
+# wxhub
 
-Repository della tesi di laurea triennale in Informatica (Università degli Studi di Napoli
-"Parthenope") *Sviluppo e messa in produzione di un ambiente interattivo basato su Jupyter
-Notebook* – Mariano Pio Stora, relatore Prof. Raffaele Montella.
+> A reproducible, containerized JupyterHub workspace for weather and marine-data analysis.
 
-La piattaforma fornisce a ogni utente autenticato un server JupyterLab isolato in un container
-Docker, con lo stack scientifico (Xarray, Dask, Zarr, NetCDF4, cfgrib, Voilà, Papermill) e
-l'accesso in sola lettura ai dati locali.
+[![CI](https://github.com/raffmont/wxhub/actions/workflows/ci.yml/badge.svg)](https://github.com/raffmont/wxhub/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Struttura
+wxhub gives every authenticated user an isolated JupyterLab server with a ready-to-use scientific
+stack: Xarray, Dask, Zarr, NetCDF4, cfgrib, Cartopy, Voilà, and Papermill. Shared source data and
+notebook templates are mounted read-only; each user's work lives in a persistent Docker volume.
 
-| Percorso | Contenuto |
-|---|---|
-| `docker-compose.yml` | servizio JupyterHub, rete `wxhub-net`, volume dello stato |
-| `jupyterhub/` | Dockerfile dell'Hub (JupyterHub 5.3.0) e `jupyterhub_config.py` |
-| `image/` | Dockerfile (base `scipy-notebook:2025-12-31`) e dipendenze dell'immagine utente |
-| `templates/` | notebook template condivisi (montati in sola lettura) |
-| `notebooks/` | caso d'uso WRF Campania (dati meteo@uniparthenope) e dashboard Voilà |
-| `scripts/` | download dati WRF via OPeNDAP, test dei permessi, misure, Papermill |
+The repository accompanies the Computer Science bachelor thesis *Development and production
+deployment of an interactive environment based on Jupyter Notebook* at the University of Naples
+“Parthenope” (author: Mariano Pio Stora; supervisor: Prof. Raffaele Montella).
 
-## Requisiti
+## What you get
 
-Linux x86_64, Docker Engine con plugin Compose v2, 4 GB di RAM liberi, porta 8000.
+- Per-user, persistent JupyterLab containers managed by JupyterHub and DockerSpawner.
+- A versioned scientific runtime and an auditable environment snapshot.
+- Read-only shared weather data and starter notebooks.
+- A reproducible WRF Campania case study with maps, time series, Zarr output, and a Voilà dashboard.
+- Scripts for data acquisition, headless execution, permission checks, and performance measurements.
+- Continuous validation of code, notebooks, documentation links, Compose configuration, and images.
 
-## Installazione
+## Architecture
 
-I percorsi dell'host usati dalla configurazione sono `/opt/weather/data/{raw/sensors,raw/models,curated}`
-per i dati e la directory `templates` del clone per i template. Si possono cambiare senza modificare
-il codice impostando `WXHUB_SENSORS_HOST`, `WXHUB_MODELS_HOST`, `WXHUB_CURATED_HOST` e
-`WXHUB_TEMPLATES_HOST` prima di `docker compose up`.
+```text
+browser ──► JupyterHub :8000 ──► DockerSpawner ──► jupyter-<username>
+                    │                                  │
+                    ├── persistent Hub state           ├── persistent /home/jovyan/work
+                    └── Docker socket                  └── read-only data and templates
+```
+
+See [Architecture](docs/architecture.md) for the complete component and storage model.
+
+## Quick start
+
+### Requirements
+
+- Linux x86_64 (the production target)
+- Docker Engine 24+ with Docker Compose v2
+- At least 4 GB free RAM and 15 GB free disk space
+- TCP port 8000 available
+
+### Install
 
 ```bash
-git clone https://github.com/<utente>/wxhub.git ~/wxhub && cd ~/wxhub
+git clone https://github.com/raffmont/wxhub.git
+cd wxhub
 sudo mkdir -p /opt/weather/data/raw/sensors /opt/weather/data/raw/models /opt/weather/data/curated
-sudo chown -R $USER /opt/weather/data
+sudo chown -R "$USER" /opt/weather/data
 docker build -t wxhub-singleuser:latest ./image
 docker compose up -d --build
-docker compose logs -f jupyterhub               # attendere "JupyterHub is now running"
+docker compose logs -f jupyterhub
 ```
 
-Aprire `http://<host>:8000`, registrare `admin` con *Sign up*. Possono accedere solo gli utenti
-elencati in `c.Authenticator.allowed_users`.
+Open `http://localhost:8000`, sign up as `admin`, and start the server. The deployment intentionally
+uses HTTP for a trusted pilot network; put it behind TLS before exposing it publicly.
 
-## Caso d'uso
-
-Evento di maltempo del 13-17 novembre 2026 in Campania, analizzato con le uscite orarie del modello WRF
-del Centro meteo@uniparthenope (dominio d03, ~3 km, dati aperti IODL 2.0, server OPeNDAP
-`https://data.meteo.uniparthenope.it/opendap/`).
-
-1. Scaricare le variabili superficiali nell'area raw (sull'host):
-   ```bash
-   sudo docker run --rm --entrypoint python -u 1000 \
-     -v /opt/weather/data/raw/models:/out -v ~/wxhub/scripts:/scripts:ro \
-     wxhub-singleuser:latest /scripts/fetch_wrf_d03.py --start 2026-11-13 --days 5 --out /out/wrf5_d03
-   ```
-2. In JupyterLab copiare `notebooks/` in `~/work/notebooks` ed eseguire `caso_uso_wrf_campania.ipynb`,
-   oppure `./scripts/run_papermill.sh 2026-11-15T00 2026-11-15T23 Salerno`.
-3. Dashboard: `http://<host>:8000/user/<utente>/voila/render/notebooks/dashboard_wrf_voila.ipynb`.
-
-## Verifiche e misure
+Host paths can be changed without editing source files:
 
 ```bash
-./scripts/test_permissions.sh                     # nel terminale JupyterLab
-export JUPYTERHUB_TOKEN=<token admin da /hub/token>
-python3 scripts/measure_spawn.py --users 1 --runs 5
-python3 scripts/measure_spawn.py --users 5 --runs 3 --keep
-./scripts/measure_load.sh 5
+export WXHUB_TEMPLATES_HOST="$PWD/templates"
+export WXHUB_SENSORS_HOST=/srv/weather/raw/sensors
+export WXHUB_MODELS_HOST=/srv/weather/raw/models
+export WXHUB_CURATED_HOST=/srv/weather/curated
+docker compose up -d
 ```
 
-## Riproducibilità
+For production preparation, user management, upgrades, backups, and troubleshooting, follow the
+[Deployment guide](docs/deployment.md) and [Operations guide](docs/operations.md).
 
-Le immagini base sono fissate (`scipy-notebook:2025-12-31`, `jupyterhub:5.3.0`). Dopo la build eseguire
-`./scripts/freeze_env.sh`: registra in `image/requirements.lock` le versioni esatte delle librerie e in
-`image/IMAGE_ID` l'identificativo dell'immagine; committare entrambi i file.
+## Reproduce the WRF case study
 
-## Limiti noti
+The analysis covers the 13–17 November 2026 severe-weather event in Campania using hourly WRF d03
+output from the meteo@uniparthenope OPeNDAP service (~3 km resolution, IODL 2.0).
 
-Prototipo su singolo host: HTTP senza TLS, registrazione aperta (limitata da `allowed_users`),
-socket Docker montato nell'Hub, nessuno spegnimento dei server inattivi. Vedere il capitolo sulla sicurezza della tesi prima di esporlo in rete.
+```bash
+sudo docker run --rm --entrypoint python -u 1000 \
+  -v /opt/weather/data/raw/models:/out -v "$PWD/scripts":/scripts:ro \
+  wxhub-singleuser:latest /scripts/fetch_wrf_d03.py \
+  --start 2026-11-13 --days 5 --out /out/wrf5_d03
+```
 
-## Licenza
+Copy `notebooks/` into `~/work/notebooks` from JupyterLab, then run
+`wrf_campania_case_study.ipynb`. For a headless run inside the user server:
 
-Codice: MIT. Dati WRF: meteo@uniparthenope, Italian Open Data License v2.0.
+```bash
+./scripts/run_papermill.sh 2026-11-15T00 2026-11-15T23 Salerno
+```
+
+Open the dashboard at
+`http://<host>:8000/user/<username>/voila/render/notebooks/wrf_voila_dashboard.ipynb`.
+Data lineage, checksums, outputs, and limitations are documented in
+[Reproducibility](docs/reproducibility.md).
+
+## Repository map
+
+| Path | Purpose |
+|---|---|
+| `jupyterhub/` | Hub image and DockerSpawner configuration |
+| `image/` | Versioned single-user scientific image and environment snapshot |
+| `notebooks/` | Executable WRF analysis and Voilà dashboard |
+| `templates/` | Read-only starter notebooks |
+| `scripts/` | Acquisition, validation, execution, and benchmark utilities |
+| `measurements/` | Committed pilot benchmark evidence |
+| `docs/` | Architecture, deployment, operations, security, and reproducibility guides |
+| `.github/workflows/` | Continuous integration configuration |
+
+## Validate a checkout
+
+```bash
+./scripts/validate_repo.sh
+docker compose build jupyterhub
+docker build -t wxhub-singleuser:check ./image
+```
+
+The first command is fast and offline. Image builds require network access. See
+[Contributing](docs/contributing.md).
+
+## Security scope
+
+This is a single-host pilot. It mounts the Docker socket into the Hub, serves plain HTTP, allows
+signup for a fixed allow-list, and does not stop idle servers. Do not expose it directly to the
+internet. Review [Security](docs/security.md) first.
+
+## License and data attribution
+
+Source code is licensed under the [MIT License](LICENSE). WRF data is provided by
+meteo@uniparthenope under the Italian Open Data License 2.0; data is not redistributed here.

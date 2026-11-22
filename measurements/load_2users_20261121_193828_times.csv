@@ -1,3 +1,3 @@
-utente,tempo_s,esito
+user,elapsed_seconds,status
 bench01,187.349101419,ok
 bench02,194.411669969,ok

@@ -11,7 +11,7 @@ c.JupyterHub.bind_url = "http://0.0.0.0:8000"
 c.JupyterHub.hub_ip = "0.0.0.0"
 c.JupyterHub.hub_connect_ip = os.environ.get("HUB_IP", "jupyterhub")
 c.JupyterHub.db_url = "sqlite:///data/jupyterhub.sqlite"
-# [NUOVO] segreto dei cookie nel volume persistente: le sessioni sopravvivono al riavvio
+# Keep the cookie secret in persistent storage so sessions survive Hub restarts.
 c.JupyterHub.cookie_secret_file = "/srv/jupyterhub/data/jupyterhub_cookie_secret"
 
 #-----------------------------------------------------------------------------
@@ -25,8 +25,8 @@ c.JupyterHub.template_paths = [
 c.NativeAuthenticator.open_signup = True
 c.Authenticator.admin_users = {"admin"}
 
-# [MODIFICATO] aggiunti due utenti di prova per i test T02 e T16
-c.Authenticator.allowed_users = {'admin', 'aulainfo', 'utente1', 'utente2'}
+# Pilot users used by the acceptance and load tests.
+c.Authenticator.allowed_users = {'admin', 'aulainfo', 'user1', 'user2'}
 
 #----------------------------------------------------------------------------------
 # Spawner
@@ -53,10 +53,9 @@ c.Spawner.cmd = ["jupyterhub-singleuser"]
 notebook_dir = "/home/jovyan/work"
 c.DockerSpawner.notebook_dir = notebook_dir
 
-# I percorsi a sinistra sono percorsi dell'HOST (la VM), perché i mount
-# li esegue il Docker Engine dell'host, non il container dell'Hub. Sono passati
-# da Compose per evitare di legare la configurazione a uno specifico utente host.
-# Le aree condivise sono in sola lettura ("mode": "ro").
+# Keys are paths on the Docker HOST because the host engine creates these mounts.
+# Compose passes them as environment variables to keep the setup host-independent.
+# Shared areas are read-only ("mode": "ro").
 c.DockerSpawner.volumes = {
     "jupyterhub-user-{username}": "/home/jovyan/work",
     os.environ["WXHUB_TEMPLATES_HOST"]: {"bind": "/home/jovyan/templates", "mode": "ro"},

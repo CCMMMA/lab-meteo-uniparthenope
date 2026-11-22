@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Misura il tempo di avvio dei server JupyterLab tramite la REST API di JupyterHub.
+"""Measure JupyterLab server startup time through the JupyterHub REST API.
 
-Uso (sull'host, con un token generato dall'amministratore nella pagina /hub/token):
-    export JUPYTERHUB_TOKEN=...            # token dell'utente admin
-    python3 scripts/measure_spawn.py --users 1 --runs 5      # avvio singolo, 5 ripetizioni
-    python3 scripts/measure_spawn.py --users 5 --runs 3      # 5 utenti contemporanei
+Run on the host with an administrator token generated at /hub/token:
+    export JUPYTERHUB_TOKEN=...            # administrator token
+    python3 scripts/measure_spawn.py --users 1 --runs 5      # single user, 5 runs
+    python3 scripts/measure_spawn.py --users 5 --runs 3      # 5 concurrent users
 
-Per ogni ripetizione: crea (se mancano) gli utenti bench01..benchNN, avvia in parallelo
-i loro server, misura il tempo fino a "ready", poi li arresta. Output: CSV + riepilogo.
-Richiede solo la libreria standard di Python.
+For every run, create missing bench01..benchNN users, start their servers in parallel,
+measure time to readiness, and stop them. Output is a CSV file plus a summary.
+Only the Python standard library is required.
 """
 import argparse
 import csv
@@ -25,18 +25,18 @@ ap.add_argument("--hub", default="http://127.0.0.1:8000")
 ap.add_argument("--users", type=int, default=1)
 ap.add_argument("--runs", type=int, default=5)
 ap.add_argument("--timeout", type=float, default=180)
-ap.add_argument("--csv", default="misure/spawn_times.csv")
-ap.add_argument("--keep", action="store_true", help="lascia attivi i server dopo l'ultima ripetizione")
+ap.add_argument("--csv", default="measurements/spawn_times.csv")
+ap.add_argument("--keep", action="store_true", help="keep servers running after the final run")
 args = ap.parse_args()
 if args.users < 1:
-    ap.error("--users deve essere almeno 1")
+    ap.error("--users must be at least 1")
 if args.runs < 1:
-    ap.error("--runs deve essere almeno 1")
+    ap.error("--runs must be at least 1")
 if args.timeout <= 0:
-    ap.error("--timeout deve essere positivo")
+    ap.error("--timeout must be positive")
 TOKEN = os.environ.get("JUPYTERHUB_TOKEN")
 if not TOKEN:
-    ap.error("impostare la variabile d'ambiente JUPYTERHUB_TOKEN")
+    ap.error("set the JUPYTERHUB_TOKEN environment variable")
 API = args.hub.rstrip("/") + "/hub/api"
 
 
@@ -58,9 +58,9 @@ def ensure_user(name):
     if st == 404:
         st, _ = call("POST", f"/users/{name}")
         if st != 201:
-            raise RuntimeError(f"creazione utente {name} fallita: HTTP {st}")
+            raise RuntimeError(f"failed to create user {name}: HTTP {st}")
     elif st != 200:
-        raise RuntimeError(f"lettura utente {name} fallita: HTTP {st}")
+        raise RuntimeError(f"failed to read user {name}: HTTP {st}")
 
 
 def server_ready(name):
@@ -100,10 +100,10 @@ rows = []
 for run in range(1, args.runs + 1):
     with ThreadPoolExecutor(max_workers=len(names)) as ex:
         res = list(ex.map(spawn, names))
-    for n, t, esito in res:
-        rows.append({"run": run, "utenti_concorrenti": args.users, "utente": n,
-                     "tempo_avvio_s": round(t, 2) if t else "", "esito": esito})
-        print(f"run {run} {n}: {esito} {t and f'{t:.2f} s' or ''}")
+    for n, t, status in res:
+        rows.append({"run": run, "concurrent_users": args.users, "user": n,
+                     "startup_seconds": round(t, 2) if t else "", "status": status})
+        print(f"run {run} {n}: {status} {t and f'{t:.2f} s' or ''}")
     if run < args.runs or not args.keep:
         for n in names:
             stop(n)
@@ -117,9 +117,9 @@ with open(args.csv, "a", newline="") as f:
         w.writeheader()
     w.writerows(rows)
 
-ok = [r["tempo_avvio_s"] for r in rows if r["esito"] == "ok"]
+ok = [r["startup_seconds"] for r in rows if r["status"] == "ok"]
 if ok:
-    print(f"\nUtenti concorrenti: {args.users} | campioni: {len(ok)}/{len(rows)}")
-    print(f"media {statistics.mean(ok):.2f} s | mediana {statistics.median(ok):.2f} s | "
+    print(f"\nConcurrent users: {args.users} | samples: {len(ok)}/{len(rows)}")
+    print(f"mean {statistics.mean(ok):.2f} s | median {statistics.median(ok):.2f} s | "
           f"min {min(ok):.2f} s | max {max(ok):.2f} s"
-          + (f" | dev.std {statistics.stdev(ok):.2f} s" if len(ok) > 1 else ""))
+          + (f" | std.dev. {statistics.stdev(ok):.2f} s" if len(ok) > 1 else ""))

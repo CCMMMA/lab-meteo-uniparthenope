@@ -1,7 +1,0 @@
-# sab 21 nov 2026, 19:38:28, CET
-CPU(s):                                  1
-Model name:                              13th Gen Intel(R) Core(TM) i3-1315U
-BIOS Model name:                           CPU @ 0.0GHz
-               total        utiliz     liber     condiv buff/cache   disponibile
-Mem:           3,8Gi       1,9Gi       589Mi        46Mi       1,4Gi       1,9Gi
-Docker 29.4.0
