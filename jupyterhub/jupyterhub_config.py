@@ -53,15 +53,16 @@ c.Spawner.cmd = ["jupyterhub-singleuser"]
 notebook_dir = "/home/jovyan/work"
 c.DockerSpawner.notebook_dir = notebook_dir
 
-# [MODIFICATO] I percorsi a sinistra sono percorsi dell'HOST (la VM), perché i mount
-# li esegue il Docker Engine dell'host, non il container dell'Hub.
+# I percorsi a sinistra sono percorsi dell'HOST (la VM), perché i mount
+# li esegue il Docker Engine dell'host, non il container dell'Hub. Sono passati
+# da Compose per evitare di legare la configurazione a uno specifico utente host.
 # Le aree condivise sono in sola lettura ("mode": "ro").
 c.DockerSpawner.volumes = {
     "jupyterhub-user-{username}": "/home/jovyan/work",
-    "/home/aulainfo/wxhub/templates": {"bind": "/home/jovyan/templates", "mode": "ro"},
-    "/opt/weather/data/raw/sensors": {"bind": "/home/jovyan/data/raw/sensors", "mode": "ro"},
-    "/opt/weather/data/raw/models": {"bind": "/home/jovyan/data/raw/models", "mode": "ro"},
-    "/opt/weather/data/curated": {"bind": "/home/jovyan/data/curated", "mode": "ro"},
+    os.environ["WXHUB_TEMPLATES_HOST"]: {"bind": "/home/jovyan/templates", "mode": "ro"},
+    os.environ["WXHUB_SENSORS_HOST"]: {"bind": "/home/jovyan/data/raw/sensors", "mode": "ro"},
+    os.environ["WXHUB_MODELS_HOST"]: {"bind": "/home/jovyan/data/raw/models", "mode": "ro"},
+    os.environ["WXHUB_CURATED_HOST"]: {"bind": "/home/jovyan/data/curated", "mode": "ro"},
 }
 
 #Useful environment variables inside user servers

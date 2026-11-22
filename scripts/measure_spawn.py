@@ -28,7 +28,15 @@ ap.add_argument("--timeout", type=float, default=180)
 ap.add_argument("--csv", default="misure/spawn_times.csv")
 ap.add_argument("--keep", action="store_true", help="lascia attivi i server dopo l'ultima ripetizione")
 args = ap.parse_args()
-TOKEN = os.environ["JUPYTERHUB_TOKEN"]
+if args.users < 1:
+    ap.error("--users deve essere almeno 1")
+if args.runs < 1:
+    ap.error("--runs deve essere almeno 1")
+if args.timeout <= 0:
+    ap.error("--timeout deve essere positivo")
+TOKEN = os.environ.get("JUPYTERHUB_TOKEN")
+if not TOKEN:
+    ap.error("impostare la variabile d'ambiente JUPYTERHUB_TOKEN")
 API = args.hub.rstrip("/") + "/hub/api"
 
 
@@ -48,7 +56,11 @@ def call(method, path, body=None):
 def ensure_user(name):
     st, _ = call("GET", f"/users/{name}")
     if st == 404:
-        call("POST", f"/users/{name}")
+        st, _ = call("POST", f"/users/{name}")
+        if st != 201:
+            raise RuntimeError(f"creazione utente {name} fallita: HTTP {st}")
+    elif st != 200:
+        raise RuntimeError(f"lettura utente {name} fallita: HTTP {st}")
 
 
 def server_ready(name):

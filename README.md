@@ -26,9 +26,9 @@ Linux x86_64, Docker Engine con plugin Compose v2, 4 GB di RAM liberi, porta 800
 ## Installazione
 
 I percorsi dell'host usati dalla configurazione sono `/opt/weather/data/{raw/sensors,raw/models,curated}`
-per i dati e `~/wxhub/templates` per i template (vedi `c.DockerSpawner.volumes` in
-`jupyterhub/jupyterhub_config.py`: le chiavi sono percorsi dell'HOST). Se il repository non è clonato in
-`/home/aulainfo/wxhub`, aggiornare il percorso dei template in quel file.
+per i dati e la directory `templates` del clone per i template. Si possono cambiare senza modificare
+il codice impostando `WXHUB_SENSORS_HOST`, `WXHUB_MODELS_HOST`, `WXHUB_CURATED_HOST` e
+`WXHUB_TEMPLATES_HOST` prima di `docker compose up`.
 
 ```bash
 git clone https://github.com/<utente>/wxhub.git ~/wxhub && cd ~/wxhub

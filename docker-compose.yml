@@ -16,6 +16,10 @@ services:
     environment:
       DOCKER_NOTEBOOK_IMAGE: wxhub-singleuser:latest
       PUBLIC_HOST: http://localhost:8000
+      WXHUB_TEMPLATES_HOST: ${WXHUB_TEMPLATES_HOST:-${PWD}/templates}
+      WXHUB_SENSORS_HOST: ${WXHUB_SENSORS_HOST:-/opt/weather/data/raw/sensors}
+      WXHUB_MODELS_HOST: ${WXHUB_MODELS_HOST:-/opt/weather/data/raw/models}
+      WXHUB_CURATED_HOST: ${WXHUB_CURATED_HOST:-/opt/weather/data/curated}
     networks:
       - wxhub-net
 

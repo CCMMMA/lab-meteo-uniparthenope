@@ -31,6 +31,10 @@ ap.add_argument("--out", default="/out/wrf5_d03")
 ap.add_argument("--base", default=BASE)
 ap.add_argument("--retries", type=int, default=3)
 args = ap.parse_args()
+if args.days < 1:
+    ap.error("--days deve essere almeno 1")
+if args.retries < 1:
+    ap.error("--retries deve essere almeno 1")
 
 out = Path(args.out)
 out.mkdir(parents=True, exist_ok=True)
@@ -61,6 +65,8 @@ for i, t in enumerate(hours, 1):
         continue
     esito = "mancante"
     for k in range(args.retries):
+        src = None
+        tmp = dest.with_suffix(dest.suffix + ".part")
         try:
             src = xr.open_dataset(url_for(t), engine="netcdf4", decode_times=False, decode_coords=False)
             if not grid_done:
@@ -72,13 +78,17 @@ for i, t in enumerate(hours, 1):
             sub = sub.expand_dims(time=[np.datetime64(t, "ns")])
             sub.attrs = {"source": "meteo@uniparthenope WRF5 d03 (history)", "url": url_for(t)}
             enc = {v: {"zlib": True, "complevel": 4} for v in VARS}
-            sub.to_netcdf(dest, encoding=enc)
-            src.close()
+            sub.to_netcdf(tmp, encoding=enc)
+            tmp.replace(dest)
             esito = "ok"
             break
         except Exception as e:  # file assente sul server o errore di rete
             esito = f"errore: {type(e).__name__}"
+            tmp.unlink(missing_ok=True)
             time.sleep(2 * (k + 1))
+        finally:
+            if src is not None:
+                src.close()
     log.append({"ora": f"{t:%Y-%m-%d %H}:00", "file": dest.name if esito == "ok" else "",
                 "esito": esito, "sha256": sha256(dest) if esito == "ok" else ""})
     print(f"[{i:3d}/{len(hours)}] {t:%Y-%m-%d %H}:00  {esito}", flush=True)
