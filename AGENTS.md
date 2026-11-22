@@ -41,3 +41,4 @@ When the WRF workflow changes and data is available, execute it through Papermil
 - Preserve user volumes and measurement evidence.
 - Never run `docker compose down -v` during validation; it destroys persistent state.
 - Do not silently change the data source, geographic domain, or scientific derivation.
+- Never push a `v*` tag casually: release tags publish both container images to GHCR.

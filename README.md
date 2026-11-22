@@ -21,6 +21,7 @@ deployment of an interactive environment based on Jupyter Notebook* at the Unive
 - A reproducible WRF Campania case study with maps, time series, Zarr output, and a Voilà dashboard.
 - Scripts for data acquisition, headless execution, permission checks, and performance measurements.
 - Continuous validation of code, notebooks, documentation links, Compose configuration, and images.
+- Tag-driven delivery of versioned Hub and single-user images to GitHub Container Registry.
 
 ## Architecture
 
@@ -106,6 +107,10 @@ Data lineage, checksums, outputs, and limitations are documented in
 | `measurements/` | Committed pilot benchmark evidence |
 | `docs/` | Architecture, deployment, operations, security, and reproducibility guides |
 | `.github/workflows/` | Continuous integration configuration |
+
+Pushing a tag such as `v1.0.0` runs the release workflow and publishes versioned images as
+`ghcr.io/raffmont/wxhub-jupyterhub:<tag>` and `ghcr.io/raffmont/wxhub-singleuser:<tag>` with
+provenance and SBOM attestations.
 
 ## Validate a checkout
 

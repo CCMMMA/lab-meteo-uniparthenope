@@ -49,3 +49,10 @@ Wait for `JupyterHub is now running`, open port 8000, and register `admin`. Only
 Back up `jupyterhub-data` and record image IDs. Build new images with versioned tags, validate them,
 then update `DOCKER_NOTEBOOK_IMAGE`. Roll back by restoring the previous tag and restarting the Hub.
 Never delete per-user volumes during an upgrade.
+
+## Release delivery
+
+Push a semantic version tag such as `v1.0.0` after CI passes. The release workflow builds both
+images and publishes tag- and commit-addressable variants to GitHub Container Registry with
+provenance and SBOM attestations. Package visibility and retention are managed in the repository's
+GitHub package settings.
