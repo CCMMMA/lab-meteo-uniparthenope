@@ -1,4 +1,5 @@
 import os
+import re
 from dockerspawner import DockerSpawner
 import nativeauthenticator
 
@@ -18,11 +19,47 @@ c.JupyterHub.cookie_secret_file = "/srv/jupyterhub/data/jupyterhub_cookie_secret
 # Authentication
 #------------------------------------------------------------------------------
 c.JupyterHub.authenticator_class = "native"
+
+
+def env_bool(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_color(name, default):
+    value = os.environ.get(name, default).strip()
+    if not re.fullmatch(r"#[0-9a-fA-F]{6}", value):
+        raise ValueError(f"{name} must be a six-digit hexadecimal color")
+    return value
+
+
+def env_http_url(name, default):
+    value = os.environ.get(name, default).strip()
+    if not re.fullmatch(r"https?://[^\s]+", value):
+        raise ValueError(f"{name} must be an HTTP or HTTPS URL")
+    return value
+
+
 c.JupyterHub.template_paths = [
+    "/srv/jupyterhub/templates",
     f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"
 ]
+c.JupyterHub.template_vars = {
+    "wxhub_brand_name": os.environ.get("WXHUB_BRAND_NAME", "meteo@uniparthenope WxHub"),
+    "wxhub_brand_subtitle": os.environ.get(
+        "WXHUB_BRAND_SUBTITLE", "Weather and marine data workspace"
+    ),
+    "wxhub_brand_primary": env_color("WXHUB_BRAND_PRIMARY", "#1f4e79"),
+    "wxhub_brand_secondary": env_color("WXHUB_BRAND_SECONDARY", "#2a91eb"),
+    "wxhub_brand_accent": env_color("WXHUB_BRAND_ACCENT", "#181c63"),
+    "wxhub_brand_site_url": env_http_url(
+        "WXHUB_BRAND_SITE_URL", "https://meteo.uniparthenope.it"
+    ),
+    "wxhub_brand_network_url": env_http_url(
+        "WXHUB_BRAND_NETWORK_URL", "https://network.meteo.uniparthenope.it"
+    ),
+}
 
-c.NativeAuthenticator.open_signup = True
+c.NativeAuthenticator.open_signup = env_bool("WXHUB_OPEN_SIGNUP")
 c.Authenticator.admin_users = {"admin"}
 
 # Pilot users used by the acceptance and load tests.

@@ -38,5 +38,9 @@ diff. The snapshot may contain platform-specific base-image references. The pinn
 - **Data is writable or missing:** run `scripts/test_permissions.sh` in the user server and compare
   `docker inspect jupyter-<username>` with [Architecture](architecture.md).
 - **Benchmark returns 403:** use a token created by a member of `admin_users`.
+- **Browser reports phishing:** do not bypass the warning; deploy a trusted DNS name and HTTPS as
+  described in [Security](security.md). Changing colors or text cannot establish browser trust.
+- **Branding is unchanged:** confirm the `jupyterhub/templates` bind mount is present, inspect the
+  `WXHUB_BRAND_*` values in `docker compose config`, and recreate the Hub container.
 - **Notebook fails:** confirm the requested WRF range and grid file exist, the output is writable,
   and `manifest.csv` contains no relevant download errors.

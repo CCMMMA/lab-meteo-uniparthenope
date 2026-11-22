@@ -4,10 +4,11 @@ services:
     container_name: wxhub-jupyterhub
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "${WXHUB_PORT:-8000}:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
+      - ./jupyterhub/templates:/srv/jupyterhub/templates:ro
       -  jupyterhub-data:/srv/jupyterhub/data
       - ./templates:/srv/templates:ro
       - /opt/weather/data/raw/sensors:/srv/data/raw/sensors:ro
@@ -15,11 +16,19 @@ services:
       - /opt/weather/data/curated:/srv/data/curated
     environment:
       DOCKER_NOTEBOOK_IMAGE: wxhub-singleuser:latest
-      PUBLIC_HOST: http://localhost:8000
+      PUBLIC_HOST: ${WXHUB_PUBLIC_HOST:-http://localhost:8000}
       WXHUB_TEMPLATES_HOST: ${WXHUB_TEMPLATES_HOST:-${PWD}/templates}
       WXHUB_SENSORS_HOST: ${WXHUB_SENSORS_HOST:-/opt/weather/data/raw/sensors}
       WXHUB_MODELS_HOST: ${WXHUB_MODELS_HOST:-/opt/weather/data/raw/models}
       WXHUB_CURATED_HOST: ${WXHUB_CURATED_HOST:-/opt/weather/data/curated}
+      WXHUB_OPEN_SIGNUP: ${WXHUB_OPEN_SIGNUP:-false}
+      WXHUB_BRAND_NAME: ${WXHUB_BRAND_NAME:-meteo@uniparthenope WxHub}
+      WXHUB_BRAND_SUBTITLE: ${WXHUB_BRAND_SUBTITLE:-Weather and marine data workspace}
+      WXHUB_BRAND_PRIMARY: ${WXHUB_BRAND_PRIMARY:-#1f4e79}
+      WXHUB_BRAND_SECONDARY: ${WXHUB_BRAND_SECONDARY:-#2a91eb}
+      WXHUB_BRAND_ACCENT: ${WXHUB_BRAND_ACCENT:-#181c63}
+      WXHUB_BRAND_SITE_URL: ${WXHUB_BRAND_SITE_URL:-https://meteo.uniparthenope.it}
+      WXHUB_BRAND_NETWORK_URL: ${WXHUB_BRAND_NETWORK_URL:-https://network.meteo.uniparthenope.it}
     networks:
       - wxhub-net
 

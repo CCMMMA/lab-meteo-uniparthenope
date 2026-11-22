@@ -13,6 +13,7 @@ wxhub is a single-host JupyterHub deployment for a controlled teaching or resear
 | ConfigurableHTTPProxy | Routes `/user/<username>/` to its container |
 | Docker volumes | Persist Hub state and each user's workspace |
 | Host bind mounts | Expose templates and weather data read-only |
+| Custom Hub template | Applies configurable meteo@uniparthenope identity and colors |
 
 All containers join `wxhub-net`. JupyterHub is reachable as `jupyterhub` on that network, and
 DockerSpawner uses internal container addresses.

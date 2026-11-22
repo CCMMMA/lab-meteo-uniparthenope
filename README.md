@@ -125,9 +125,10 @@ The first command is fast and offline. Image builds require network access. See
 
 ## Security scope
 
-This is a single-host pilot. It mounts the Docker socket into the Hub, serves plain HTTP, allows
-signup for a fixed allow-list, and does not stop idle servers. Do not expose it directly to the
-internet. Review [Security](docs/security.md) first.
+This is a single-host pilot. It mounts the Docker socket into the Hub, serves plain HTTP by default,
+uses locally provisioned accounts from a fixed allow-list, and does not stop idle servers. Public
+self-signup is disabled by default. Do not expose it directly to the internet without a trusted DNS
+name and HTTPS. Review [Security](docs/security.md) first.
 
 ## License and data attribution
 

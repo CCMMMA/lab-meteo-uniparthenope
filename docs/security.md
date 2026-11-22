@@ -1,8 +1,9 @@
 # Security
 
 wxhub is a laboratory pilot, not a hardened multi-tenant service. Its defaults include plain HTTP,
-the Docker socket in the Hub, signup constrained by a static allow-list, no idle culler, and local
-SQLite/volume storage.
+the Docker socket in the Hub, controlled local accounts constrained by a static allow-list, no idle
+culler, and local SQLite/volume storage. Public self-signup is disabled by default and can be
+enabled temporarily with `WXHUB_OPEN_SIGNUP=true` for controlled provisioning.
 
 Before public exposure:
 
@@ -12,6 +13,18 @@ Before public exposure:
 4. Restrict network ingress and egress.
 5. Add monitoring, log retention, backups, vulnerability scanning, and an upgrade policy.
 6. Evaluate a socket proxy or an orchestrator that does not grant unrestricted Docker access.
+
+## Browser phishing warnings
+
+Branding makes the service identity clear to people but does not establish browser trust. A login
+form served from a raw IP address over HTTP can be classified as phishing because it has no trusted
+DNS identity, no TLS certificate, and transmits passwords without encryption. Do not bypass or ask
+users to suppress that warning.
+
+The production remedy is to assign a trusted DNS name, obtain a certificate for that name, and put
+a maintained HTTPS reverse proxy in front of JupyterHub. Set `WXHUB_PUBLIC_HOST` to the resulting
+`https://` URL, redirect HTTP to HTTPS, and expose only the reverse proxy publicly. The direct
+`http://IP:port` endpoint is suitable only for isolated acceptance testing.
 
 The cookie secret is generated in the persistent Hub volume. Never commit it. Pass external
 credentials through an approved runtime secret mechanism, not notebooks, Compose files, or Git.

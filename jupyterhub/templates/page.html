@@ -1,0 +1,82 @@
+{% extends "templates/page.html" %}
+
+{% block title %}{{ wxhub_brand_name }}{% endblock title %}
+
+{% block stylesheet %}
+  {{ super() }}
+  <style>
+    :root {
+      --wxhub-primary: {{ wxhub_brand_primary }};
+      --wxhub-secondary: {{ wxhub_brand_secondary }};
+      --wxhub-accent: {{ wxhub_brand_accent }};
+      --wxhub-page: #f4f7fa;
+      --wxhub-surface: #ffffff;
+      --wxhub-ink: #13283a;
+      --wxhub-muted: #607486;
+      --bs-primary: {{ wxhub_brand_primary }};
+      --bs-primary-rgb: 31, 78, 121;
+    }
+    [data-bs-theme="dark"] {
+      --wxhub-page: #0c1822;
+      --wxhub-surface: #142433;
+      --wxhub-ink: #edf6fb;
+      --wxhub-muted: #a9bdca;
+    }
+    body { background: var(--wxhub-page); color: var(--wxhub-ink); }
+    a { color: var(--wxhub-secondary); }
+    .navbar {
+      background: linear-gradient(120deg, var(--wxhub-primary), var(--wxhub-accent)) !important;
+      box-shadow: 0 .25rem 1.5rem rgba(0, 26, 48, .2);
+    }
+    .navbar .nav-link, .navbar .navbar-brand, .navbar #login_widget, .navbar #login_widget span {
+      color: rgba(255, 255, 255, .88) !important;
+    }
+    .navbar .nav-link:hover, .navbar .nav-link:focus { color: #fff !important; }
+    .wxhub-brand { display: flex; align-items: center; gap: .7rem; color: #fff; text-decoration: none; }
+    .wxhub-brand-mark {
+      display: grid; place-items: center; width: 2.5rem; height: 2.5rem;
+      border: 2px solid rgba(255,255,255,.75); border-radius: 50%;
+      color: #fff; font-weight: 800; letter-spacing: -.08em;
+    }
+    .wxhub-brand-copy strong, .wxhub-brand-copy small { display: block; line-height: 1.1; }
+    .wxhub-brand-copy strong { font-size: 1rem; }
+    .wxhub-brand-copy small { margin-top: .2rem; font-size: .68rem; opacity: .75; font-weight: 400; }
+    .btn-primary {
+      --bs-btn-bg: var(--wxhub-primary); --bs-btn-border-color: var(--wxhub-primary);
+      --bs-btn-hover-bg: var(--wxhub-accent); --bs-btn-hover-border-color: var(--wxhub-accent);
+    }
+    .btn, .form-control, .form-select { border-radius: .65rem; }
+    .form-control:focus, .form-select:focus {
+      border-color: var(--wxhub-secondary);
+      box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--wxhub-secondary) 20%, transparent);
+    }
+    .card, .auth-form-body, .auth-form-header {
+      background: var(--wxhub-surface); border-color: color-mix(in srgb, var(--wxhub-primary) 18%, transparent);
+    }
+    #start, #stop { border-radius: .65rem; }
+    .wxhub-links { margin-left: 1rem; font-size: .78rem; white-space: nowrap; }
+    .wxhub-links a { color: rgba(255,255,255,.78) !important; margin-left: .75rem; }
+    @media (max-width: 767px) { .wxhub-brand-copy small, .wxhub-links { display: none; } }
+  </style>
+{% endblock stylesheet %}
+
+{% block logo %}
+  <span id="jupyterhub-logo" class="navbar-brand">
+    <a class="wxhub-brand" href="{{ logo_url or base_url }}">
+      <span class="wxhub-brand-mark" aria-hidden="true">Wx</span>
+      <span class="wxhub-brand-copy">
+        <strong>{{ wxhub_brand_name }}</strong>
+        <small>{{ wxhub_brand_subtitle }}</small>
+      </span>
+    </a>
+  </span>
+  <span class="wxhub-links">
+    <a href="{{ wxhub_brand_site_url }}" target="_blank" rel="noopener">Forecasts</a>
+    <a href="{{ wxhub_brand_network_url }}" target="_blank" rel="noopener">Sensor network</a>
+  </span>
+{% endblock logo %}
+
+{% block meta %}
+  <meta name="description" content="{{ wxhub_brand_subtitle }}">
+  <meta name="theme-color" content="{{ wxhub_brand_primary }}">
+{% endblock meta %}
