@@ -3,7 +3,9 @@
 wxhub is a laboratory pilot, not a hardened multi-tenant service. Its defaults include plain HTTP,
 the Docker socket in the Hub, controlled local accounts constrained by a static allow-list, no idle
 culler, and local SQLite/volume storage. Public self-signup is disabled by default and can be
-enabled temporarily with `WXHUB_OPEN_SIGNUP=true` for controlled provisioning.
+enabled temporarily with `WXHUB_ENABLE_SIGNUP=true` for controlled, administrator-approved
+provisioning. Setting `WXHUB_OPEN_SIGNUP=true` additionally allows new accounts to log in without
+approval and should not be used on an internet-facing deployment.
 
 Before public exposure:
 

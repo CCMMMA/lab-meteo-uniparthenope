@@ -21,6 +21,7 @@ services:
       WXHUB_SENSORS_HOST: ${WXHUB_SENSORS_HOST:-/opt/weather/data/raw/sensors}
       WXHUB_MODELS_HOST: ${WXHUB_MODELS_HOST:-/opt/weather/data/raw/models}
       WXHUB_CURATED_HOST: ${WXHUB_CURATED_HOST:-/opt/weather/data/curated}
+      WXHUB_ENABLE_SIGNUP: ${WXHUB_ENABLE_SIGNUP:-false}
       WXHUB_OPEN_SIGNUP: ${WXHUB_OPEN_SIGNUP:-false}
       WXHUB_BRAND_NAME: ${WXHUB_BRAND_NAME:-meteo@uniparthenope WxHub}
       WXHUB_BRAND_SUBTITLE: ${WXHUB_BRAND_SUBTITLE:-Weather and marine data workspace}

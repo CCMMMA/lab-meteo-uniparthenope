@@ -59,6 +59,7 @@ c.JupyterHub.template_vars = {
     ),
 }
 
+c.NativeAuthenticator.enable_signup = env_bool("WXHUB_ENABLE_SIGNUP")
 c.NativeAuthenticator.open_signup = env_bool("WXHUB_OPEN_SIGNUP")
 c.Authenticator.admin_users = {"admin"}
 
