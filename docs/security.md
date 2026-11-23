@@ -34,6 +34,17 @@ The live-instrument notebooks display public observations returned by the upstre
 timeouts as availability failures and do not fall back to host CSV files, alternate networks, or
 cached private observations.
 
+## Artificial-intelligence demonstrations
+
+The AI notebooks execute visible NumPy/Pandas algorithms inside the same browser sandbox. They send
+only normal public-data requests to the configured meteo API and do not transmit notebook contents,
+user files, prompts, or credentials to an AI provider. Their models are deliberately small teaching
+baselines trained on the current forecast or observation response.
+
+Outputs must not be treated as official forecasts, public warnings, navigation advice, emergency
+decisions, or automated environmental control signals. The bundled model card records intended use,
+data provenance, limitations, privacy properties, and reproducibility constraints.
+
 ## Browser phishing warnings
 
 Branding makes the service identity clear to people but does not establish browser trust. A login

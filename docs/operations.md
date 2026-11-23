@@ -52,6 +52,9 @@ diff. The snapshot may contain platform-specific base-image references. The pinn
 - **A live-instrument notebook reports temporary unavailability:** check the public API
   `/v2/weatherreports/latest/json` endpoint. Upstream timeouts do not indicate a JupyterLite
   container failure and the notebook never substitutes a different observation source.
+- **An AI notebook has too few samples or constant features:** check its source API response and
+  selected area. The notebook intentionally reports data limitations instead of downloading a
+  different training dataset or calling an external AI service.
 - **Demo changes are missing:** run `python3 scripts/build_demo_notebooks.py`, validate that outputs
   are clear, and recreate the `demos` service.
 - **Notebook fails:** confirm the requested WRF range and grid file exist, the output is writable,

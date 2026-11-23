@@ -12,7 +12,11 @@ and transient output cleared. Full WRF execution is excluded from CI because inp
 remotely hosted.
 
 Public demos are generated, not edited independently. Update `scripts/build_demo_notebooks.py`, run
-it, and commit the resulting twenty output-free files. If the catalog size changes, update the
+it, and commit the resulting thirty output-free files. If the catalog size changes, update the
 validator, `demos/README.md`, and the deployment acceptance count together. Branding changes must
 cover both `jupyterhub/templates/page.html` and `demos/wxhub.css`; bump the published stylesheet
 asset name when an existing JupyterLite service-worker cache would otherwise retain old CSS.
+
+AI demos must keep training and inference inspectable, state their intended use and limitations,
+use only documented meteo@uniparthenope sources, and avoid hidden datasets, credentials, remote AI
+providers, or claims of operational forecast skill without appropriate independent validation.

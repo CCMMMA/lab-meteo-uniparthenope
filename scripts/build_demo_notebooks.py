@@ -686,6 +686,241 @@ def render(_=None):
 
 refresh.on_click(render); display(widgets.VBox([refresh, output])); render()
 '''),
+    "21_aiq_mussel_intelligence.ipynb": notebook(
+        "AIQ mussel-contamination intelligence",
+        "Inspect the official AIQ3 machine-learning product, its prediction fields, units, aggregation rules, and published outputs.",
+        '''refresh = widgets.Button(description="Inspect AIQ3", button_style="primary", icon="refresh")
+output = widgets.Output()
+
+def render(_=None):
+    with output:
+        clear_output(wait=True)
+        try:
+            product = api_json("products")["products"]["aiq3"]
+            fields = product.get("fields", {})
+            rows = [{"field": key, "label": item.get("label", {}).get("en-US", ""),
+                     "unit": item.get("unit", ""), "source": item.get("var", ""),
+                     "aggregation": ", ".join(item.get("aggregate", []))}
+                    for key, item in fields.items()]
+            display(HTML(f"<h3>{product['desc']['en-US']}</h3>")); display(pd.DataFrame(rows))
+            display(pd.DataFrame([{"output": key, "configuration": str(value)[:180]}
+                                  for key, value in product.get("outputs", {}).items()]))
+        except Exception as exc:
+            display(HTML(f"<b>AIQ3 metadata temporarily unavailable:</b> {exc}"))
+
+refresh.on_click(render); display(widgets.VBox([refresh, output])); render()
+'''),
+    "22_ai_temperature_regression.ipynb": notebook(
+        "AI temperature regression",
+        "Train and evaluate a transparent linear regression on the live WRF forecast, using forecast hour to estimate near-surface temperature.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            frame = forecast_frame(place.value).dropna(subset=["t2c"]).head(168)
+            x = np.arange(len(frame), dtype=float); y = frame.t2c.to_numpy(float)
+            split = max(12, int(len(y) * .75)); coef = np.polyfit(x[:split], y[:split], 1)
+            prediction = np.polyval(coef, x); rmse = np.sqrt(np.mean((y[split:] - prediction[split:]) ** 2))
+            display(pd.DataFrame([{"slope_C_per_hour": coef[0], "intercept_C": coef[1], "test_RMSE_C": rmse}]))
+            plt.figure(figsize=(10, 4)); plt.plot(frame.index, y, label="WRF"); plt.plot(frame.index, prediction, label="linear AI model")
+            plt.axvline(frame.index[split], color="grey", ls="--", label="test split"); plt.legend(); plt.grid(alpha=.25); plt.title(place.label); plt.show()
+        except Exception as exc: display(HTML(f"<b>Regression unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); display(widgets.VBox([place, output])); render()
+'''),
+    "23_ai_weather_regimes.ipynb": notebook(
+        "Unsupervised weather regimes",
+        "Use deterministic k-means clustering to discover recurring WRF weather regimes from temperature, humidity, wind, pressure, rain, and cloud cover.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+clusters = widgets.IntSlider(value=3, min=2, max=6, description="Regimes:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            cols = ["t2c", "rh2", "ws10", "slp", "crh", "clf"]
+            frame = forecast_frame(place.value)[cols].apply(pd.to_numeric, errors="coerce").dropna().head(168)
+            x = (frame - frame.mean()) / frame.std().replace(0, 1); values = x.to_numpy()
+            centers = values[np.linspace(0, len(values)-1, clusters.value, dtype=int)]
+            for _ in range(30):
+                labels = ((values[:, None, :] - centers[None, :, :]) ** 2).sum(axis=2).argmin(axis=1)
+                updated = np.array([values[labels == k].mean(axis=0) if np.any(labels == k) else centers[k] for k in range(clusters.value)])
+                if np.allclose(updated, centers): break
+                centers = updated
+            display(pd.DataFrame(centers, columns=cols).rename_axis("regime").round(2))
+            plt.figure(figsize=(10, 3)); plt.scatter(frame.index, frame.t2c, c=labels, cmap="viridis"); plt.ylabel("Temperature (°C)"); plt.title(f"{place.label}: learned weather regimes"); plt.show()
+        except Exception as exc: display(HTML(f"<b>Clustering unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); clusters.observe(render, names="value")
+display(widgets.VBox([widgets.HBox([place, clusters]), output])); render()
+'''),
+    "24_ai_forecast_anomalies.ipynb": notebook(
+        "Multivariate forecast anomaly detection",
+        "Detect unusual WRF forecast hours with a robust median absolute-deviation score across key atmospheric variables.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+sensitivity = widgets.FloatSlider(value=3.5, min=2, max=6, step=.5, description="Threshold:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            cols = ["t2c", "rh2", "ws10", "slp", "crh", "clf"]
+            frame = forecast_frame(place.value)[cols].apply(pd.to_numeric, errors="coerce").dropna().head(168)
+            median = frame.median(); mad = (frame - median).abs().median().replace(0, 1)
+            score = ((frame - median).abs() / (1.4826 * mad)).max(axis=1)
+            result = frame.assign(anomaly_score=score, anomalous=score >= sensitivity.value)
+            display(result.nlargest(12, "anomaly_score"))
+            score.plot(figsize=(10, 3.5), color=BRAND); plt.axhline(sensitivity.value, color="#d95f02", ls="--"); plt.ylabel("Robust anomaly score"); plt.grid(alpha=.25); plt.show()
+        except Exception as exc: display(HTML(f"<b>Anomaly detection unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); sensitivity.observe(render, names="value")
+display(widgets.VBox([widgets.HBox([place, sensitivity]), output])); render()
+'''),
+    "25_ai_pca_weather_space.ipynb": notebook(
+        "PCA weather-space explorer",
+        "Apply principal component analysis to compress the live WRF forecast and visualize its dominant atmospheric patterns.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            cols = ["t2c", "rh2", "ws10", "slp", "crh", "clf"]
+            frame = forecast_frame(place.value)[cols].apply(pd.to_numeric, errors="coerce").dropna().head(168)
+            z = ((frame - frame.mean()) / frame.std().replace(0, 1)).to_numpy()
+            _, singular, vectors = np.linalg.svd(z, full_matrices=False); projected = z @ vectors[:2].T
+            explained = singular ** 2 / np.sum(singular ** 2)
+            display(pd.DataFrame(vectors[:2].T, index=cols, columns=["PC1 loading", "PC2 loading"]).round(3))
+            display(HTML(f"<b>Explained variance:</b> PC1 {explained[0]:.1%}, PC2 {explained[1]:.1%}"))
+            plt.figure(figsize=(7, 5)); plt.scatter(projected[:,0], projected[:,1], c=np.arange(len(frame)), cmap="plasma"); plt.xlabel("PC1"); plt.ylabel("PC2"); plt.title(place.label); plt.colorbar(label="Forecast hour"); plt.show()
+        except Exception as exc: display(HTML(f"<b>PCA unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); display(widgets.VBox([place, output])); render()
+'''),
+    "26_ai_rain_classifier.ipynb": notebook(
+        "Rain-event classifier",
+        "Train a logistic classifier on WRF humidity, cloud fraction, pressure, and wind to estimate the probability of hourly rain.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+threshold = widgets.FloatSlider(value=.2, min=.05, max=2, step=.05, description="Rain mm:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            cols = ["rh2", "clf", "slp", "ws10"]
+            frame = forecast_frame(place.value)[cols + ["crh"]].apply(pd.to_numeric, errors="coerce").dropna().head(168)
+            x = ((frame[cols] - frame[cols].mean()) / frame[cols].std().replace(0, 1)).to_numpy(); x = np.c_[np.ones(len(x)), x]
+            y = (frame.crh.to_numpy() >= threshold.value).astype(float); weights = np.zeros(x.shape[1])
+            for _ in range(600):
+                probability = 1 / (1 + np.exp(-np.clip(x @ weights, -30, 30)))
+                weights -= .08 * (x.T @ (probability - y) / len(y))
+            prediction = probability >= .5; accuracy = np.mean(prediction == y)
+            display(pd.DataFrame({"feature": ["intercept"] + cols, "weight": weights.round(3)})); display(HTML(f"<b>Training accuracy:</b> {accuracy:.1%}"))
+            pd.Series(probability, index=frame.index).plot(figsize=(10, 3.5), color=ACCENT); plt.ylabel("Rain probability"); plt.ylim(0,1); plt.grid(alpha=.25); plt.show()
+        except Exception as exc: display(HTML(f"<b>Rain classifier unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); threshold.observe(render, names="value")
+display(widgets.VBox([widgets.HBox([place, threshold]), output])); render()
+'''),
+    "27_ai_analog_forecast.ipynb": notebook(
+        "Nearest-neighbor analog forecast",
+        "Find forecast hours with the most similar multivariate weather state and present them as explainable analog evidence.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+analogs = widgets.IntSlider(value=5, min=2, max=12, description="Neighbors:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            cols = ["t2c", "rh2", "ws10", "slp", "clf"]
+            frame = forecast_frame(place.value)[cols].apply(pd.to_numeric, errors="coerce").dropna().head(168)
+            z = ((frame - frame.mean()) / frame.std().replace(0, 1)).to_numpy(); target = z[-1]
+            distance = np.sqrt(((z[:-1] - target) ** 2).sum(axis=1)); selected = np.argsort(distance)[:analogs.value]
+            table = frame.iloc[selected].copy(); table["distance"] = distance[selected]
+            display(HTML(f"<h3>Analogs for {frame.index[-1]}</h3>")); display(table)
+            table[cols].plot.bar(subplots=True, layout=(3,2), figsize=(10,8), legend=False); plt.tight_layout(); plt.show()
+        except Exception as exc: display(HTML(f"<b>Analog forecast unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); analogs.observe(render, names="value")
+display(widgets.VBox([widgets.HBox([place, analogs]), output])); render()
+'''),
+    "28_ai_svd_sensor_quality.ipynb": notebook(
+        "AI-assisted instrument quality control",
+        "Use low-rank SVD reconstruction to identify observation fields that behave differently from the dominant live-instrument data structure.",
+        '''rank = widgets.IntSlider(value=2, min=1, max=5, description="SVD rank:")
+refresh = widgets.Button(description="Audit live reports", button_style="primary", icon="refresh")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            frame = records_frame(api_json("v2/weatherreports/latest/json")); numeric = frame.apply(pd.to_numeric, errors="coerce").dropna(axis=1, thresh=max(2, len(frame)//2))
+            filled = numeric.fillna(numeric.median()); z = ((filled - filled.mean()) / filled.std().replace(0,1)).to_numpy()
+            u, s, vt = np.linalg.svd(z, full_matrices=False); keep = min(rank.value, len(s)); reconstruction = (u[:,:keep] * s[:keep]) @ vt[:keep]
+            error = np.sqrt(((z - reconstruction) ** 2).mean(axis=0)); result = pd.Series(error, index=filled.columns, name="reconstruction_error").sort_values(ascending=False)
+            display(result.to_frame()); result.head(20).sort_values().plot.barh(figsize=(8,5), color=ACCENT); plt.title("Fields requiring quality review"); plt.show()
+        except Exception as exc: display(HTML(f"<b>Live quality model temporarily unavailable:</b> {exc}"))
+
+rank.observe(render, names="value"); refresh.on_click(render); display(widgets.VBox([widgets.HBox([rank, refresh]), output])); render()
+'''),
+    "29_ai_forecast_explainability.ipynb": notebook(
+        "Explainable temperature model",
+        "Fit a multivariate linear model for WRF temperature and rank standardized feature contributions for an interpretable AI baseline.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            features = ["rh2", "ws10", "slp", "crh", "clf"]
+            frame = forecast_frame(place.value)[features + ["t2c"]].apply(pd.to_numeric, errors="coerce").dropna().head(168)
+            xframe = (frame[features] - frame[features].mean()) / frame[features].std().replace(0,1); y = (frame.t2c - frame.t2c.mean()) / frame.t2c.std()
+            x = np.c_[np.ones(len(xframe)), xframe.to_numpy()]; weights = np.linalg.pinv(x) @ y.to_numpy(); prediction = x @ weights
+            r2 = 1 - np.sum((y - prediction)**2) / np.sum((y - y.mean())**2)
+            importance = pd.Series(np.abs(weights[1:]), index=features, name="absolute standardized weight").sort_values()
+            display(HTML(f"<b>Training R²:</b> {r2:.3f}")); display(importance.sort_values(ascending=False).to_frame())
+            importance.plot.barh(figsize=(8,4), color=BRAND); plt.title("Explainable feature importance"); plt.show()
+        except Exception as exc: display(HTML(f"<b>Explainability model unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); display(widgets.VBox([place, output])); render()
+'''),
+    "30_ai_model_card.ipynb": notebook(
+        "AI model card and responsible-use checklist",
+        "Generate a reproducible model card for the notebook AI demonstrations using live API provenance, assumptions, limitations, and safety constraints.",
+        '''refresh = widgets.Button(description="Generate model card", button_style="primary", icon="refresh")
+output = widgets.Output()
+
+def render(_=None):
+    with output:
+        clear_output(wait=True)
+        try:
+            version = api_json("version"); products = api_json("products")["products"]
+            card = pd.DataFrame([
+                ("API provenance", f"meteo@uniparthenope API {version['version']} ({version['environment']})"),
+                ("Models represented", ", ".join(sorted(products))),
+                ("AI methods", "linear/logistic regression, k-means, robust anomalies, PCA/SVD, nearest neighbors"),
+                ("Training scope", "Current forecast cycle or latest public observations; no hidden training corpus"),
+                ("Intended use", "Education, research exploration, and method demonstration"),
+                ("Prohibited use", "Official warnings, navigation, emergency response, or automated safety decisions"),
+                ("Known limitations", "Small non-independent samples, forecast bias, missing observations, concept drift, upstream outages"),
+                ("Privacy", "Public environmental data only; browser-local execution; no user data transmitted"),
+                ("Reproducibility", "Notebook source is versioned; live results vary by API cycle and observation availability"),
+            ], columns=["model-card field", "statement"])
+            display(HTML("<h2>Responsible AI model card</h2>")); display(card)
+        except Exception as exc: display(HTML(f"<b>Model card provenance temporarily unavailable:</b> {exc}"))
+
+refresh.on_click(render); display(widgets.VBox([refresh, output])); render()
+'''),
 }
 
 

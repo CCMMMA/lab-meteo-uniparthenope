@@ -30,9 +30,10 @@ the Hub. New accounts require administrator approval unless `WXHUB_OPEN_SIGNUP=t
 signup on an internet-facing deployment. Edit the allow-list before onboarding real users.
 
 Verify that `/` redirects anonymous visitors to `/services/demos/lab/`. The JupyterLite workspace
-should list exactly twenty editable notebooks, start a Pyodide kernel, and require no Hub cookie.
-Confirm that notebooks 11–15 cover model products and notebooks 16–20 cover live instruments. Run a
-cell that calls the meteo API and confirm browser-local save and download. The authenticated,
+should list exactly thirty editable notebooks, start a Pyodide kernel, and require no Hub cookie.
+Confirm that notebooks 11–15 cover model products, notebooks 16–20 cover live instruments, and
+notebooks 21–30 cover artificial-intelligence methods and responsible use. Run a cell
+that calls the meteo API and confirm browser-local save and download. The authenticated,
 server-side environment remains available explicitly at `/hub/login`.
 
 For internet-facing use, terminate HTTPS at a maintained reverse proxy on a trusted DNS name and
@@ -47,9 +48,11 @@ still trigger browser phishing protection and exposes passwords in transit.
 4. Restart the user server and confirm workspace persistence.
 5. Restart the Hub and confirm its database and sessions persist.
 6. Open `/services/demos/lab/` anonymously, confirm the WxHub gradient matches `/hub/login`, and
-   verify that all twenty notebooks appear.
+   verify that all thirty notebooks appear.
 7. Run one model demo and one live-instrument demo. An explicit upstream-timeout message is an
    acceptable instrument-service result, but an unhandled traceback is not.
+8. Run one AI notebook, confirm the algorithm executes in Pyodide, and verify its limitations or
+   model-card text does not present the result as an official forecast or warning.
 
 ## Configuration
 

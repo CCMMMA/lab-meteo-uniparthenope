@@ -26,8 +26,8 @@ RAM, 0.5 CPU, and 64-process limits. Notebook execution and uploaded files remai
 browser. Browser code can call the public meteo API because it permits cross-origin requests, but
 cannot access the host, Docker socket, authenticated user volumes, or server-side data mounts.
 The anonymous lab injects the same WxHub palette, typography, and gradient navigation used by the
-Hub login page. Its twenty bundled notebooks cover API discovery, forecasts, model products, and
-live instrument observations.
+Hub login page. Its thirty bundled notebooks cover API discovery, forecasts, model products, live
+instrument observations, and transparent artificial-intelligence methods.
 
 ## Storage model
 
