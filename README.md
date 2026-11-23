@@ -111,7 +111,7 @@ Data lineage, checksums, outputs, and limitations are documented in
 | `jupyterhub/` | Hub image and DockerSpawner configuration |
 | `image/` | Versioned single-user scientific image and environment snapshot |
 | `notebooks/` | Executable WRF analysis and Voilà dashboard |
-| `demos/` | JupyterLite image and ten browser-executed API notebooks |
+| `demos/` | JupyterLite image and twenty browser-executed model and instrument notebooks |
 | `templates/` | Read-only starter notebooks |
 | `scripts/` | Acquisition, validation, execution, and benchmark utilities |
 | `measurements/` | Committed pilot benchmark evidence |

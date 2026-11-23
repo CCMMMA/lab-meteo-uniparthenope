@@ -1,0 +1,56 @@
+:root {
+  --wxhub-primary: #1f4e79;
+  --wxhub-secondary: #2a91eb;
+  --wxhub-accent: #181c63;
+  --jp-brand-color0: var(--wxhub-primary);
+  --jp-brand-color1: var(--wxhub-primary);
+  --jp-brand-color2: var(--wxhub-secondary);
+  --jp-layout-color0: #f4f7fa;
+  --jp-layout-color1: #ffffff;
+  --jp-ui-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+#jp-top-panel {
+  background: linear-gradient(120deg, var(--wxhub-primary), var(--wxhub-accent)) !important;
+  box-shadow: 0 .25rem 1.5rem rgba(0, 26, 48, .2);
+}
+
+#jp-menu-panel,
+#jp-top-bar {
+  background: transparent !important;
+  color: #fff !important;
+}
+
+#jp-menu-panel::before {
+  content: "Wx  meteo@uniparthenope";
+  display: inline-flex;
+  align-items: center;
+  min-width: 15rem;
+  padding: 0 .8rem;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+#jp-menu-panel .lm-MenuBar-itemLabel,
+#jp-menu-panel .jp-MenuBar-itemLabel {
+  color: rgba(255, 255, 255, .9) !important;
+}
+
+#jp-menu-panel .lm-MenuBar-item.lm-mod-active,
+#jp-menu-panel .jp-MenuBar-item.jp-mod-active {
+  background: rgba(255, 255, 255, .15);
+}
+
+.jp-FileBrowser,
+.jp-Launcher {
+  background: #f4f7fa;
+}
+
+.jp-LauncherCard {
+  border-radius: .65rem;
+}
+
+@media (max-width: 760px) {
+  #jp-menu-panel::before { content: "WxHub"; min-width: auto; }
+}

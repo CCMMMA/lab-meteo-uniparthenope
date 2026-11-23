@@ -49,6 +49,9 @@ diff. The snapshot may contain platform-specific base-image references. The pinn
   recreate the Hub container. Authenticated users should use `/hub/login` directly.
 - **A browser notebook reports an API error:** request the API `/version` endpoint in the same
   browser and inspect its developer console for network, TLS, or CORS errors.
+- **A live-instrument notebook reports temporary unavailability:** check the public API
+  `/v2/weatherreports/latest/json` endpoint. Upstream timeouts do not indicate a JupyterLite
+  container failure and the notebook never substitutes a different observation source.
 - **Demo changes are missing:** run `python3 scripts/build_demo_notebooks.py`, validate that outputs
   are clear, and recreate the `demos` service.
 - **Notebook fails:** confirm the requested WRF range and grid file exist, the output is writable,

@@ -25,6 +25,9 @@ The service container is only an Nginx static-file server with a read-only root 
 RAM, 0.5 CPU, and 64-process limits. Notebook execution and uploaded files remain in the visitor's
 browser. Browser code can call the public meteo API because it permits cross-origin requests, but
 cannot access the host, Docker socket, authenticated user volumes, or server-side data mounts.
+The anonymous lab injects the same WxHub palette, typography, and gradient navigation used by the
+Hub login page. Its twenty bundled notebooks cover API discovery, forecasts, model products, and
+live instrument observations.
 
 ## Storage model
 

@@ -75,6 +75,33 @@ def forecast_frame(place):
     frame["time"] = pd.to_datetime(frame["dateTime"], format="%Y%m%dZ%H%M", utc=True)
     return frame.set_index("time")
 
+def records_frame(payload):
+    """Normalize common API list, GeoJSON, and envelope responses."""
+    if isinstance(payload, list):
+        records = payload
+    elif isinstance(payload, dict) and isinstance(payload.get("features"), list):
+        records = []
+        for feature in payload["features"]:
+            record = dict(feature.get("properties", {}))
+            coordinates = feature.get("geometry", {}).get("coordinates", [])
+            if len(coordinates) >= 2:
+                record.update(longitude=coordinates[0], latitude=coordinates[1])
+            records.append(record)
+    elif isinstance(payload, dict):
+        records = next((payload[key] for key in ("weatherreports", "reports", "data", "results", "items")
+                        if isinstance(payload.get(key), list)), [payload])
+    else:
+        records = []
+    return pd.json_normalize(records)
+
+def numeric_snapshot(payload):
+    """Return scalar numeric values without assuming a product-specific schema."""
+    frame = records_frame(payload)
+    if frame.empty:
+        return frame
+    numeric = frame.apply(pd.to_numeric, errors="coerce").dropna(axis=1, how="all")
+    return numeric
+
 PLACES = {"Gulf of Naples": "ca001", "Gulf of Salerno": "ca002", "Cilento": "ca003"}
 '''
 
@@ -445,6 +472,220 @@ display(widgets.VBox([refresh, output]))
 render()
 ''',
     ),
+    "11_model_cycle_inventory.ipynb": notebook(
+        "Model cycle inventory",
+        "Compare the currently published atmospheric, wave, ocean, water-quality, and AI model products and their forecast horizons.",
+        '''refresh = widgets.Button(description="Refresh models", button_style="primary", icon="refresh")
+output = widgets.Output()
+
+def render(_=None):
+    with output:
+        clear_output(wait=True)
+        try:
+            products = api_json("products")["products"]
+            rows = []
+            for code, item in products.items():
+                rows.append({"model": code, "description": item.get("desc", {}).get("en-US", ""),
+                             "forecast_steps": item.get("steps"), "fields": len(item.get("fields", {})),
+                             "map_outputs": len(item.get("outputs", {}))})
+            frame = pd.DataFrame(rows).sort_values("model")
+            display(frame)
+            frame.set_index("model")[["fields", "map_outputs"]].plot.bar(figsize=(9, 4), color=[BRAND, ACCENT])
+            plt.title("Published model capabilities"); plt.ylabel("Count"); plt.xticks(rotation=0); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>Model catalog temporarily unavailable:</b> {exc}"))
+
+refresh.on_click(render); display(widgets.VBox([refresh, output])); render()
+'''),
+    "12_wrf_heat_stress.ipynb": notebook(
+        "WRF heat-stress indicators",
+        "Derive humidex-like apparent temperature from the WRF temperature and humidity forecast for a selected Campania coastal area.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+hours = widgets.IntSlider(value=72, min=24, max=168, step=24, description="Hours:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            frame = forecast_frame(place.value).head(hours.value).copy()
+            vapor = 6.112 * np.exp((17.67 * frame.t2c) / (frame.t2c + 243.5)) * frame.rh2 / 100
+            frame["apparent_C"] = frame.t2c + 0.5555 * (vapor - 10)
+            frame[["t2c", "apparent_C"]].plot(figsize=(10, 4.5), color=[BRAND, "#d95f02"])
+            plt.title(f"{place.label}: WRF thermal comfort"); plt.ylabel("°C"); plt.grid(alpha=.25); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>WRF forecast temporarily unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); hours.observe(render, names="value")
+display(widgets.VBox([widgets.HBox([place, hours]), output])); render()
+'''),
+    "13_wavewatch_snapshot.ipynb": notebook(
+        "WaveWatch III model snapshot",
+        "Inspect the latest WaveWatch III forecast payload and visualize every numeric sea-state variable returned for the selected coastal area.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            payload = api_json(f"products/ww33/forecast/{place.value}")
+            numeric = numeric_snapshot(payload)
+            display(pd.DataFrame(records_frame(payload).iloc[:1].T, columns=["value"]))
+            if not numeric.empty:
+                numeric.iloc[0].dropna().head(16).plot.bar(figsize=(10, 4), color=ACCENT)
+                plt.title(f"{place.label}: WaveWatch III numeric fields"); plt.grid(axis="y", alpha=.25); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>Wave model temporarily unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); display(widgets.VBox([place, output])); render()
+'''),
+    "14_roms_ocean_snapshot.ipynb": notebook(
+        "ROMS ocean model snapshot",
+        "Explore the latest ROMS coastal-dynamics forecast returned by the public API without assuming a fixed variable schema.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            payload = api_json(f"products/rms3/forecast/{place.value}")
+            frame = records_frame(payload)
+            display(HTML(f"<h3>{place.label} · ROMS coastal dynamics</h3>")); display(frame.T.rename(columns={0: "value"}))
+            numeric = numeric_snapshot(payload)
+            if not numeric.empty:
+                numeric.iloc[0].dropna().head(16).plot.bar(figsize=(10, 4), color=BRAND)
+                plt.ylabel("Reported value"); plt.grid(axis="y", alpha=.25); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>ROMS model temporarily unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); display(widgets.VBox([place, output])); render()
+'''),
+    "15_wacomm_water_quality.ipynb": notebook(
+        "WaComM water-quality snapshot",
+        "Inspect the latest WaComM inert-tracer transport and diffusion forecast for a Campania coastal area.",
+        '''place = widgets.Dropdown(options=PLACES, description="Area:")
+output = widgets.Output()
+
+def render(*_):
+    with output:
+        clear_output(wait=True)
+        try:
+            payload = api_json(f"products/wcm3/forecast/{place.value}")
+            frame = records_frame(payload)
+            display(HTML(f"<h3>{place.label} · WaComM</h3>")); display(frame.T.rename(columns={0: "value"}))
+            numeric = numeric_snapshot(payload)
+            if not numeric.empty:
+                numeric.iloc[0].dropna().head(16).plot.bar(figsize=(10, 4), color="#2a9d8f")
+                plt.ylabel("Reported value"); plt.grid(axis="y", alpha=.25); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>Water-quality model temporarily unavailable:</b> {exc}"))
+
+place.observe(render, names="value"); display(widgets.VBox([place, output])); render()
+'''),
+    "16_live_instrument_map.ipynb": notebook(
+        "Live instrument network map",
+        "Load the latest official weather reports and map instruments whenever the API supplies geographic coordinates.",
+        '''refresh = widgets.Button(description="Refresh instruments", button_style="primary", icon="refresh")
+output = widgets.Output()
+
+def render(_=None):
+    with output:
+        clear_output(wait=True)
+        try:
+            frame = records_frame(api_json("v2/weatherreports/latest/json"))
+            display(HTML(f"<h3>{len(frame)} latest instrument reports</h3>")); display(frame.head(30))
+            lon = next((c for c in frame if c.lower() in ("lon", "longitude", "lng")), None)
+            lat = next((c for c in frame if c.lower() in ("lat", "latitude")), None)
+            if lon and lat:
+                plt.figure(figsize=(8, 5)); plt.scatter(frame[lon], frame[lat], c=ACCENT, edgecolor=BRAND)
+                plt.xlabel("Longitude"); plt.ylabel("Latitude"); plt.title("Live meteo@uniparthenope instruments"); plt.grid(alpha=.25); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>Live instrument service temporarily unavailable:</b> {exc}"))
+
+refresh.on_click(render); display(widgets.VBox([refresh, output])); render()
+'''),
+    "17_live_air_temperature.ipynb": notebook(
+        "Live air-temperature observations",
+        "Retrieve the newest air-temperature field reported by the meteo@uniparthenope instrument network.",
+        '''refresh = widgets.Button(description="Refresh temperature", button_style="primary", icon="refresh")
+output = widgets.Output()
+
+def render(_=None):
+    with output:
+        clear_output(wait=True)
+        try:
+            frame = records_frame(api_json("v2/weatherreports/latest/t2c/json"))
+            display(frame)
+            numeric = numeric_snapshot(frame.to_dict("records"))
+            if not numeric.empty: numeric.iloc[:, -1].dropna().plot.hist(bins=15, color="#d95f02", edgecolor="white", title="Latest air-temperature distribution")
+            plt.xlabel("Reported value"); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>Live temperature temporarily unavailable:</b> {exc}"))
+
+refresh.on_click(render); display(widgets.VBox([refresh, output])); render()
+'''),
+    "18_live_wind.ipynb": notebook(
+        "Live wind observations",
+        "Refresh the latest wind-speed reports from the official live-instrument endpoint and compare reporting stations.",
+        '''refresh = widgets.Button(description="Refresh wind", button_style="primary", icon="refresh")
+output = widgets.Output()
+
+def render(_=None):
+    with output:
+        clear_output(wait=True)
+        try:
+            frame = records_frame(api_json("v2/weatherreports/latest/ws10/json"))
+            display(frame)
+            numeric = numeric_snapshot(frame.to_dict("records"))
+            if not numeric.empty: numeric.iloc[:, -1].dropna().head(30).plot.bar(figsize=(10, 4), color=ACCENT, title="Latest wind-speed reports")
+            plt.ylabel("Reported value"); plt.grid(axis="y", alpha=.25); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>Live wind temporarily unavailable:</b> {exc}"))
+
+refresh.on_click(render); display(widgets.VBox([refresh, output])); render()
+'''),
+    "19_live_pressure.ipynb": notebook(
+        "Live atmospheric-pressure observations",
+        "Inspect the most recent sea-level pressure observations published by live instruments.",
+        '''refresh = widgets.Button(description="Refresh pressure", button_style="primary", icon="refresh")
+output = widgets.Output()
+
+def render(_=None):
+    with output:
+        clear_output(wait=True)
+        try:
+            frame = records_frame(api_json("v2/weatherreports/latest/slp/json"))
+            display(frame)
+            numeric = numeric_snapshot(frame.to_dict("records"))
+            if not numeric.empty: numeric.iloc[:, -1].dropna().head(30).plot(marker="o", figsize=(10, 4), color=BRAND, title="Latest pressure reports")
+            plt.ylabel("Reported value"); plt.grid(alpha=.25); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>Live pressure temporarily unavailable:</b> {exc}"))
+
+refresh.on_click(render); display(widgets.VBox([refresh, output])); render()
+'''),
+    "20_live_instrument_quality.ipynb": notebook(
+        "Live instrument freshness and completeness",
+        "Audit the newest weather reports for timestamp freshness, missing values, and field completeness.",
+        '''refresh = widgets.Button(description="Run quality audit", button_style="primary", icon="refresh")
+output = widgets.Output()
+
+def render(_=None):
+    with output:
+        clear_output(wait=True)
+        try:
+            frame = records_frame(api_json("v2/weatherreports/latest/json"))
+            summary = pd.DataFrame({"non_null": frame.notna().sum(), "missing": frame.isna().sum(), "coverage_pct": (100 * frame.notna().mean()).round(1)})
+            display(HTML(f"<h3>Quality audit · {len(frame)} live reports</h3>")); display(summary.sort_values("coverage_pct"))
+            summary.coverage_pct.sort_values().tail(25).plot.barh(figsize=(8, 6), color=ACCENT)
+            plt.xlabel("Coverage (%)"); plt.xlim(0, 100); plt.grid(axis="x", alpha=.25); plt.show()
+        except Exception as exc:
+            display(HTML(f"<b>Live quality audit temporarily unavailable:</b> {exc}"))
+
+refresh.on_click(render); display(widgets.VBox([refresh, output])); render()
+'''),
 }
 
 

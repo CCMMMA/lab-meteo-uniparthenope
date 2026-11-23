@@ -2,7 +2,7 @@
 
 ## Public API demonstrations
 
-The ten notebooks in `demos/` are generated from `scripts/build_demo_notebooks.py`. They use the
+The twenty notebooks in `demos/` are generated from `scripts/build_demo_notebooks.py`. They use the
 public meteo@uniparthenope API configured by `METEO_API_BASE_URL`; consequently, their numerical
 results change with each forecast cycle and upstream catalog revision. The notebooks record no
 transient outputs in Git and use explicit request timeouts and UTC parsing.
@@ -25,8 +25,12 @@ Executed copies are verification artifacts and must not be committed.
 
 The anonymous environment is built from the pinned dependencies and image digests in
 `demos/Dockerfile`. `docker compose build demos` generates the static JupyterLite application and
-indexes the ten notebooks. In that environment, Pyodide executes Python in the browser and calls
+indexes the twenty notebooks. In that environment, Pyodide executes Python in the browser and calls
 the fixed public API URL directly; results still vary with the live forecast cycle.
+
+Notebooks 11–15 exercise model products, while notebooks 16–20 use the official live instrument
+weather-report endpoints. Live observations can be delayed or temporarily unavailable upstream;
+the notebooks report that condition without substituting another data source.
 
 ## Contract
 

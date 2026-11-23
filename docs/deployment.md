@@ -72,6 +72,11 @@ The default palette is derived from the public meteo@uniparthenope forecast and 
 sites. Override the variables in `.env`; color values must use `#RRGGBB`, and link values must be
 absolute HTTP or HTTPS URLs. Recreate the Hub container after changes.
 
+The anonymous lab carries the same default palette in `demos/wxhub.css`; the image publishes it
+under a versioned asset name so existing service-worker caches receive branding updates. When changing default
+brand colors, update that stylesheet with the `WXHUB_BRAND_*` defaults, rebuild `demos`, and
+recreate both services to keep `/hub/login` and `/services/demos/lab/` visually consistent.
+
 ## Upgrade and rollback
 
 Back up `jupyterhub-data` and record image IDs. Build new images with versioned tags, validate them,

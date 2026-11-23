@@ -21,8 +21,8 @@ def fail(message: str) -> None:
 
 def validate_notebooks() -> None:
     demo_paths = sorted(ROOT.glob("demos/*.ipynb"))
-    if len(demo_paths) != 10:
-        fail(f"expected 10 public demo notebooks, found {len(demo_paths)}")
+    if len(demo_paths) != 20:
+        fail(f"expected 20 public demo notebooks, found {len(demo_paths)}")
     paths = sorted((*ROOT.glob("notebooks/*.ipynb"), *ROOT.glob("templates/*.ipynb"), *demo_paths))
     for path in paths:
         try:
