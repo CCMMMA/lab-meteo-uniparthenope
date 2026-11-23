@@ -1,6 +1,21 @@
 {% extends "templates/page.html" %}
+{#
+  WxHub base template. It mirrors the meteo@uniparthenope sensor-network portal: gradient
+  navigation, circular brand logo, cards with large radii, a skip link, visible focus rings,
+  a privacy/accessibility footer, and day/night themes. Colours meet WCAG 2.1 AA contrast.
+#}
 
 {% block title %}{{ wxhub_brand_name }}{% endblock title %}
+
+{% block favicon %}
+  <link rel="icon" href="{{ base_url }}wxhub/static/favicon.png" type="image/png">
+{% endblock favicon %}
+
+{% block meta %}
+  <meta name="description" content="{{ wxhub_brand_subtitle }}">
+  <meta name="theme-color" content="{{ wxhub_brand_primary }}">
+  <meta name="color-scheme" content="light dark">
+{% endblock meta %}
 
 {% block stylesheet %}
   {{ super() }}
@@ -12,83 +27,193 @@
       --wxhub-page: #f4f7fa;
       --wxhub-surface: #ffffff;
       --wxhub-ink: #13283a;
-      --wxhub-muted: #607486;
+      --wxhub-muted: #55687a;
+      --wxhub-link: {{ wxhub_brand_primary }};
+      --wxhub-radius: 1rem;
+      --wxhub-shadow: 0 .75rem 2.5rem rgba(5, 37, 63, .09);
       --bs-primary: {{ wxhub_brand_primary }};
-      --bs-primary-rgb: 31, 78, 121;
+      --bs-link-color: var(--wxhub-link);
+      --bs-link-hover-color: var(--wxhub-accent);
     }
     [data-bs-theme="dark"] {
       --wxhub-page: #0c1822;
       --wxhub-surface: #142433;
       --wxhub-ink: #edf6fb;
       --wxhub-muted: #a9bdca;
+      --wxhub-link: #7cc0ff;
+      --wxhub-shadow: 0 .75rem 2.5rem rgba(0, 0, 0, .24);
+      --bs-link-hover-color: #b5dcff;
     }
-    body { background: var(--wxhub-page); color: var(--wxhub-ink); }
-    a { color: var(--wxhub-secondary); }
-    .navbar {
+    html { min-height: 100%; scroll-padding-top: 5rem; }
+    body {
+      min-height: 100vh; display: flex; flex-direction: column;
+      background: var(--wxhub-page); color: var(--wxhub-ink);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Open Sans", sans-serif;
+    }
+    #wxhub-main { flex: 1 0 auto; display: flex; flex-direction: column; outline: none; }
+    a { color: var(--wxhub-link); text-underline-offset: .15em; }
+    a:hover { color: var(--bs-link-hover-color); }
+    .skip-link {
+      position: fixed; left: 1rem; top: -5rem; z-index: 5000; padding: .65rem 1rem;
+      border-radius: .5rem; background: #fff; color: #111; font-weight: 600;
+    }
+    .skip-link:focus { top: 1rem; }
+    :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--wxhub-secondary) 70%, #000);
+      outline-offset: 3px;
+    }
+    .wxhub-navbar {
       background: linear-gradient(120deg, var(--wxhub-primary), var(--wxhub-accent)) !important;
       box-shadow: 0 .25rem 1.5rem rgba(0, 26, 48, .2);
     }
-    .navbar .nav-link, .navbar .navbar-brand, .navbar #login_widget, .navbar #login_widget span {
-      color: rgba(255, 255, 255, .88) !important;
+    .wxhub-navbar .nav-link, .wxhub-navbar #login_widget, .wxhub-navbar #login_widget span {
+      color: rgba(255, 255, 255, .9) !important; border-radius: .5rem;
     }
-    .navbar .nav-link:hover, .navbar .nav-link:focus { color: #fff !important; }
-    .wxhub-brand { display: flex; align-items: center; gap: .7rem; color: #fff; text-decoration: none; }
-    .wxhub-brand-mark {
-      display: grid; place-items: center; width: 2.5rem; height: 2.5rem;
-      border: 2px solid rgba(255,255,255,.75); border-radius: 50%;
-      color: #fff; font-weight: 800; letter-spacing: -.08em;
+    .wxhub-navbar .nav-link { padding-inline: .75rem !important; }
+    .wxhub-navbar .nav-link:hover, .wxhub-navbar .nav-link:focus,
+    .wxhub-navbar .nav-link[aria-current="page"] { color: #fff !important; background: rgba(255,255,255,.12); }
+    .wxhub-navbar .btn-outline-contrast, .wxhub-navbar #dark-theme-toggle {
+      color: #fff; border-color: rgba(255,255,255,.6);
     }
-    .wxhub-brand-copy strong, .wxhub-brand-copy small { display: block; line-height: 1.1; }
-    .wxhub-brand-copy strong { font-size: 1rem; }
-    .wxhub-brand-copy small { margin-top: .2rem; font-size: .68rem; opacity: .75; font-weight: 400; }
-    .btn-primary {
+    .wxhub-navbar .navbar-toggler { border-color: rgba(255,255,255,.6); }
+    .wxhub-navbar .navbar-toggler-icon { filter: invert(1); }
+    .wxhub-brand { display: flex; align-items: center; gap: .7rem; color: #fff !important; text-decoration: none; }
+    .wxhub-brand img { width: 2.5rem; height: 2.5rem; border-radius: 50%; background: #fff; padding: .1rem; }
+    .wxhub-brand strong, .wxhub-brand small { display: block; line-height: 1.1; }
+    .wxhub-brand strong { font-size: 1rem; }
+    .wxhub-brand small { margin-top: .2rem; font-size: .7rem; opacity: .85; font-weight: 400; letter-spacing: .035em; }
+    .wxhub-signin { color: var(--wxhub-primary) !important; font-weight: 700; background: #fff; }
+    .page-shell { width: 100%; max-width: 1280px; margin-inline: auto; padding: clamp(1rem, 2.5vw, 2rem); }
+    .page-kicker { color: var(--wxhub-link); text-transform: uppercase; letter-spacing: .12em; font-weight: 800; font-size: .72rem; }
+    .page-title { letter-spacing: -.03em; font-weight: 750; }
+    .text-muted, .text-body-secondary, .wxhub-muted { color: var(--wxhub-muted) !important; }
+    .card, .wxhub-card {
+      background: var(--wxhub-surface); color: var(--wxhub-ink);
+      border: 1px solid color-mix(in srgb, var(--bs-border-color) 75%, transparent);
+      border-radius: var(--wxhub-radius); box-shadow: var(--wxhub-shadow);
+    }
+    .wxhub-card { padding: clamp(1.25rem, 3vw, 2rem); }
+    .btn { border-radius: .65rem; font-weight: 600; }
+    .btn-primary, .btn-jupyter {
       --bs-btn-bg: var(--wxhub-primary); --bs-btn-border-color: var(--wxhub-primary);
       --bs-btn-hover-bg: var(--wxhub-accent); --bs-btn-hover-border-color: var(--wxhub-accent);
+      --bs-btn-color: #fff; --bs-btn-hover-color: #fff;
+      background: var(--wxhub-primary) !important; border-color: var(--wxhub-primary) !important; color: #fff !important;
     }
-    .btn, .form-control, .form-select { border-radius: .65rem; }
+    .btn-primary:hover, .btn-jupyter:hover { background: var(--wxhub-accent) !important; }
+    .btn-outline-primary {
+      --bs-btn-color: var(--wxhub-link); --bs-btn-border-color: var(--wxhub-link);
+      --bs-btn-hover-bg: var(--wxhub-primary); --bs-btn-hover-border-color: var(--wxhub-primary); --bs-btn-hover-color: #fff;
+    }
+    .form-control, .form-select { border-radius: .65rem; min-height: 2.65rem; }
     .form-control:focus, .form-select:focus {
       border-color: var(--wxhub-secondary);
-      box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--wxhub-secondary) 20%, transparent);
+      box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--wxhub-secondary) 25%, transparent);
     }
-    .card, .auth-form-body, .auth-form-header {
-      background: var(--wxhub-surface); border-color: color-mix(in srgb, var(--wxhub-primary) 18%, transparent);
+    .table { --bs-table-bg: transparent; }
+    .badge-role { background: color-mix(in srgb, var(--wxhub-secondary) 18%, transparent); color: var(--wxhub-ink); font-weight: 600; }
+    .auth-shell {
+      flex: 1 0 auto; display: grid; place-items: center; padding: 2rem 1rem;
+      background: radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--wxhub-secondary) 16%, transparent), transparent 34%);
     }
-    .auth-form-header {
-      background: linear-gradient(120deg, var(--wxhub-primary), var(--wxhub-accent)) !important;
-      color: #fff !important;
+    .auth-card { width: 100%; max-width: 30rem; }
+    .announcement { border-radius: .8rem; }
+    .wxhub-footer {
+      margin-top: auto; color: var(--wxhub-muted);
+      background: color-mix(in srgb, var(--wxhub-surface) 92%, var(--wxhub-primary));
+      border-top: 1px solid var(--bs-border-color);
     }
-    .btn-jupyter {
-      background: var(--wxhub-primary) !important; border-color: var(--wxhub-primary) !important;
-      color: #fff !important;
+    .wxhub-footer a { color: inherit; }
+    .wxhub-cookie {
+      position: fixed; inset: auto 1rem 1rem auto; max-width: 26rem; z-index: 2000;
+      background: var(--wxhub-surface); color: var(--wxhub-ink); border-radius: var(--wxhub-radius);
+      box-shadow: var(--wxhub-shadow); border: 1px solid var(--bs-border-color); padding: 1rem 1.25rem;
     }
-    .btn-jupyter:hover, .btn-jupyter:focus {
-      background: var(--wxhub-accent) !important; border-color: var(--wxhub-accent) !important;
+    .visually-hidden-focusable:not(:focus):not(:focus-within) { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
-    #start, #stop { border-radius: .65rem; }
-    .wxhub-links { margin-left: 1rem; font-size: .78rem; white-space: nowrap; }
-    .wxhub-links a { color: rgba(255,255,255,.78) !important; margin-left: .75rem; }
-    @media (max-width: 767px) { .wxhub-brand-copy small, .wxhub-links { display: none; } }
+    @media (forced-colors: active) { .wxhub-navbar { forced-color-adjust: auto; } }
   </style>
 {% endblock stylesheet %}
 
-{% block logo %}
-  <span id="jupyterhub-logo" class="navbar-brand">
-    <a class="wxhub-brand" href="{{ logo_url or base_url }}">
-      <span class="wxhub-brand-mark" aria-hidden="true">Wx</span>
-      <span class="wxhub-brand-copy">
-        <strong>{{ wxhub_brand_name }}</strong>
-        <small>{{ wxhub_brand_subtitle }}</small>
-      </span>
-    </a>
-  </span>
-  <span class="wxhub-links">
-    <a href="/services/demos/">Notebook demos</a>
-    <a href="{{ wxhub_brand_site_url }}" target="_blank" rel="noopener">Forecasts</a>
-    <a href="{{ wxhub_brand_network_url }}" target="_blank" rel="noopener">Sensor network</a>
-  </span>
-{% endblock logo %}
+{% block nav_bar %}
+  <a class="skip-link" href="#wxhub-main">Skip to main content</a>
+  <nav class="navbar navbar-expand-lg wxhub-navbar sticky-top" data-bs-theme="dark" aria-label="Main navigation">
+    <div class="container-fluid" style="max-width: 1500px;">
+      {% block logo %}
+        <a id="jupyterhub-logo" class="navbar-brand wxhub-brand" href="{{ logo_url or base_url }}">
+          <img src="{{ base_url }}logo" alt="">
+          <span><strong>{{ wxhub_brand_name }}</strong><small>{{ wxhub_brand_subtitle }}</small></span>
+        </a>
+      {% endblock logo %}
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#thenavbar"
+              aria-controls="thenavbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="thenavbar">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+          <li class="nav-item"><a class="nav-link" href="/services/demos/">Notebook gallery</a></li>
+          {% if user %}
+            {% block nav_bar_left_items %}
+              <li class="nav-item"><a class="nav-link" href="{{ base_url }}home">My runtime</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ base_url }}wxhub/account">My data</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ base_url }}token">Tokens</a></li>
+              {% if wxhub_authenticator == "native" %}
+                <li class="nav-item"><a class="nav-link" href="{{ base_url }}change-password">Password</a></li>
+              {% endif %}
+              {% if 'admin-ui' in parsed_scopes %}
+                <li class="nav-item dropdown">
+                  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Administration</a>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="{{ base_url }}wxhub/admin">Platform dashboard</a></li>
+                    <li><a class="dropdown-item" href="{{ base_url }}admin">Users and servers</a></li>
+                    {% if user.admin and wxhub_authenticator == "native" %}
+                      <li><a class="dropdown-item" href="{{ base_url }}authorize">Approve sign-ups</a></li>
+                    {% endif %}
+                  </ul>
+                </li>
+              {% endif %}
+            {% endblock nav_bar_left_items %}
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{{ wxhub_brand_site_url }}" rel="noopener">Forecasts</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ wxhub_brand_network_url }}" rel="noopener">Sensor network</a></li>
+          {% endif %}
+          {% block nav_bar_right_items %}
+            <li class="nav-item">
+              {% block theme_toggle %}
+                <button class="btn btn-sm ms-lg-1" id="dark-theme-toggle" type="button"
+                        aria-label="Switch between day and night theme" title="Day or night theme">
+                  <i aria-hidden="true" class="fa fa-circle-half-stroke"></i>
+                </button>
+              {% endblock theme_toggle %}
+            </li>
+            <li class="nav-item">
+              {% block login_widget %}
+                <span id="login_widget" class="d-inline-flex align-items-center gap-2 ms-lg-2">
+                  {% if user %}
+                    <span>{{ user.name }}</span>
+                    <a id="logout" role="button" class="btn btn-sm btn-outline-contrast" href="{{ logout_url }}">
+                      <i aria-hidden="true" class="fa fa-sign-out"></i> Sign out</a>
+                  {% else %}
+                    <a id="login" role="button" class="btn btn-sm wxhub-signin" href="{{ login_url }}">Sign in</a>
+                  {% endif %}
+                </span>
+              {% endblock login_widget %}
+            </li>
+          {% endblock nav_bar_right_items %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+{% endblock nav_bar %}
 
-{% block meta %}
-  <meta name="description" content="{{ wxhub_brand_subtitle }}">
-  <meta name="theme-color" content="{{ wxhub_brand_primary }}">
-{% endblock meta %}
+{% block announcement %}
+  {# The main landmark opens here and closes in wxhub_footer.html, wrapping every page's main block. #}
+  <main id="wxhub-main" tabindex="-1">
+  {{ super() }}
+{% endblock announcement %}
+
+{% block footer %}
+  {% include "wxhub_footer.html" %}
+{% endblock footer %}

@@ -2,98 +2,136 @@
 
 ## Prepare the host
 
-Install Docker Engine and Compose v2, then create the data directories:
+Install Docker Engine 24+ and Compose v2 on Linux x86_64. Decide the instance name, published
+port, and data paths, and write them to an untracked `.env` file next to `docker-compose.yml`:
 
 ```bash
-sudo install -d -o "$USER" -g "$(id -gn)" \
-  /opt/weather/data/raw/sensors /opt/weather/data/raw/models /opt/weather/data/curated
+umask 077
+cat > .env <<'EOF'
+WXHUB_INSTANCE=labmeteo
+WXHUB_PORT=8290
+WXHUB_PUBLIC_HOST=http://<host>:8290
+WXHUB_SINGLEUSER_IMAGE=labmeteo-singleuser:latest
+WXHUB_TEMPLATES_HOST=/home/<user>/devel/lab-meteo-uniparthenope/templates
+WXHUB_OPENDAP_HOST=/storage/ccmmma/prometeo/data/opendap
+WXHUB_NETWORK_HOST=/storage/ccmmma/prometeo/data/network
+WXHUB_SENSORS_HOST=/home/<user>/devel/lab-meteo-uniparthenope-data/raw/sensors
+WXHUB_MODELS_HOST=/home/<user>/devel/lab-meteo-uniparthenope-data/raw/models
+WXHUB_CURATED_HOST=/home/<user>/devel/lab-meteo-uniparthenope-data/curated
+WXHUB_ADMIN_USERS=admin
+EOF
 ```
 
-Clone the repository. Optional `WXHUB_*_HOST` overrides must be absolute paths because the host
-Docker daemon, not the Hub container, resolves them.
+Every `*_HOST` value must be an absolute, existing path: the host Docker daemon resolves it, and a
+missing path would be created empty by Docker. Create the local mirror directories first. Choose a
+`WXHUB_INSTANCE` that no other deployment on the host uses; it scopes container, network, volume,
+and image names (see [Architecture](architecture.md#instances)).
 
 ## Build, validate, and start
 
 ```bash
 ./scripts/validate_repo.sh
-docker build -t wxhub-singleuser:latest ./image
+docker compose --profile images build singleuser
 docker compose build jupyterhub demos
 docker compose up -d
 docker compose ps
 docker compose logs -f jupyterhub
 ```
 
-Wait for `JupyterHub is now running` and open port 8000. Only names in
-`c.Authenticator.allowed_users` can log in. Public self-signup is disabled by default; temporarily
-set `WXHUB_ENABLE_SIGNUP=true` while provisioning an allowed account, then unset it and recreate
-the Hub. New accounts require administrator approval unless `WXHUB_OPEN_SIGNUP=true`; avoid open
-signup on an internet-facing deployment. Edit the allow-list before onboarding real users.
+Wait for `JupyterHub is now running`. Never run `docker compose down -v`: it deletes the Hub
+database and cookie secret.
 
-Verify that `/` redirects anonymous visitors to `/services/demos/lab/`. The JupyterLite workspace
-should list exactly thirty editable notebooks, start a Pyodide kernel, and require no Hub cookie.
-Confirm that notebooks 11–15 cover model products, notebooks 16–20 cover live instruments, and
-notebooks 21–30 cover artificial-intelligence methods and responsible use. Run a cell
-that calls the meteo API and confirm browser-local save and download. The authenticated,
-server-side environment remains available explicitly at `/hub/login`.
+## Provision the first accounts
 
-For internet-facing use, terminate HTTPS at a maintained reverse proxy on a trusted DNS name and
-set `WXHUB_PUBLIC_HOST` to that `https://` URL. A branded login form on a raw HTTP IP address can
-still trigger browser phishing protection and exposes passwords in transit.
+With local accounts (the default), create the administrator and any initial users from the host.
+Generate passwords, store them only in a mode-600 file outside Git, and hand them over through a
+secure channel:
+
+```bash
+mkdir -p .secrets && chmod 700 .secrets
+PASSWORD=$(python3 -c 'import secrets; print(secrets.token_urlsafe(16))')
+printf '%s\n' "$PASSWORD" | docker compose exec -T jupyterhub \
+  python -m wxhub_ext.manage_users create admin --role admin
+printf 'admin %s\n' "$PASSWORD" >> .secrets/credentials.txt && chmod 600 .secrets/credentials.txt
+```
+
+Repeat with `--role user|student|researcher|instructor` for other accounts. Ask every user to change
+the initial password at `/hub/change-password`. For Microsoft or Google sign-in, follow
+[Identity and roles](identity-and-roles.md) instead.
 
 ## Acceptance checks
 
-1. Start a user server and open JupyterLab.
-2. Copy a template into `/home/jovyan/work` and run it with suitable input data.
-3. Run `scripts/test_permissions.sh` from a repository copy available to the user server.
-4. Restart the user server and confirm workspace persistence.
-5. Restart the Hub and confirm its database and sessions persist.
-6. Open `/services/demos/lab/` anonymously, confirm the WxHub gradient matches `/hub/login`, and
-   verify that all thirty notebooks appear.
-7. Run one model demo and one live-instrument demo. An explicit upstream-timeout message is an
-   acceptable instrument-service result, but an unhandled traceback is not.
-8. Run one AI notebook, confirm the algorithm executes in Pyodide, and verify its limitations or
-   model-card text does not present the result as an official forecast or warning.
+1. `/` sends anonymous visitors to the gallery at `/services/demos/`, which lists thirty notebooks
+   in four sections; a card opens its notebook in the lab and a Pyodide kernel starts.
+2. `/hub/login` shows the branded sign-in card; signing in as a regular user reaches *My runtime*.
+3. Start a server, open a terminal, and run `scripts/test_permissions.sh`: every shared path must
+   report `ro`, `~/work` `rw`, and both privilege checks `PASSED`.
+4. Run `templates/local_archives.ipynb` (copied to `~/work`): it reads a WRF file and a station CSV
+   and reports that the archive is read-only.
+5. As administrator, open `/hub/wxhub/admin`: the live audit reports no writable shared mount and
+   the archive tables show recent days. A regular user receives HTTP 403 there.
+6. Restart the user server and the Hub; confirm workspace files and sessions persist.
+7. Open `/hub/wxhub/privacy` and `/hub/wxhub/accessibility` without signing in.
+8. Run one model, one live-instrument, and one AI notebook in the gallery; an explicit upstream
+   timeout message is acceptable, an unhandled traceback is not.
+
+For internet-facing use, terminate HTTPS at a maintained reverse proxy, set `WXHUB_PUBLIC_HOST` to
+the `https://` URL, and set `WXHUB_BIND_ADDRESS=127.0.0.1`. See [Security](security.md).
 
 ## Configuration
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `WXHUB_PORT` | `8000` | Host TCP port published for JupyterHub |
-| `WXHUB_PUBLIC_HOST` | `http://localhost:8000` | Public base URL advertised by the deployment |
-| `DOCKER_NOTEBOOK_IMAGE` | `wxhub-singleuser:latest` | Spawned user image |
-| `WXHUB_TEMPLATES_HOST` | `${PWD}/templates` | Host template directory |
-| `WXHUB_SENSORS_HOST` | `/opt/weather/data/raw/sensors` | Raw sensor directory |
-| `WXHUB_MODELS_HOST` | `/opt/weather/data/raw/models` | Raw model directory |
-| `WXHUB_CURATED_HOST` | `/opt/weather/data/curated` | Curated data directory |
-| `WXHUB_ENABLE_SIGNUP` | `false` | Expose NativeAuthenticator self-registration; enable only during controlled provisioning |
-| `WXHUB_OPEN_SIGNUP` | `false` | Authorize new registrations without administrator approval |
-| `WXHUB_BRAND_NAME` | `meteo@uniparthenope WxHub` | Product name shown in Hub pages and the browser title |
-| `WXHUB_BRAND_SUBTITLE` | `Weather and marine data workspace` | Short identity line in the Hub navigation |
-| `WXHUB_BRAND_PRIMARY` | `#1f4e79` | Six-digit primary theme color |
-| `WXHUB_BRAND_SECONDARY` | `#2a91eb` | Six-digit link and focus color |
-| `WXHUB_BRAND_ACCENT` | `#181c63` | Six-digit navigation-gradient accent color |
-| `WXHUB_BRAND_SITE_URL` | `https://meteo.uniparthenope.it` | Forecast-site navigation link |
-| `WXHUB_BRAND_NETWORK_URL` | `https://network.meteo.uniparthenope.it` | Sensor-network navigation link |
-| `METEO_API_BASE_URL` | `https://api.meteo.uniparthenope.it` | API base URL passed to authenticated user servers |
+| `WXHUB_INSTANCE` | `wxhub` | Prefix for containers, network, user containers/volumes, and the gallery image |
+| `WXHUB_PORT` | `8000` | Host TCP port |
+| `WXHUB_BIND_ADDRESS` | `0.0.0.0` | Host address the port binds to; use `127.0.0.1` behind a proxy |
+| `WXHUB_PUBLIC_HOST` | `http://localhost:8000` | Public base URL; `https://` enables secure cookies, HSTS, and SSO callbacks |
+| `WXHUB_SINGLEUSER_IMAGE` | `wxhub-singleuser:latest` | Image spawned for users |
+| `WXHUB_TEMPLATES_HOST` | `${PWD}/templates` | Starter notebooks (read-only) |
+| `WXHUB_OPENDAP_HOST` | empty | Operational model archive root (read-only); omitted when empty |
+| `WXHUB_NETWORK_HOST` | empty | Weather-station network root (read-only); omitted when empty |
+| `WXHUB_SENSORS_HOST` | `/opt/weather/data/raw/sensors` | Raw sensor mirror (read-only) |
+| `WXHUB_MODELS_HOST` | `/opt/weather/data/raw/models` | Raw model mirror used by the WRF case study (read-only) |
+| `WXHUB_CURATED_HOST` | `/opt/weather/data/curated` | Curated products (read-only) |
+| `WXHUB_AUTHENTICATOR` | `native` | `native`, `azuread`, or `google` |
+| `WXHUB_ADMIN_USERS` | `admin` | Comma-separated administrators |
+| `WXHUB_ALLOWED_USERS` | empty | Optional explicit allow-list (otherwise approval or IdP restriction applies) |
+| `WXHUB_STUDENTS`, `WXHUB_RESEARCHERS`, `WXHUB_INSTRUCTORS` | empty | Seed role groups at start-up |
+| `WXHUB_ENABLE_SIGNUP` | `false` | Expose the local sign-up form (requests need approval) |
+| `WXHUB_OPEN_SIGNUP` | `false` | Approve sign-ups automatically; avoid on reachable hosts |
+| `WXHUB_OAUTH_CLIENT_ID`, `WXHUB_OAUTH_CLIENT_SECRET` | empty | SSO application credentials |
+| `WXHUB_OAUTH_TENANT_ID` | empty | Entra ID tenant (required for `azuread`) |
+| `WXHUB_OAUTH_USERNAME_CLAIM` | `upn` | Entra ID claim used as username |
+| `WXHUB_OAUTH_HOSTED_DOMAINS` | empty | Google Workspace domains (required for `google`) |
+| `WXHUB_OAUTH_ALLOW_ALL` | `true` | Allow every member of the tenant/domain |
+| `WXHUB_MEM_LIMIT`, `WXHUB_CPU_LIMIT` | `4G`, `2` | User and instructor tier |
+| `WXHUB_STUDENT_MEM_LIMIT`, `WXHUB_STUDENT_CPU_LIMIT` | `2G`, `1` | Student tier |
+| `WXHUB_RESEARCHER_MEM_LIMIT`, `WXHUB_RESEARCHER_CPU_LIMIT` | `8G`, `4` | Researcher and administrator tier |
+| `WXHUB_IDLE_TIMEOUT` | `3600` | Seconds before idle servers stop; `0` disables culling |
+| `WXHUB_COOKIE_MAX_AGE_DAYS` | `7` | Session cookie lifetime |
+| `WXHUB_RETENTION_DAYS` | `365` | Inactivity period after which accounts are reviewed |
+| `WXHUB_PRIVACY_CONTROLLER` | University of Naples “Parthenope” | Controller named in the privacy notice |
+| `WXHUB_PRIVACY_CONTACT`, `WXHUB_DPO_CONTACT` | empty | Contacts shown in the privacy notice |
+| `WXHUB_ACCESSIBILITY_CONTACT` | empty | Feedback channel in the accessibility statement |
+| `WXHUB_BRAND_NAME`, `WXHUB_BRAND_SUBTITLE` | meteo@uniparthenope WxHub; Weather and marine data workspace | Identity text |
+| `WXHUB_BRAND_PRIMARY`, `WXHUB_BRAND_SECONDARY`, `WXHUB_BRAND_ACCENT` | `#1f4e79`, `#2a91eb`, `#181c63` | Palette shared with the meteo@uniparthenope portals |
+| `WXHUB_BRAND_SITE_URL`, `WXHUB_BRAND_NETWORK_URL` | meteo and network portal URLs | Navigation links |
+| `METEO_API_BASE_URL` | `https://api.meteo.uniparthenope.it` | API base URL passed to user servers |
 
-The default palette is derived from the public meteo@uniparthenope forecast and sensor-network
-sites. Override the variables in `.env`; color values must use `#RRGGBB`, and link values must be
-absolute HTTP or HTTPS URLs. Recreate the Hub container after changes.
-
-The anonymous lab carries the same default palette in `demos/wxhub.css`; the image publishes it
-under a versioned asset name so existing service-worker caches receive branding updates. When
-changing default brand colors, update that stylesheet with the `WXHUB_BRAND_*` defaults, rebuild `demos`, and
-recreate both services to keep `/hub/login` and `/services/demos/lab/` visually consistent.
+Colours must use `#RRGGBB`; the light-mode link colour is the primary colour so that link text
+keeps at least 4.5:1 contrast. The gallery and lab share the default palette through
+`demos/wxhub.css` (published as `wxhub-v3.css`; bump the name when changing it so that browser
+service-worker caches refresh). Recreate the affected containers after configuration changes.
 
 ## Upgrade and rollback
 
 Back up `jupyterhub-data` and record image IDs. Build new images with versioned tags, validate them,
-then update `DOCKER_NOTEBOOK_IMAGE`. Roll back by restoring the previous tag and restarting the Hub.
-Never delete per-user volumes during an upgrade.
+then update `WXHUB_SINGLEUSER_IMAGE` and recreate the Hub. Roll back by restoring the previous tag.
+Never delete per-user volumes during an upgrade. Changing `WXHUB_INSTANCE` on an existing deployment
+changes volume names; migrate volumes first.
 
 ## Release delivery
 
 Push a semantic version tag such as `v1.0.0` after CI passes. The release workflow builds both
 images and publishes tag- and commit-addressable variants to GitHub Container Registry with
-provenance and SBOM attestations. Package visibility and retention are managed in the repository's
-GitHub package settings.
+provenance and SBOM attestations.

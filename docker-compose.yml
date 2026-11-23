@@ -1,28 +1,63 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   jupyterhub:
     build: ./jupyterhub
-    container_name: wxhub-jupyterhub
+    container_name: ${WXHUB_INSTANCE:-wxhub}-jupyterhub
     restart: unless-stopped
     ports:
-      - "${WXHUB_PORT:-8000}:8000"
+      - "${WXHUB_BIND_ADDRESS:-0.0.0.0}:${WXHUB_PORT:-8000}:8000"
+    logging: *default-logging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
+      - ./jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro
       - ./jupyterhub/templates:/srv/jupyterhub/templates:ro
-      -  jupyterhub-data:/srv/jupyterhub/data
-      - ${WXHUB_TEMPLATES_HOST:-${PWD}/templates}:/srv/templates:ro
-      - ${WXHUB_SENSORS_HOST:-/opt/weather/data/raw/sensors}:/srv/data/raw/sensors:ro
-      - ${WXHUB_MODELS_HOST:-/opt/weather/data/raw/models}:/srv/data/raw/models:ro
-      - ${WXHUB_CURATED_HOST:-/opt/weather/data/curated}:/srv/data/curated
+      - jupyterhub-data:/srv/jupyterhub/data
+      # Read-only views used only by the administration dashboard inventory.
+      - ${WXHUB_OPENDAP_HOST:-./jupyterhub/empty}:/srv/data/opendap:ro
+      - ${WXHUB_NETWORK_HOST:-./jupyterhub/empty}:/srv/data/network:ro
     environment:
-      DOCKER_NOTEBOOK_IMAGE: wxhub-singleuser:latest
-      PUBLIC_HOST: ${WXHUB_PUBLIC_HOST:-http://localhost:8000}
+      WXHUB_INSTANCE: ${WXHUB_INSTANCE:-wxhub}
+      HUB_IP: ${WXHUB_INSTANCE:-wxhub}-jupyterhub
+      DOCKER_NOTEBOOK_IMAGE: ${WXHUB_SINGLEUSER_IMAGE:-wxhub-singleuser:latest}
+      WXHUB_PUBLIC_HOST: ${WXHUB_PUBLIC_HOST:-http://localhost:8000}
       WXHUB_TEMPLATES_HOST: ${WXHUB_TEMPLATES_HOST:-${PWD}/templates}
       WXHUB_SENSORS_HOST: ${WXHUB_SENSORS_HOST:-/opt/weather/data/raw/sensors}
       WXHUB_MODELS_HOST: ${WXHUB_MODELS_HOST:-/opt/weather/data/raw/models}
       WXHUB_CURATED_HOST: ${WXHUB_CURATED_HOST:-/opt/weather/data/curated}
+      WXHUB_OPENDAP_HOST: ${WXHUB_OPENDAP_HOST:-}
+      WXHUB_NETWORK_HOST: ${WXHUB_NETWORK_HOST:-}
+      WXHUB_AUTHENTICATOR: ${WXHUB_AUTHENTICATOR:-native}
+      WXHUB_ADMIN_USERS: ${WXHUB_ADMIN_USERS:-admin}
+      WXHUB_ALLOWED_USERS: ${WXHUB_ALLOWED_USERS:-}
+      WXHUB_STUDENTS: ${WXHUB_STUDENTS:-}
+      WXHUB_RESEARCHERS: ${WXHUB_RESEARCHERS:-}
+      WXHUB_INSTRUCTORS: ${WXHUB_INSTRUCTORS:-}
       WXHUB_ENABLE_SIGNUP: ${WXHUB_ENABLE_SIGNUP:-false}
       WXHUB_OPEN_SIGNUP: ${WXHUB_OPEN_SIGNUP:-false}
+      WXHUB_OAUTH_CLIENT_ID: ${WXHUB_OAUTH_CLIENT_ID:-}
+      WXHUB_OAUTH_CLIENT_SECRET: ${WXHUB_OAUTH_CLIENT_SECRET:-}
+      WXHUB_OAUTH_TENANT_ID: ${WXHUB_OAUTH_TENANT_ID:-}
+      WXHUB_OAUTH_USERNAME_CLAIM: ${WXHUB_OAUTH_USERNAME_CLAIM:-upn}
+      WXHUB_OAUTH_HOSTED_DOMAINS: ${WXHUB_OAUTH_HOSTED_DOMAINS:-}
+      WXHUB_OAUTH_ALLOW_ALL: ${WXHUB_OAUTH_ALLOW_ALL:-true}
+      WXHUB_MEM_LIMIT: ${WXHUB_MEM_LIMIT:-4G}
+      WXHUB_CPU_LIMIT: ${WXHUB_CPU_LIMIT:-2}
+      WXHUB_STUDENT_MEM_LIMIT: ${WXHUB_STUDENT_MEM_LIMIT:-2G}
+      WXHUB_STUDENT_CPU_LIMIT: ${WXHUB_STUDENT_CPU_LIMIT:-1}
+      WXHUB_RESEARCHER_MEM_LIMIT: ${WXHUB_RESEARCHER_MEM_LIMIT:-8G}
+      WXHUB_RESEARCHER_CPU_LIMIT: ${WXHUB_RESEARCHER_CPU_LIMIT:-4}
+      WXHUB_IDLE_TIMEOUT: ${WXHUB_IDLE_TIMEOUT:-3600}
+      WXHUB_COOKIE_MAX_AGE_DAYS: ${WXHUB_COOKIE_MAX_AGE_DAYS:-7}
+      WXHUB_RETENTION_DAYS: ${WXHUB_RETENTION_DAYS:-365}
+      WXHUB_PRIVACY_CONTROLLER: ${WXHUB_PRIVACY_CONTROLLER:-University of Naples “Parthenope”}
+      WXHUB_PRIVACY_CONTACT: ${WXHUB_PRIVACY_CONTACT:-}
+      WXHUB_DPO_CONTACT: ${WXHUB_DPO_CONTACT:-}
+      WXHUB_ACCESSIBILITY_CONTACT: ${WXHUB_ACCESSIBILITY_CONTACT:-}
       WXHUB_BRAND_NAME: ${WXHUB_BRAND_NAME:-meteo@uniparthenope WxHub}
       WXHUB_BRAND_SUBTITLE: ${WXHUB_BRAND_SUBTITLE:-Weather and marine data workspace}
       WXHUB_BRAND_PRIMARY: ${WXHUB_BRAND_PRIMARY:-#1f4e79}
@@ -38,13 +73,16 @@ services:
     build:
       context: .
       dockerfile: demos/Dockerfile
-    image: wxhub-demos:latest
-    container_name: wxhub-demos
+    image: ${WXHUB_INSTANCE:-wxhub}-demos:latest
+    container_name: ${WXHUB_INSTANCE:-wxhub}-demos
     restart: unless-stopped
     read_only: true
     mem_limit: 256m
     cpus: 0.5
     pids_limit: 64
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
     tmpfs:
       - /var/cache/nginx:rw,nosuid,nodev,size=16m
       - /var/run:rw,nosuid,nodev,size=4m
@@ -58,11 +96,15 @@ services:
       retries: 3
       start_period: 20s
 
+  # Build-only target for the per-user image: `docker compose --profile images build singleuser`.
+  singleuser:
+    build: ./image
+    image: ${WXHUB_SINGLEUSER_IMAGE:-wxhub-singleuser:latest}
+    profiles: ["images"]
+
 networks:
   wxhub-net:
-    name: wxhub-net
+    name: ${WXHUB_INSTANCE:-wxhub}-net
 
 volumes:
-   jupyterhub-data:
-
-
+  jupyterhub-data:

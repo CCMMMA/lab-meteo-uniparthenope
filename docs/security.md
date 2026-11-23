@@ -1,62 +1,83 @@
 # Security
 
-wxhub is a laboratory pilot, not a hardened multi-tenant service. Its defaults include plain HTTP,
-the Docker socket in the Hub, controlled local accounts constrained by a static allow-list, no idle
-culler, and local SQLite/volume storage. Public self-signup is disabled by default and can be
-enabled temporarily with `WXHUB_ENABLE_SIGNUP=true` for controlled, administrator-approved
-provisioning. Setting `WXHUB_OPEN_SIGNUP=true` additionally allows new accounts to log in without
-approval and should not be used on an internet-facing deployment.
+WxHub is a single-host service for a university laboratory, not a hardened multi-tenant cloud.
+This page states the trust boundaries, the controls in place, and what must be added before
+internet-wide exposure.
 
-Before public exposure:
+## Trust boundaries
 
-1. Add a maintained TLS reverse proxy.
-2. Replace open signup with institutional authentication or controlled provisioning.
-3. Minimize administrators and protect API tokens as secrets.
-4. Restrict network ingress and egress.
-5. Add monitoring, log retention, backups, vulnerability scanning, and an upgrade policy.
-6. Evaluate a socket proxy or an orchestrator that does not grant unrestricted Docker access.
+- **Hub container:** holds the Docker socket and can therefore control the host's Docker engine.
+  Compromising the Hub is equivalent to root on the host. Only administrators should reach the
+  host; keep the Hub image pinned and patched.
+- **User containers:** run arbitrary user code as the unprivileged `jovyan` user, with no Docker
+  socket, no capabilities, and no way to gain privileges.
+- **Public gallery:** static files only; anonymous code runs in the visitor's browser sandbox.
 
-## Anonymous notebook execution
+## Read-only scientific data
 
-Anonymous access under `/services/demos/` is a JupyterLite application. It intentionally exposes an
-editable notebook and file interface, but its Python kernel is WebAssembly running in the visitor's
-browser. Browser-local storage holds changes and uploads. The static Nginx service has no notebook
-kernel, Docker socket, secrets, scientific-data mounts, or writable content directory.
+Model archives, station data, curated products, and templates must never be modified from
+WxHub. The guarantee is layered:
 
-Browser code remains subject to the browser security model and can reach public CORS-enabled
-services, including the meteo API model and live weather-report endpoints. The public notebooks do
-not mount or expose the host model and sensor directories; those mounts remain exclusive to
-authenticated user containers and read-only. Never place credentials or non-public datasets in the static
-JupyterLite image. This isolation does not apply to authenticated JupyterHub user containers, which
-remain server-side and retain their existing resource and read-only data controls.
+1. DockerSpawner binds every shared source through `read_only_volumes` (`ro` bind mounts).
+2. User containers start with `cap_drop: ALL` and `no-new-privileges`, so no process can remount
+   a filesystem read-write or escalate through set-uid binaries.
+3. `pre_spawn_hook` refuses to start a server if any shared destination would be writable or if
+   an unexpected mount appears in the plan.
+4. The platform dashboard performs a live audit of running user containers and reports any
+   writable shared mount; the Hub's own inventory mounts are read-only too.
+5. On the reference host the archives are owned by a different UID than `jovyan`, an additional
+   but incidental barrier.
 
-The live-instrument notebooks display public observations returned by the upstream API. They handle
-timeouts as availability failures and do not fall back to host CSV files, alternate networks, or
-cached private observations.
+`scripts/test_permissions.sh`, run inside a user server, verifies every mount, the
+no-new-privileges flag, and the empty capability set. `scripts/validate_repo.py` rejects a Compose
+file that mounts a `WXHUB_*_HOST` path without `:ro`.
 
-## Artificial-intelligence demonstrations
+## Accounts and sessions
 
-The AI notebooks execute visible NumPy/Pandas algorithms inside the same browser sandbox. They send
-only normal public-data requests to the configured meteo API and do not transmit notebook contents,
-user files, prompts, or credentials to an AI provider. Their models are deliberately small teaching
-baselines trained on the current forecast or observation response.
+- Local accounts require administrator approval or host-side provisioning; open sign-up is off.
+- Passwords: at least 12 characters, common passwords rejected, bcrypt-hashed, five failed attempts
+  block the username for ten minutes.
+- Academic SSO delegates authentication to the University identity provider (see
+  [Identity and roles](identity-and-roles.md)); no password is stored.
+- Session cookies are `SameSite=Lax`, `Secure` under HTTPS, and expire after
+  `WXHUB_COOKIE_MAX_AGE_DAYS` (default 7).
+- The idle culler stops servers after `WXHUB_IDLE_TIMEOUT` seconds of inactivity.
 
-Outputs must not be treated as official forecasts, public warnings, navigation advice, emergency
-decisions, or automated environmental control signals. The bundled model card records intended use,
-data provenance, limitations, privacy properties, and reproducibility constraints.
+## HTTP security headers
 
-## Browser phishing warnings
+Hub pages send `Content-Security-Policy` (self-hosted resources only), `X-Content-Type-Options`,
+`Referrer-Policy`, `Permissions-Policy`, and, with an HTTPS public URL, `Strict-Transport-Security`.
+The gallery sends the same non-CSP headers.
 
-Branding makes the service identity clear to people but does not establish browser trust. A login
-form served from a raw IP address over HTTP can be classified as phishing because it has no trusted
-DNS identity, no TLS certificate, and transmits passwords without encryption. Do not bypass or ask
-users to suppress that warning.
+## Transport security and phishing warnings
 
-The production remedy is to assign a trusted DNS name, obtain a certificate for that name, and put
-a maintained HTTPS reverse proxy in front of JupyterHub. Set `WXHUB_PUBLIC_HOST` to the resulting
-`https://` URL, redirect HTTP to HTTPS, and expose only the reverse proxy publicly. The direct
-`http://IP:port` endpoint is suitable only for isolated acceptance testing.
+A login form served over HTTP from a raw IP address transmits passwords in clear text and can be
+flagged by browsers as phishing. Branding cannot establish browser trust. Before public use:
 
-The cookie secret is generated in the persistent Hub volume. Never commit it. Pass external
-credentials through an approved runtime secret mechanism, not notebooks, Compose files, or Git.
-Report vulnerabilities privately to the repository owner without publishing credentials or user data.
+1. assign a DNS name and certificate and put a maintained HTTPS reverse proxy in front;
+2. set `WXHUB_PUBLIC_HOST=https://<name>` and bind the Hub port to localhost
+   (`WXHUB_BIND_ADDRESS=127.0.0.1`) so only the proxy is exposed;
+3. prefer academic SSO to local passwords.
+
+The direct `http://IP:port` endpoint is for acceptance testing on a trusted network.
+
+## Further hardening before wide exposure
+
+1. Restrict network ingress and user-container egress.
+2. Add monitoring, centralised log retention, backups, image vulnerability scanning, and an upgrade
+   policy.
+3. Replace raw Docker-socket access with a socket proxy or an orchestrator.
+
+## Secrets
+
+The cookie secret is generated in the persistent Hub volume. OAuth client secrets and generated
+initial passwords live in untracked files (`.env`, `.secrets/`) with mode 600. Never commit them,
+place them in notebooks, or pass passwords as command-line arguments. Report vulnerabilities
+privately to the repository owner.
+
+## Anonymous notebooks and AI demonstrations
+
+The gallery's notebooks run in the visitor's browser and can reach only public, CORS-enabled
+services such as the meteo API. They have no access to the host data mounts. The AI notebooks are
+transparent teaching baselines: they send no notebook content to any AI provider, and their outputs
+must not be treated as official forecasts, warnings, navigation advice, or control signals.

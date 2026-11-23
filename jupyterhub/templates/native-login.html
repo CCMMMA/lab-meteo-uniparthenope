@@ -1,0 +1,79 @@
+{% extends "page.html" %}
+{# Local-account sign-in (NativeAuthenticator), styled as the sensor-network portal auth card. #}
+
+{% block login_widget %}{% endblock login_widget %}
+
+{% block main %}
+<div class="auth-shell">
+  <div class="card auth-card">
+    <div class="card-body p-4 p-md-5">
+      <div class="page-kicker mb-2">Notebook workspace</div>
+      <h1 class="h3 page-title mb-2">Sign in</h1>
+      <p class="wxhub-muted mb-4">Sign in to start your personal JupyterLab server with read-only access
+        to meteo@uniparthenope model and sensor archives.</p>
+
+      {% if not wxhub_https %}
+        <div class="alert alert-warning small" role="alert">
+          This connection is not encrypted (HTTP). Use it only on a trusted network and never reuse a
+          password from another service here.
+        </div>
+      {% endif %}
+
+      {% if login_error %}
+        <div class="alert alert-danger" role="alert" id="login-error">{{ login_error }}</div>
+      {% endif %}
+
+      <form action="{{ login_url }}?next={{ next }}" method="post" novalidate>
+        <input type="hidden" name="_xsrf" value="{{ xsrf }}">
+        <div class="mb-3">
+          <label class="form-label" for="username_input">Username</label>
+          <input id="username_input" type="text" name="username" value="{{ username or '' }}"
+                 class="form-control" autocapitalize="off" autocorrect="off" autocomplete="username"
+                 spellcheck="false" required autofocus
+                 {% if login_error %}aria-describedby="login-error" aria-invalid="true"{% endif %}>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="password_input">Password</label>
+          <div class="input-group">
+            <input id="password_input" type="password" name="password" class="form-control"
+                   autocomplete="current-password" required>
+            <button id="eye" class="btn btn-outline-secondary" type="button"
+                    aria-controls="password_input" aria-pressed="false">Show</button>
+          </div>
+        </div>
+        {% if two_factor_auth %}
+          <div class="mb-3">
+            <label class="form-label" for="2fa_input">Two-factor code <span class="wxhub-muted">(leave empty if not enabled)</span></label>
+            <input id="2fa_input" type="text" name="2fa" inputmode="numeric" autocomplete="one-time-code" class="form-control">
+          </div>
+        {% endif %}
+        <button type="submit" id="login_submit" class="btn btn-primary btn-lg w-100">Sign in</button>
+      </form>
+
+      <hr class="my-4">
+      <p class="small mb-1">
+        No account? Explore the <a href="/services/demos/">public notebook gallery</a> without signing in.
+        {% if enable_signup %}Or <a href="{{ base_url }}signup">request an account</a>; an administrator must approve it.{% endif %}
+      </p>
+      <p class="small wxhub-muted mb-0">By signing in you acknowledge the
+        <a href="{{ base_url }}wxhub/privacy">privacy notice</a>.</p>
+    </div>
+  </div>
+</div>
+{% endblock main %}
+
+{% block script %}
+{{ super() }}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var button = document.getElementById("eye");
+    var input = document.getElementById("password_input");
+    button.addEventListener("click", function () {
+      var show = input.type === "password";
+      input.type = show ? "text" : "password";
+      button.textContent = show ? "Hide" : "Show";
+      button.setAttribute("aria-pressed", show ? "true" : "false");
+    });
+  });
+</script>
+{% endblock script %}

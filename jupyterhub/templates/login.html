@@ -1,0 +1,30 @@
+{% extends "page.html" %}
+{# Single sign-on page used by the Microsoft Entra ID and Google authenticators. #}
+
+{% block login_widget %}{% endblock login_widget %}
+
+{% block main %}
+<div class="auth-shell">
+  <div class="card auth-card">
+    <div class="card-body p-4 p-md-5">
+      <div class="page-kicker mb-2">Notebook workspace</div>
+      <h1 class="h3 page-title mb-2">Sign in</h1>
+      <p class="wxhub-muted mb-4">Use your university account. Your password is handled only by the
+        university identity provider; this service receives your username and does not store a password.</p>
+      {% if login_error %}
+        <div class="alert alert-danger" role="alert">{{ login_error }}</div>
+      {% endif %}
+      {% if custom_html %}
+        {{ custom_html | safe }}
+      {% elif login_service %}
+        <a role="button" class="btn btn-primary btn-lg w-100" href="{{ authenticator_login_url | safe }}">
+          Sign in with {{ login_service }}</a>
+      {% endif %}
+      <hr class="my-4">
+      <p class="small mb-1">No account needed for the <a href="/services/demos/">public notebook gallery</a>.</p>
+      <p class="small wxhub-muted mb-0">By signing in you acknowledge the
+        <a href="{{ base_url }}wxhub/privacy">privacy notice</a>.</p>
+    </div>
+  </div>
+</div>
+{% endblock main %}

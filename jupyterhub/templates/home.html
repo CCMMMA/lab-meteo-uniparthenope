@@ -1,0 +1,59 @@
+{% extends "templates/home.html" %}
+{# Runtime page: a Colab-style "connect to a runtime" panel for the user's server. #}
+
+{% block main %}
+<div class="page-shell">
+  <div class="page-kicker mb-2">My runtime</div>
+  <h1 class="page-title mb-3">Welcome, {{ user.name }}</h1>
+  <div class="row g-4">
+    <section class="col-lg-7" aria-labelledby="runtime-title">
+      <div class="wxhub-card h-100">
+        <h2 id="runtime-title" class="h4">Personal JupyterLab server</h2>
+        <p class="wxhub-muted">
+          Your server runs in an isolated container with the scientific Python stack (Xarray, Dask,
+          NetCDF4, Zarr, Cartopy, Voilà, Papermill). Files in <code>~/work</code> persist between sessions.
+          Model and station archives are mounted strictly <strong>read-only</strong>.
+        </p>
+        <p class="mb-3" role="status" aria-live="polite">
+          Status:
+          {% if default_server.active %}
+            <span class="badge text-bg-success">Running</span>
+          {% else %}
+            <span class="badge text-bg-secondary">Stopped</span>
+          {% endif %}
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <a id="start" role="button" class="btn btn-lg btn-primary" href="{{ url }}">
+            {% if default_server.active %}Open JupyterLab{% else %}Start my server{% endif %}
+          </a>
+          {% if default_server.active %}
+            <a id="stop" role="button" class="btn btn-lg btn-outline-danger" href="#">Stop my server</a>
+          {% endif %}
+        </div>
+        <p class="small wxhub-muted mt-3 mb-0">
+          Idle servers are stopped automatically to free shared resources; your files are kept.
+        </p>
+      </div>
+    </section>
+    <aside class="col-lg-5" aria-labelledby="data-title">
+      <div class="wxhub-card h-100">
+        <h2 id="data-title" class="h5">Data inside your server</h2>
+        <dl class="small mb-0">
+          <dt><code>~/data/opendap</code></dt>
+          <dd class="wxhub-muted">Operational model output: <code>mmm/ddd/archive|history/YYYY/MM/DD/</code>
+            for WRF (wrf5), ROMS (rms3), WaveWatch III (ww33), WaComM (wcm3), and AIquam (aiq3).</dd>
+          <dt><code>~/data/network</code></dt>
+          <dd class="wxhub-muted">Weather-station CSV files: <code>it.uniparthenope.meteo.wsN/YYYY/MM/DD/</code>.</dd>
+          <dt><code>~/templates</code></dt>
+          <dd class="wxhub-muted mb-0">Starter notebooks. Copy them into <code>~/work</code> to edit.</dd>
+        </dl>
+      </div>
+    </aside>
+  </div>
+  <section class="mt-4" aria-labelledby="explore-title">
+    <h2 id="explore-title" class="h5">Explore without a server</h2>
+    <p class="wxhub-muted">The <a href="/services/demos/">notebook gallery</a> runs thirty
+      meteo@uniparthenope examples directly in your browser.</p>
+  </section>
+</div>
+{% endblock main %}

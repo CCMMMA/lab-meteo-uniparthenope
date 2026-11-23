@@ -1,0 +1,78 @@
+{% extends "page.html" %}
+{% block title %}Privacy and data protection · {{ wxhub_brand_name }}{% endblock title %}
+
+{% block main %}
+<div class="page-shell" style="max-width: 900px;">
+  <div class="page-kicker mb-2">Regulation (EU) 2016/679 · Articles 13 and 14</div>
+  <h1 class="page-title mb-4">Privacy and data protection</h1>
+
+  <div class="wxhub-card mb-4">
+    <h2 class="h5">Controller and contacts</h2>
+    <p class="mb-1">Data controller: <strong>{{ wxhub_privacy.controller }}</strong>, operating
+      {{ wxhub_brand_name }} through the meteo@uniparthenope research centre.</p>
+    {% if wxhub_privacy.contact %}<p class="mb-1">Privacy contact: {{ wxhub_privacy.contact }}</p>{% endif %}
+    {% if wxhub_privacy.dpo_contact %}<p class="mb-1">Data protection officer: {{ wxhub_privacy.dpo_contact }}</p>{% endif %}
+    {% if not wxhub_privacy.contact and not wxhub_privacy.dpo_contact %}
+      <p class="mb-0">Contact the platform administrators through the University's official channels;
+        the University's Data Protection Officer can also be reached through the University website.</p>
+    {% endif %}
+  </div>
+
+  <h2 class="h4 mt-4">What we process and why</h2>
+  <div class="table-responsive">
+    <table class="table align-top">
+      <caption class="visually-hidden">Categories of personal data, purposes, legal bases, and retention</caption>
+      <thead><tr><th scope="col">Data</th><th scope="col">Purpose</th><th scope="col">Legal basis</th><th scope="col">Retention</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Username; for single sign-on also the identifier released by the university identity provider</th>
+          <td>Account, access control, roles</td><td>Art. 6(1)(e): research and teaching tasks in the public interest</td>
+          <td>While the account is active; inactive accounts are reviewed after {{ wxhub_retention_days }} days</td></tr>
+        <tr><th scope="row">Password (local accounts only)</th><td>Authentication</td><td>Art. 6(1)(e)</td>
+          <td>Stored only as a salted bcrypt hash; deleted with the account</td></tr>
+        <tr><th scope="row">Account creation, last activity, server start times, role and group</th>
+          <td>Operating shared resources, stopping idle servers, security</td><td>Art. 6(1)(e); Art. 32 security</td>
+          <td>While the account is active</td></tr>
+        <tr><th scope="row">Notebooks and files you save in <code>~/work</code></th><td>Providing your personal workspace</td>
+          <td>Art. 6(1)(e)</td><td>Until you delete them or your account is erased</td></tr>
+        <tr><th scope="row">Technical logs (IP address, request path, time)</th><td>Security and troubleshooting</td>
+          <td>Art. 6(1)(e); Art. 32</td><td>Rotated container logs, kept for a short, bounded period</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>We do not use the data for profiling, automated decision-making, advertising, or analytics, and we
+    do not sell or share it. Do not store special categories of personal data (Art. 9) in notebooks.
+    Data is processed on University infrastructure in Italy.</p>
+
+  <h2 class="h4 mt-4">Public notebook gallery</h2>
+  <p>The gallery at <a href="/services/demos/">/services/demos/</a> needs no account. Notebooks execute
+    in your browser (WebAssembly); edits and uploads stay in your browser's local storage and are never
+    sent to our servers. To run Python, your browser downloads the Pyodide runtime from the jsDelivr
+    content-delivery network (and, for packages not bundled with the gallery, from the Python Package
+    Index), which therefore receives your IP address; notebooks also request public
+    forecasts from <code>api.meteo.uniparthenope.it</code>.</p>
+
+  <h2 class="h4 mt-4" id="cookies">Cookies and local storage</h2>
+  <p>Only strictly necessary cookies are used, so no consent banner is required
+    (Directive 2002/58/EC, Art. 5(3)):</p>
+  <ul>
+    <li><code>jupyterhub-hub-login</code>, <code>jupyterhub-session-id</code>, and
+      <code>jupyterhub-user-…</code>: keep you signed in and route you to your server; at most
+      {{ wxhub_cookie_days }} days or until you sign out.</li>
+    <li><code>_xsrf</code>: protects forms against cross-site request forgery; session.</li>
+    <li>Browser local storage remembers your day/night theme and that you have read the cookie notice.</li>
+  </ul>
+
+  <h2 class="h4 mt-4" id="rights">Your rights</h2>
+  <p>You have the rights of access (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction
+    (Art. 18), portability (Art. 20), and objection (Art. 21). Signed-in users can view and download
+    their data and submit requests on the <a href="{{ base_url }}wxhub/account">My data</a> page;
+    workspace files can be downloaded at any time from JupyterLab. You may also lodge a complaint with
+    the Italian supervisory authority, the Garante per la protezione dei dati personali
+    (<a href="https://www.garanteprivacy.it" rel="noopener">garanteprivacy.it</a>).</p>
+
+  <h2 class="h4 mt-4">Security</h2>
+  <p>Each user server runs in an isolated container without elevated privileges; shared model and
+    sensor archives are mounted read-only; administrative access is limited to designated staff and
+    is recorded in an audit log.</p>
+</div>
+{% endblock main %}

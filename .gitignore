@@ -4,3 +4,7 @@ data/curated/**/*
 measurements/
 **/.ipynb_checkpoints/
 outputs/
+.env
+.secrets/
+__pycache__/
+*.pyc

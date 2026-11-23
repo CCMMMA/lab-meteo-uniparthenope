@@ -44,6 +44,14 @@ The committed notebook metadata selects `Python (Pyodide)` for anonymous browser
 headless verification command above explicitly selects the pinned image's `python3` kernel; this is
 a validation adaptation, not a change of data source or scientific derivation.
 
+## Operational archives
+
+Signed-in servers can read the production archives directly at `~/data/opendap` (models) and
+`~/data/network` (stations), with the layouts given in [Architecture](architecture.md#storage-model).
+`templates/local_archives.ipynb` shows path construction and read-only access. These archives are
+updated by the operational chain, so record the exact file paths (or their checksums) used by an
+analysis; the WRF case study below still uses its own downloaded, checksummed subset.
+
 ## Contract
 
 The repository fixes source code, direct and newly resolved Python dependencies, dated upstream

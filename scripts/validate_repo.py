@@ -75,6 +75,22 @@ def validate_executables() -> None:
             fail(f"{path.relative_to(ROOT)} is not executable")
 
 
+def validate_read_only_data() -> None:
+    """Shared model, sensor, and template data must never be writable."""
+    compose = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    for line in compose.splitlines():
+        match = re.search(r"\$\{(WXHUB_\w+_HOST)[^}]*\}:(\S+)", line)
+        if match and not match.group(2).endswith(":ro"):
+            fail(f"docker-compose.yml mounts {match.group(1)} without :ro")
+    config = (ROOT / "jupyterhub" / "jupyterhub_config.py").read_text(encoding="utf-8")
+    if "read_only_volumes" not in config or "pre_spawn_hook" not in config:
+        fail("jupyterhub_config.py must bind shared data through read_only_volumes and check it")
+    for required in ("page.html", "native-login.html", "login.html", "home.html", "admin.html", "wxhub_admin.html", "wxhub_footer.html",
+                     "wxhub_account.html", "wxhub_privacy.html", "wxhub_accessibility.html"):
+        if not (ROOT / "jupyterhub" / "templates" / required).exists():
+            fail(f"missing Hub template {required}")
+
+
 def validate_compose() -> None:
     try:
         subprocess.run(
@@ -91,6 +107,7 @@ validate_notebooks()
 validate_markdown_links()
 validate_english()
 validate_executables()
+validate_read_only_data()
 validate_compose()
 
 if failures:

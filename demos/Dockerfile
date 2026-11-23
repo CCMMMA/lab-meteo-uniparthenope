@@ -8,11 +8,13 @@ RUN python -m pip install --no-cache-dir \
 
 WORKDIR /lite
 COPY demos/*.ipynb /lite/files/
-COPY demos/jupyter-lite.json demos/overrides.json /lite/
+COPY demos/jupyter-lite.json demos/overrides.json demos/build_gallery.py /lite/
 RUN jupyter lite build --output-dir /site --base-url /services/demos/ && \
-    jupyter lite check --output-dir /site
+    jupyter lite check --output-dir /site && \
+    python /lite/build_gallery.py /lite/files /site/gallery.html
 
 FROM nginx:1.29.6-alpine@sha256:f46cb72c7df02710e693e863a983ac42f6a9579058a59a35f1ae36c9958e4ce0
 COPY demos/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /site /usr/share/nginx/html
-COPY demos/wxhub.css /usr/share/nginx/html/wxhub-v2.css
+COPY demos/wxhub.css /usr/share/nginx/html/wxhub-v3.css
+COPY jupyterhub/assets/logo.png /usr/share/nginx/html/wxhub-logo.png

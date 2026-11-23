@@ -1,6 +1,12 @@
 # Public notebook demonstrations
 
-These thirty output-free notebooks are published in an anonymous JupyterLite workspace. Visitors can
+These thirty output-free notebooks are published in an anonymous JupyterLite workspace. Visitors
+arrive at a Colab-style gallery (`/services/demos/`) generated at image build time by
+`build_gallery.py` from each notebook's first Markdown cell; every card opens its notebook in the
+lab through `lab/index.html?path=<file>`. The gallery is written to `gallery.html` because
+JupyterLite reads its configuration from the root `index.html`.
+
+ Visitors can
 open, edit, execute, upload, download, and save notebook copies in browser-local storage, much like
 a lightweight Colab session. Python runs in a Pyodide WebAssembly kernel inside the visitor's
 browser, never in the deployment container. The public meteo@uniparthenope API supports the live

@@ -1,0 +1,247 @@
+{% extends "page.html" %}
+{% block title %}Platform dashboard · {{ wxhub_brand_name }}{% endblock title %}
+
+{% block stylesheet %}
+  {{ super() }}
+  <style>
+    .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; }
+    .kpi div { background: var(--wxhub-surface); border-radius: var(--wxhub-radius); box-shadow: var(--wxhub-shadow); padding: 1rem 1.25rem; }
+    .kpi strong { display: block; font-size: 1.9rem; letter-spacing: -.03em; }
+    .kpi span { color: var(--wxhub-muted); font-size: .85rem; }
+    .state-ok::before { content: "✓ "; }
+    .state-bad::before { content: "✗ "; }
+    .state-ok { color: #146c2e; font-weight: 600; }
+    .state-bad { color: #b02a37; font-weight: 600; }
+    [data-bs-theme="dark"] .state-ok { color: #75d68f; }
+    [data-bs-theme="dark"] .state-bad { color: #ff9aa5; }
+    .admin-nav a { margin-right: 1rem; }
+  </style>
+{% endblock stylesheet %}
+
+{% block main %}
+{% set p = dash.posture %}
+<div class="page-shell">
+  <div class="page-kicker mb-2">Administration</div>
+  <h1 class="page-title mb-2">Platform dashboard</h1>
+  <nav class="admin-nav small mb-4" aria-label="Dashboard sections">
+    <a href="#users">Users and roles</a><a href="#data">Data sources</a><a href="#requests">Privacy requests</a>
+    <a href="#volumes">Workspaces</a><a href="#posture">Security posture</a><a href="{{ base_url }}admin">Server control panel</a>
+  </nav>
+  {% if message %}<div class="alert alert-info" role="status">{{ message }}</div>{% endif %}
+  {% if not can_change %}<div class="alert alert-secondary" role="note">You have read-only access to this dashboard.</div>{% endif %}
+
+  <section class="kpi mb-4" aria-label="Summary">
+    <div><strong>{{ dash.users | length }}</strong><span>accounts</span></div>
+    <div><strong>{{ p.running }}</strong><span>running servers</span></div>
+    <div><strong>{{ p.admins }}</strong><span>administrators</span></div>
+    <div><strong>{{ dash.pending | length }}</strong><span>sign-ups awaiting approval</span></div>
+    <div><strong>{{ dash.requests | selectattr("status", "equalto", "open") | list | length }}</strong><span>open privacy requests</span></div>
+  </section>
+
+  <section id="users" class="card mb-4" aria-labelledby="users-title">
+    <div class="card-header p-4">
+      <h2 id="users-title" class="h4 mb-1">Users and roles</h2>
+      <p class="wxhub-muted mb-0">Roles: <strong>Student</strong> (2 GB / 1 CPU tier), <strong>User</strong> and
+        <strong>Instructor</strong> (standard tier; instructors may view users and start or stop student servers),
+        <strong>Researcher</strong> and <strong>Administrator</strong> (large tier). Grant or revoke administrator
+        rights in the <a href="{{ base_url }}admin">server control panel</a> or with <code>WXHUB_ADMIN_USERS</code>.
+        {% if dash.pending %}<a href="{{ base_url }}authorize">Approve {{ dash.pending | length }} pending sign-up(s)</a>.{% endif %}</p>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <caption class="visually-hidden">Accounts with role, activity, and server state</caption>
+        <thead><tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">Last activity (UTC)</th><th scope="col">Server</th>{% if can_change %}<th scope="col">Change role</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for u in dash.users %}
+            <tr>
+              <th scope="row">{{ u.name }}</th>
+              <td><span class="badge badge-role">{{ u.role }}</span></td>
+              <td>{{ (u.last_activity or "never")[:16] | replace("T", " ") }}</td>
+              <td>{% if u.running %}<span class="state-ok">running</span>{% else %}stopped{% endif %}</td>
+              {% if can_change %}
+                <td>
+                  {% if u.admin %}<span class="small wxhub-muted">administrator</span>{% else %}
+                  <form method="post" action="{{ base_url }}wxhub/admin" class="d-flex gap-2">
+                    <input type="hidden" name="_xsrf" value="{{ xsrf }}">
+                    <input type="hidden" name="action" value="set_role">
+                    <input type="hidden" name="username" value="{{ u.name }}">
+                    <label class="visually-hidden" for="role-{{ loop.index }}">Role for {{ u.name }}</label>
+                    <select class="form-select form-select-sm w-auto" id="role-{{ loop.index }}" name="role">
+                      <option value="user" {% if u.role == "User" %}selected{% endif %}>User</option>
+                      {% for key, label in dash.role_groups.items() %}
+                        <option value="{{ key }}" {% if u.role == label %}selected{% endif %}>{{ label }}</option>
+                      {% endfor %}
+                    </select>
+                    <button class="btn btn-sm btn-outline-primary" type="submit">Apply<span class="visually-hidden"> role to {{ u.name }}</span></button>
+                  </form>
+                  {% endif %}
+                </td>
+              {% endif %}
+            </tr>
+          {% else %}
+            <tr><td colspan="5">No accounts yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="data" class="card mb-4" aria-labelledby="data-title">
+    <div class="card-header p-4">
+      <h2 id="data-title" class="h4 mb-1">Data sources</h2>
+      <p class="wxhub-muted mb-0">Every shared source is bound read-only into user servers; user containers run
+        without Linux capabilities and with <code>no-new-privileges</code>, so a mount cannot be made writable.</p>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <caption class="visually-hidden">Shared data mounts and their access mode</caption>
+        <thead><tr><th scope="col">Source</th><th scope="col">Host path</th><th scope="col">Path in user servers</th><th scope="col">Access</th></tr></thead>
+        <tbody>
+          {% for entry in dash.sources %}
+            <tr>
+              <th scope="row">{{ entry.source.label }}</th>
+              <td><code>{{ entry.source.host_path }}</code></td>
+              <td><code>{{ entry.source.container_path }}</code></td>
+              <td><span class="state-ok">read-only</span>
+                {% if entry.hub_read_only is true %}<span class="small wxhub-muted">(verified on Hub mount)</span>{% elif entry.hub_read_only is false %}<span class="state-bad">Hub mount writable</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card-body">
+      {% if dash.docker.available %}
+        {% if dash.docker.mount_violations %}
+          <p class="state-bad mb-0" role="alert">Writable shared mounts detected in: {{ dash.docker.mount_violations | join(", ") }}</p>
+        {% else %}
+          <p class="state-ok mb-0">Live audit: {{ dash.docker.containers }} running user container(s), no writable shared mount.</p>
+        {% endif %}
+      {% else %}
+        <p class="state-bad mb-0">Docker audit unavailable: {{ dash.docker.error }}</p>
+      {% endif %}
+    </div>
+    {% for entry in dash.sources if entry.inventory %}
+      <div class="card-body border-top">
+        <h3 class="h6">{{ entry.source.label }} — latest available day</h3>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            {% if entry.source.kind == "opendap" %}
+              <caption class="visually-hidden">Model products and latest available day</caption>
+              <thead><tr><th scope="col">Model</th><th scope="col">Domain</th><th scope="col">Product</th><th scope="col">Latest</th></tr></thead>
+              <tbody>{% for row in entry.inventory %}<tr><th scope="row">{{ row.model }} <span class="small wxhub-muted">{{ row.label }}</span></th><td>{{ row.domain }}</td><td>{{ row.product }}</td><td>{{ row.latest or "—" }}</td></tr>{% endfor %}</tbody>
+            {% else %}
+              <caption class="visually-hidden">Weather stations and latest available day</caption>
+              <thead><tr><th scope="col">Station</th><th scope="col">Latest</th></tr></thead>
+              <tbody>{% for row in entry.inventory %}<tr><th scope="row">{{ row.station }}</th><td>{{ row.latest or "—" }}</td></tr>{% endfor %}</tbody>
+            {% endif %}
+          </table>
+        </div>
+      </div>
+    {% endfor %}
+  </section>
+
+  <section id="requests" class="card mb-4" aria-labelledby="requests-title">
+    <div class="card-header p-4">
+      <h2 id="requests-title" class="h4 mb-1">Privacy requests</h2>
+      <p class="wxhub-muted mb-0">Answer within one month (GDPR Art. 12(3)). Erasure stops the server, deletes the
+        account and the user's workspace volume, and closes the user's open requests. It cannot be undone.</p>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <caption class="visually-hidden">Data-subject requests</caption>
+        <thead><tr><th scope="col">User</th><th scope="col">Request</th><th scope="col">Submitted</th><th scope="col">Status</th>{% if can_change %}<th scope="col">Actions</th>{% endif %}</tr></thead>
+        <tbody>
+          {% for r in dash.requests %}
+            <tr>
+              <th scope="row">{{ r.username }}</th>
+              <td>{{ wxhub_request_types[r.type] }}{% if r.note %}<div class="small wxhub-muted">{{ r.note }}</div>{% endif %}</td>
+              <td>{{ r.created[:16] | replace("T", " ") }}</td>
+              <td>{{ r.status }}{% if r.closed %} <span class="small wxhub-muted">by {{ r.closed_by }}</span>{% endif %}</td>
+              {% if can_change %}
+                <td>
+                  {% if r.status == "open" %}
+                    <div class="d-flex flex-wrap gap-2">
+                      {% if r.type == "erasure" %}
+                        <form method="post" action="{{ base_url }}wxhub/admin" class="d-flex gap-2">
+                          <input type="hidden" name="_xsrf" value="{{ xsrf }}">
+                          <input type="hidden" name="action" value="erase_user">
+                          <input type="hidden" name="username" value="{{ r.username }}">
+                          <label class="visually-hidden" for="confirm-{{ r.id }}">Type {{ r.username }} to confirm erasure</label>
+                          <input class="form-control form-control-sm" id="confirm-{{ r.id }}" name="confirm" placeholder="type username" autocomplete="off" required>
+                          <button class="btn btn-sm btn-danger" type="submit">Erase</button>
+                        </form>
+                      {% endif %}
+                      <form method="post" action="{{ base_url }}wxhub/admin">
+                        <input type="hidden" name="_xsrf" value="{{ xsrf }}">
+                        <input type="hidden" name="action" value="close_request">
+                        <input type="hidden" name="request_id" value="{{ r.id }}">
+                        <input type="hidden" name="status" value="completed">
+                        <button class="btn btn-sm btn-outline-primary" type="submit">Mark completed</button>
+                      </form>
+                      <form method="post" action="{{ base_url }}wxhub/admin">
+                        <input type="hidden" name="_xsrf" value="{{ xsrf }}">
+                        <input type="hidden" name="action" value="close_request">
+                        <input type="hidden" name="request_id" value="{{ r.id }}">
+                        <input type="hidden" name="status" value="rejected">
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">Reject</button>
+                      </form>
+                    </div>
+                  {% endif %}
+                </td>
+              {% endif %}
+            </tr>
+          {% else %}
+            <tr><td colspan="5">No requests.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="volumes" class="card mb-4" aria-labelledby="volumes-title">
+    <div class="card-header p-4">
+      <h2 id="volumes-title" class="h4 mb-1">Orphaned workspaces</h2>
+      <p class="wxhub-muted mb-0">Workspace volumes whose account no longer exists. Erase them to complete an
+        erasure performed elsewhere (storage limitation, GDPR Art. 5(1)(e)).</p>
+    </div>
+    <div class="card-body">
+      {% if dash.docker.orphans %}
+        <ul class="list-unstyled mb-0">
+          {% for name in dash.docker.orphans %}
+            <li class="d-flex flex-wrap align-items-center gap-2 mb-2"><code>{{ name }}</code>
+              {% if can_change %}
+                <form method="post" action="{{ base_url }}wxhub/admin" class="d-flex gap-2">
+                  <input type="hidden" name="_xsrf" value="{{ xsrf }}">
+                  <input type="hidden" name="action" value="erase_volume">
+                  <input type="hidden" name="volume" value="{{ name }}">
+                  <label class="visually-hidden" for="vol-{{ loop.index }}">Type {{ name }} to confirm</label>
+                  <input class="form-control form-control-sm" id="vol-{{ loop.index }}" name="confirm" placeholder="type volume name" autocomplete="off" required>
+                  <button class="btn btn-sm btn-danger" type="submit">Erase</button>
+                </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="mb-0">No orphaned workspaces.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section id="posture" class="card mb-4" aria-labelledby="posture-title">
+    <div class="card-header p-4"><h2 id="posture-title" class="h4 mb-0">Security posture</h2></div>
+    <div class="card-body">
+      <ul class="mb-0">
+        <li>Authentication: <strong>{{ {"native": "local accounts", "azuread": "Microsoft Entra ID single sign-on", "google": "Google Workspace single sign-on"}.get(p.authenticator, p.authenticator) }}</strong></li>
+        <li>Public URL: <code>{{ p.public_host }}</code> —
+          {% if p.https %}<span class="state-ok">HTTPS</span>{% else %}<span class="state-bad">plain HTTP: put a TLS reverse proxy in front before public use</span>{% endif %}</li>
+        {% if p.authenticator == "native" %}
+          <li>Self-service sign-up: {% if p.signup %}<span class="state-bad">enabled</span>{% else %}<span class="state-ok">disabled</span>{% endif %};
+            open sign-up: {% if p.open_signup %}<span class="state-bad">enabled</span>{% else %}<span class="state-ok">disabled</span>{% endif %}</li>
+        {% endif %}
+        <li>Idle-server culling: {% if p.idle_timeout %}<span class="state-ok">after {{ (p.idle_timeout / 60) | int }} minutes</span>{% else %}<span class="state-bad">disabled</span>{% endif %}</li>
+      </ul>
+    </div>
+  </section>
+</div>
+{% endblock main %}

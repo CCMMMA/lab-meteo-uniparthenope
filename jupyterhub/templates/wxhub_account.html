@@ -1,0 +1,67 @@
+{% extends "page.html" %}
+{% block title %}My data · {{ wxhub_brand_name }}{% endblock title %}
+
+{% block main %}
+<div class="page-shell" style="max-width: 1000px;">
+  <div class="page-kicker mb-2">Personal data self-service</div>
+  <h1 class="page-title mb-3">My account and data</h1>
+  {% if message %}<div class="alert alert-info" role="status">{{ message }}</div>{% endif %}
+
+  <section class="wxhub-card mb-4" aria-labelledby="record-title">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+      <h2 id="record-title" class="h5 mb-0">What this service stores about you</h2>
+      <a class="btn btn-outline-primary btn-sm" href="{{ base_url }}wxhub/account?format=json" download>
+        Download as JSON (Art. 15, 20)</a>
+    </div>
+    <dl class="row mb-0">
+      <dt class="col-sm-4">Username</dt><dd class="col-sm-8">{{ record.username }}</dd>
+      <dt class="col-sm-4">Role</dt><dd class="col-sm-8"><span class="badge badge-role">{{ record.role }}</span></dd>
+      <dt class="col-sm-4">Groups</dt><dd class="col-sm-8">{{ record.groups | join(", ") or "none" }}</dd>
+      <dt class="col-sm-4">Sign-in method</dt><dd class="col-sm-8">{{ {"native": "Local account", "azuread": "Microsoft university account", "google": "Google university account"}.get(record.authentication, record.authentication) }}</dd>
+      <dt class="col-sm-4">Account created</dt><dd class="col-sm-8">{{ record.created or "unknown" }}</dd>
+      <dt class="col-sm-4">Last activity</dt><dd class="col-sm-8">{{ record.last_activity or "none recorded" }}</dd>
+      <dt class="col-sm-4">API tokens</dt><dd class="col-sm-8">{{ record.api_tokens }} (<a href="{{ base_url }}token">manage</a>)</dd>
+      <dt class="col-sm-4">Workspace volume</dt><dd class="col-sm-8">{{ record.workspace_volumes | join(", ") or "not created yet" }}</dd>
+      {% if record.local_account %}
+        <dt class="col-sm-4">E-mail</dt><dd class="col-sm-8">{{ record.local_account.email or "not collected" }}</dd>
+        <dt class="col-sm-4">Password</dt><dd class="col-sm-8">{{ record.local_account.password }} (<a href="{{ base_url }}change-password">change</a>)</dd>
+      {% endif %}
+    </dl>
+    <p class="small wxhub-muted mt-3 mb-0">Download the files in your workspace at any time from the
+      JupyterLab file browser (right-click → Download).</p>
+  </section>
+
+  <section class="wxhub-card mb-4" aria-labelledby="request-title">
+    <h2 id="request-title" class="h5">Submit a data-protection request</h2>
+    {% if open_requests %}
+      <p>Open requests:</p>
+      <ul>{% for r in open_requests %}<li>{{ wxhub_request_types[r.type] }} — submitted {{ r.created }}</li>{% endfor %}</ul>
+    {% endif %}
+    <form method="post" action="{{ base_url }}wxhub/account">
+      <input type="hidden" name="_xsrf" value="{{ xsrf }}">
+      <fieldset class="mb-3">
+        <legend class="form-label fs-6">Request type</legend>
+        {% for key, label in wxhub_request_types.items() %}
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="type" id="type-{{ key }}" value="{{ key }}" {% if loop.first %}checked{% endif %}>
+            <label class="form-check-label" for="type-{{ key }}">{{ label }}</label>
+          </div>
+        {% endfor %}
+      </fieldset>
+      <div class="mb-3">
+        <label class="form-label" for="note">Details (optional)</label>
+        <textarea class="form-control" id="note" name="note" rows="3" maxlength="500" aria-describedby="note-help"></textarea>
+        <div id="note-help" class="form-text">Do not include passwords or sensitive information.</div>
+      </div>
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="confirm" name="confirm" value="yes">
+        <label class="form-check-label" for="confirm">For erasure: I understand that my account and every file
+          in my workspace will be permanently deleted and cannot be recovered.</label>
+      </div>
+      <button class="btn btn-primary" type="submit">Submit request</button>
+    </form>
+    <p class="small wxhub-muted mt-3 mb-0">Requests are answered within one month (Art. 12(3) GDPR).
+      See the <a href="{{ base_url }}wxhub/privacy#rights">privacy notice</a>.</p>
+  </section>
+</div>
+{% endblock main %}

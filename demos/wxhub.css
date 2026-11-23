@@ -54,3 +54,13 @@
 @media (max-width: 760px) {
   #jp-menu-panel::before { content: "WxHub"; min-width: auto; }
 }
+
+/* Accessibility: visible keyboard focus and reduced motion, matching the Hub pages. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--wxhub-secondary) 70%, #000);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
