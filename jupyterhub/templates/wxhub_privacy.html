@@ -6,12 +6,14 @@
   <div class="page-kicker mb-2">Regulation (EU) 2016/679 · Articles 13 and 14</div>
   <h1 class="page-title mb-4">Privacy and data protection</h1>
 
-  <div class="wxhub-card mb-4">
+  <div class="lab-card mb-4">
     <h2 class="h5">Controller and contacts</h2>
     <p class="mb-1">Data controller: <strong>{{ wxhub_privacy.controller }}</strong>, operating
       {{ wxhub_brand_name }} through the meteo@uniparthenope research centre.</p>
-    {% if wxhub_privacy.contact %}<p class="mb-1">Privacy contact: {{ wxhub_privacy.contact }}</p>{% endif %}
-    {% if wxhub_privacy.dpo_contact %}<p class="mb-1">Data protection officer: {{ wxhub_privacy.dpo_contact }}</p>{% endif %}
+    {% if wxhub_privacy.contact %}<p class="mb-1">Privacy contact: {{ wxhub_privacy.contact | urlize }}</p>{% endif %}
+    {% if wxhub_privacy.dpo_contact %}<p class="mb-1">Data protection officer (DPO) of the University: {{ wxhub_privacy.dpo_contact | urlize }}</p>{% endif %}
+    <p class="mb-1">Service operator: meteo@uniparthenope research centre, <a href="mailto:meteo@uniparthenope.it">meteo@uniparthenope.it</a>.
+      University privacy policy: <a href="https://www.uniparthenope.it/Portale-Ateneo/privacy" rel="noopener">uniparthenope.it/Portale-Ateneo/privacy</a>.</p>
     {% if not wxhub_privacy.contact and not wxhub_privacy.dpo_contact %}
       <p class="mb-0">Contact the platform administrators through the University's official channels;
         the University's Data Protection Officer can also be reached through the University website.</p>
@@ -65,7 +67,7 @@
   <h2 class="h4 mt-4" id="rights">Your rights</h2>
   <p>You have the rights of access (Art. 15), rectification (Art. 16), erasure (Art. 17), restriction
     (Art. 18), portability (Art. 20), and objection (Art. 21). Signed-in users can view and download
-    their data and submit requests on the <a href="{{ base_url }}wxhub/account">My data</a> page;
+    their data and submit requests on the <a href="{{ base_url }}lab/account">My data</a> page;
     workspace files can be downloaded at any time from JupyterLab. You may also lodge a complaint with
     the Italian supervisory authority, the Garante per la protezione dei dati personali
     (<a href="https://www.garanteprivacy.it" rel="noopener">garanteprivacy.it</a>).</p>

@@ -1,4 +1,4 @@
-"""Environment-driven WxHub settings shared by the Hub configuration and the extension handlers."""
+"""Environment-driven lab.meteo@uniparthenope settings shared by the Hub configuration and the extension handlers."""
 
 from __future__ import annotations
 
@@ -65,7 +65,7 @@ class DataSource:
 
 
 @dataclass(frozen=True)
-class WxHubSettings:
+class LabMeteoSettings:
     instance: str
     public_host: str
     authenticator: str
@@ -84,7 +84,7 @@ class WxHubSettings:
         return self.public_host.startswith("https://")
 
 
-def load() -> WxHubSettings:
+def load() -> LabMeteoSettings:
     instance = env_instance()
     # Keep historical Docker object names for the default instance so that existing
     # deployments retain their per-user volumes after an upgrade.
@@ -114,7 +114,7 @@ def load() -> WxHubSettings:
             raise ValueError(f"host path for {source.key} must be absolute: {source.host_path}")
 
     brand = {
-        "wxhub_brand_name": env_str("WXHUB_BRAND_NAME", "meteo@uniparthenope WxHub"),
+        "wxhub_brand_name": env_str("WXHUB_BRAND_NAME", "lab.meteo@uniparthenope"),
         "wxhub_brand_subtitle": env_str("WXHUB_BRAND_SUBTITLE", "Weather and marine data workspace"),
         "wxhub_brand_primary": env_color("WXHUB_BRAND_PRIMARY", "#1f4e79"),
         "wxhub_brand_secondary": env_color("WXHUB_BRAND_SECONDARY", "#2a91eb"),
@@ -128,11 +128,12 @@ def load() -> WxHubSettings:
         "controller": env_str(
             "WXHUB_PRIVACY_CONTROLLER", "University of Naples “Parthenope”"
         ),
-        "contact": env_str("WXHUB_PRIVACY_CONTACT"),
-        "dpo_contact": env_str("WXHUB_DPO_CONTACT"),
-        "accessibility_contact": env_str("WXHUB_ACCESSIBILITY_CONTACT"),
+        "contact": env_str("WXHUB_PRIVACY_CONTACT", "privacy@uniparthenope.it, privacy@pec.uniparthenope.it (University Privacy Office)"),
+        "dpo_contact": env_str("WXHUB_DPO_CONTACT", "dpo.privacy@uniparthenope.it"),
+        "accessibility_contact": env_str("WXHUB_ACCESSIBILITY_CONTACT",
+                                       "meteo@uniparthenope.it or the University accessibility page https://www.uniparthenope.it/Portale-Ateneo/accessibilita"),
     }
-    return WxHubSettings(
+    return LabMeteoSettings(
         instance=instance,
         public_host=env_str("WXHUB_PUBLIC_HOST", "http://localhost:8000").rstrip("/"),
         authenticator=env_str("WXHUB_AUTHENTICATOR", "native").lower(),

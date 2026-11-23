@@ -69,7 +69,7 @@ Approve sign-ups*; keep `WXHUB_OPEN_SIGNUP=false` on any reachable deployment.
 | Student | group `students` | Small resource tier |
 | User | approved account without a role group | Standard tier |
 
-Administrators assign roles on the platform dashboard (`/hub/wxhub/admin#users`); changes apply at
+Administrators assign roles on the platform dashboard (`/hub/lab/admin#users`); changes apply at
 the next server start. Groups can also be seeded at start-up with `WXHUB_STUDENTS`,
 `WXHUB_RESEARCHERS`, and `WXHUB_INSTRUCTORS` (comma-separated usernames); seeding adds members but
 never removes them. Instructors receive JupyterHub's `admin-ui` scope only to read; they cannot
@@ -79,10 +79,10 @@ access other users' notebooks.
 
 | Page | Who | Purpose |
 |---|---|---|
-| `/hub/wxhub/admin` | administrators (change), instructors (view) | Accounts and roles, data-mount audit, archive freshness, privacy requests, orphaned workspaces, security posture |
+| `/hub/lab/admin` | administrators (change), instructors (view) | Accounts and roles, data-mount audit, archive freshness, privacy requests, orphaned workspaces, security posture |
 | `/hub/admin` | administrators | JupyterHub control panel: add/delete users, admin flag, groups, start/stop servers |
 | `/hub/authorize` | administrators, local accounts only | Approve or revoke sign-up requests |
-| `/hub/wxhub/account` | every user | Personal data, JSON export, data-protection requests |
+| `/hub/lab/account` | every user | Personal data, JSON export, data-protection requests |
 
-Every change made from the platform dashboard is written to the Hub log with the `wxhub.audit`
+Every change made from the platform dashboard is written to the Hub log with the `lab.meteo.audit`
 logger (role changes, erasures, request decisions).

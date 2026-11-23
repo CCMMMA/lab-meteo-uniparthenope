@@ -55,10 +55,10 @@ services:
       WXHUB_COOKIE_MAX_AGE_DAYS: ${WXHUB_COOKIE_MAX_AGE_DAYS:-7}
       WXHUB_RETENTION_DAYS: ${WXHUB_RETENTION_DAYS:-365}
       WXHUB_PRIVACY_CONTROLLER: ${WXHUB_PRIVACY_CONTROLLER:-University of Naples “Parthenope”}
-      WXHUB_PRIVACY_CONTACT: ${WXHUB_PRIVACY_CONTACT:-}
-      WXHUB_DPO_CONTACT: ${WXHUB_DPO_CONTACT:-}
-      WXHUB_ACCESSIBILITY_CONTACT: ${WXHUB_ACCESSIBILITY_CONTACT:-}
-      WXHUB_BRAND_NAME: ${WXHUB_BRAND_NAME:-meteo@uniparthenope WxHub}
+      WXHUB_PRIVACY_CONTACT: ${WXHUB_PRIVACY_CONTACT:-privacy@uniparthenope.it, privacy@pec.uniparthenope.it (University Privacy Office)}
+      WXHUB_DPO_CONTACT: ${WXHUB_DPO_CONTACT:-dpo.privacy@uniparthenope.it}
+      WXHUB_ACCESSIBILITY_CONTACT: ${WXHUB_ACCESSIBILITY_CONTACT:-meteo@uniparthenope.it or the University accessibility page https://www.uniparthenope.it/Portale-Ateneo/accessibilita}
+      WXHUB_BRAND_NAME: ${WXHUB_BRAND_NAME:-lab.meteo@uniparthenope}
       WXHUB_BRAND_SUBTITLE: ${WXHUB_BRAND_SUBTITLE:-Weather and marine data workspace}
       WXHUB_BRAND_PRIMARY: ${WXHUB_BRAND_PRIMARY:-#1f4e79}
       WXHUB_BRAND_SECONDARY: ${WXHUB_BRAND_SECONDARY:-#2a91eb}

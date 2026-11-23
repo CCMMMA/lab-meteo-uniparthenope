@@ -9,7 +9,7 @@
     <div class="card-body p-4 p-md-5">
       <div class="page-kicker mb-2">Notebook workspace</div>
       <h1 class="h3 page-title mb-2">Sign in</h1>
-      <p class="wxhub-muted mb-4">Sign in to start your personal JupyterLab server with read-only access
+      <p class="lab-muted mb-4">Sign in to start your personal JupyterLab server with read-only access
         to meteo@uniparthenope model and sensor archives.</p>
 
       {% if not wxhub_https %}
@@ -43,7 +43,7 @@
         </div>
         {% if two_factor_auth %}
           <div class="mb-3">
-            <label class="form-label" for="2fa_input">Two-factor code <span class="wxhub-muted">(leave empty if not enabled)</span></label>
+            <label class="form-label" for="2fa_input">Two-factor code <span class="lab-muted">(leave empty if not enabled)</span></label>
             <input id="2fa_input" type="text" name="2fa" inputmode="numeric" autocomplete="one-time-code" class="form-control">
           </div>
         {% endif %}
@@ -55,8 +55,8 @@
         No account? Explore the <a href="/services/demos/">public notebook gallery</a> without signing in.
         {% if enable_signup %}Or <a href="{{ base_url }}signup">request an account</a>; an administrator must approve it.{% endif %}
       </p>
-      <p class="small wxhub-muted mb-0">By signing in you acknowledge the
-        <a href="{{ base_url }}wxhub/privacy">privacy notice</a>.</p>
+      <p class="small lab-muted mb-0">By signing in you acknowledge the
+        <a href="{{ base_url }}lab/privacy">privacy notice</a>.</p>
     </div>
   </div>
 </div>

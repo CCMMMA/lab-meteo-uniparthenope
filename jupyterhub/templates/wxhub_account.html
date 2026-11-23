@@ -7,10 +7,10 @@
   <h1 class="page-title mb-3">My account and data</h1>
   {% if message %}<div class="alert alert-info" role="status">{{ message }}</div>{% endif %}
 
-  <section class="wxhub-card mb-4" aria-labelledby="record-title">
+  <section class="lab-card mb-4" aria-labelledby="record-title">
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
       <h2 id="record-title" class="h5 mb-0">What this service stores about you</h2>
-      <a class="btn btn-outline-primary btn-sm" href="{{ base_url }}wxhub/account?format=json" download>
+      <a class="btn btn-outline-primary btn-sm" href="{{ base_url }}lab/account?format=json" download>
         Download as JSON (Art. 15, 20)</a>
     </div>
     <dl class="row mb-0">
@@ -27,17 +27,17 @@
         <dt class="col-sm-4">Password</dt><dd class="col-sm-8">{{ record.local_account.password }} (<a href="{{ base_url }}change-password">change</a>)</dd>
       {% endif %}
     </dl>
-    <p class="small wxhub-muted mt-3 mb-0">Download the files in your workspace at any time from the
+    <p class="small lab-muted mt-3 mb-0">Download the files in your workspace at any time from the
       JupyterLab file browser (right-click → Download).</p>
   </section>
 
-  <section class="wxhub-card mb-4" aria-labelledby="request-title">
+  <section class="lab-card mb-4" aria-labelledby="request-title">
     <h2 id="request-title" class="h5">Submit a data-protection request</h2>
     {% if open_requests %}
       <p>Open requests:</p>
       <ul>{% for r in open_requests %}<li>{{ wxhub_request_types[r.type] }} — submitted {{ r.created }}</li>{% endfor %}</ul>
     {% endif %}
-    <form method="post" action="{{ base_url }}wxhub/account">
+    <form method="post" action="{{ base_url }}lab/account">
       <input type="hidden" name="_xsrf" value="{{ xsrf }}">
       <fieldset class="mb-3">
         <legend class="form-label fs-6">Request type</legend>
@@ -60,8 +60,8 @@
       </div>
       <button class="btn btn-primary" type="submit">Submit request</button>
     </form>
-    <p class="small wxhub-muted mt-3 mb-0">Requests are answered within one month (Art. 12(3) GDPR).
-      See the <a href="{{ base_url }}wxhub/privacy#rights">privacy notice</a>.</p>
+    <p class="small lab-muted mt-3 mb-0">Requests are answered within one month (Art. 12(3) GDPR).
+      See the <a href="{{ base_url }}lab/privacy#rights">privacy notice</a>.</p>
   </section>
 </div>
 {% endblock main %}

@@ -7,7 +7,7 @@ not send the complete ~140 MB source file.
 
 Run on the host with the single-user image, which provides Xarray and netCDF4:
   sudo docker run --rm --entrypoint python -u 1000 \
-      -v /opt/weather/data/raw/models:/out -v ~/wxhub/scripts:/scripts:ro \
+      -v /opt/weather/data/raw/models:/out -v ~/lab-meteo-uniparthenope/scripts:/scripts:ro \
       wxhub-singleuser:latest /scripts/fetch_wrf_d03.py --start 2026-11-13 --days 5 --out /out/wrf5_d03
 """
 import argparse

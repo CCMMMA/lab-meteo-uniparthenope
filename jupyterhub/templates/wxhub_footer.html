@@ -1,36 +1,36 @@
 {# Shared footer, cookie notice, and closing main landmark; included by page.html and admin.html. #}
 </main>
-  <footer class="wxhub-footer mt-4">
+  <footer class="lab-footer mt-4">
     <div class="container-fluid py-4 d-flex flex-wrap justify-content-between align-items-center gap-3" style="max-width: 1500px;">
       <div>
         <strong>{{ wxhub_brand_name }}</strong>
         <div class="small">Interactive notebooks for weather, ocean, and sensor-network research and teaching.</div>
       </div>
       <nav aria-label="Legal and related links" class="d-flex flex-wrap align-items-center gap-3 small">
-        <a href="{{ base_url }}wxhub/privacy">Privacy &amp; data protection</a>
-        <a href="{{ base_url }}wxhub/privacy#cookies">Cookies</a>
-        <a href="{{ base_url }}wxhub/accessibility">Accessibility</a>
+        <a href="{{ base_url }}lab/privacy">Privacy &amp; data protection</a>
+        <a href="{{ base_url }}lab/privacy#cookies">Cookies</a>
+        <a href="{{ base_url }}lab/accessibility">Accessibility</a>
         <a href="{{ wxhub_brand_site_url }}" rel="noopener">meteo@uniparthenope</a>
         <a href="{{ wxhub_brand_network_url }}" rel="noopener">Sensor network</a>
       </nav>
     </div>
   </footer>
-  <section id="wxhub-cookie" class="wxhub-cookie" hidden aria-labelledby="wxhub-cookie-title">
-    <h2 id="wxhub-cookie-title" class="h6">Cookies on this service</h2>
+  <section id="lab-cookie" class="lab-cookie" hidden aria-labelledby="lab-cookie-title">
+    <h2 id="lab-cookie-title" class="h6">Cookies on this service</h2>
     <p class="small mb-2">We only use cookies that are strictly necessary for sign-in, security, and
       routing to your notebook server. There are no analytics, advertising, or tracking cookies, so
       no consent is required.</p>
     <div class="d-flex gap-2">
-      <button id="wxhub-cookie-ok" type="button" class="btn btn-sm btn-primary">OK, understood</button>
-      <a class="btn btn-sm btn-link" href="{{ base_url }}wxhub/privacy#cookies">Cookie details</a>
+      <button id="lab-cookie-ok" type="button" class="btn btn-sm btn-primary">OK, understood</button>
+      <a class="btn btn-sm btn-link" href="{{ base_url }}lab/privacy#cookies">Cookie details</a>
     </div>
   </section>
   <script>
     (function () {
-      var key = "wxhub-cookie-notice";
-      var box = document.getElementById("wxhub-cookie");
+      var key = "lab-cookie-notice";
+      var box = document.getElementById("lab-cookie");
       try { if (!window.localStorage.getItem(key)) { box.hidden = false; } } catch (e) { box.hidden = false; }
-      document.getElementById("wxhub-cookie-ok").addEventListener("click", function () {
+      document.getElementById("lab-cookie-ok").addEventListener("click", function () {
         try { window.localStorage.setItem(key, "seen"); } catch (e) {}
         box.hidden = true;
       });

@@ -1,4 +1,4 @@
-"""JupyterHub configuration for the meteo@uniparthenope WxHub single-host deployment."""
+"""JupyterHub configuration for the lab.meteo@uniparthenope single-host deployment."""
 
 import os
 import sys

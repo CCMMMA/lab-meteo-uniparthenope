@@ -1,6 +1,6 @@
 # Architecture
 
-WxHub is a single-host JupyterHub deployment for teaching and research at meteo@uniparthenope.
+lab.meteo@uniparthenope is a single-host JupyterHub deployment for teaching and research at meteo@uniparthenope.
 The reasoning behind each choice is in [Design rationale](design-rationale.md).
 
 ## Components

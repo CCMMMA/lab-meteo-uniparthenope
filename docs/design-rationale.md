@@ -1,6 +1,6 @@
 # Design rationale
 
-This document explains the scientific and engineering reasoning behind WxHub. Every cited work
+This document explains the scientific and engineering reasoning behind lab.meteo@uniparthenope. Every cited work
 is a peer-reviewed journal article or conference paper whose bibliographic record was verified
 against its DOI.
 
@@ -12,13 +12,13 @@ Jupyter notebook as a publishing format for reproducible workflows, and Granger 
 describe it as a tool for "thinking and storytelling with code and data". The same flexibility,
 however, threatens reproducibility: in a study of 1.4 million public notebooks, Pimentel et al. [3]
 could re-execute only a minority with identical results, mostly because of undeclared dependencies
-and out-of-order execution. Rule et al. [4] condensed community practice into rules that WxHub
+and out-of-order execution. Rule et al. [4] condensed community practice into rules that lab.meteo@uniparthenope
 operationalises: pinned environments, parameterised headless execution (Papermill), notebooks kept
 without transient output, and data provenance stated in each notebook.
 
 Multi-user notebook services are an established pattern in research computing. Zonca and Sinkovits
 [5] showed how JupyterHub with container spawners serves workshops and science gateways at scale;
-WxHub follows that pattern on a single host, with one container per user and a persistent volume
+lab.meteo@uniparthenope follows that pattern on a single host, with one container per user and a persistent volume
 per workspace. Containers make the analysis environment itself an inspectable, versioned artefact
 [6], which is why both images pin their base by digest and their direct Python dependencies by
 version.
@@ -27,7 +27,7 @@ version.
 
 The interaction model follows the widely adopted hosted-notebook pattern: an anonymous visitor
 lands on a gallery, opens a notebook with one click, and runs it without installing anything, while
-a signed-in member "connects" to a persistent server runtime. WxHub implements the anonymous tier
+a signed-in member "connects" to a persistent server runtime. lab.meteo@uniparthenope implements the anonymous tier
 with JupyterLite, whose Python kernel is Pyodide compiled to WebAssembly. WebAssembly was designed
 as a safe, portable, near-native execution target for the browser sandbox [7]; running anonymous
 code client-side therefore removes the most significant risk of public notebook services —
@@ -48,7 +48,7 @@ processing of environmental data [12], [13] motivates exposing these archives to
 rather than through copies: copies drift, consume storage, and break provenance.
 
 Exposing a production archive to arbitrary user code requires that the archive cannot be altered.
-WxHub enforces this at three independent layers, following the principle of least privilege and
+lab.meteo@uniparthenope enforces this at three independent layers, following the principle of least privilege and
 defence in depth [14]: (i) every shared path is bind-mounted read-only by the container engine;
 (ii) user containers run with all Linux capabilities dropped and `no-new-privileges`, so a process
 cannot remount a filesystem read-write; and (iii) the Hub refuses to spawn a server whose mount
@@ -57,20 +57,20 @@ barrier. Container isolation has known limits [15]; the residual risk concentrat
 access to the Docker socket, which is documented in [Security](security.md).
 
 The layout of the archives (`mmm/ddd/archive|history/YYYY/MM/DD/…`) is preserved unchanged inside
-user servers so that notebooks written in WxHub run unmodified on the centre's processing hosts,
+user servers so that notebooks written in lab.meteo@uniparthenope run unmodified on the centre's processing hosts,
 supporting the reusability goals of the FAIR principles [16].
 
 ## 4. Identity, roles, and administration
 
 Role-based access control assigns permissions to roles rather than individuals, which simplifies
-review and revocation [17]. WxHub maps four platform roles onto JupyterHub's RBAC scopes and
+review and revocation [17]. lab.meteo@uniparthenope maps four platform roles onto JupyterHub's RBAC scopes and
 groups: *student* (small resource tier), *user*, *instructor* (read-only oversight of users and
 start/stop of student servers), *researcher* (large tier), plus the built-in *administrator*.
 Roles also select per-user resource limits, so that teaching cohorts cannot exhaust capacity
 needed by research workloads.
 
 Universities already operate identity providers. Federated identity management lets a service
-rely on the institution's authentication instead of storing passwords [18]. WxHub therefore
+rely on the institution's authentication instead of storing passwords [18]. lab.meteo@uniparthenope therefore
 supports Microsoft Entra ID (university Microsoft 365 tenants) and Google Workspace for Education
 through OAuth 2.0/OpenID Connect, restricted to the institution's tenant or hosted domains; local
 accounts with administrator approval remain available for pilots and external collaborators.
@@ -84,7 +84,7 @@ archive freshness, data-subject requests, orphaned workspaces, and the security 
 
 The GDPR requires data protection by design and by default (Art. 25) and accountability (Art. 5(2))
 [19]. Spiekermann [20] argues that privacy by design succeeds only when translated into concrete
-engineering decisions; WxHub's are:
+engineering decisions; lab.meteo@uniparthenope's are:
 
 - **Minimisation:** no e-mail at sign-up, no analytics, no third-party resources on Hub pages, and
   only strictly necessary cookies (hence no consent banner is required).
@@ -104,7 +104,7 @@ Public-sector websites in the EU must conform to EN 301 549, which incorporates 
 in Italy this obligation is implemented by Law 4/2004 and the AgID guidelines. Empirical reviews
 show that educational websites frequently fail basic success criteria such as contrast, labels, and
 keyboard operation [21], and data-science notebooks are particularly problematic for screen-reader
-users [22]. WxHub addresses what it controls — Hub pages, gallery, sign-in, and administration —
+users [22]. lab.meteo@uniparthenope addresses what it controls — Hub pages, gallery, sign-in, and administration —
 with semantic landmarks, a skip link, labelled forms, AA contrast in both themes, visible focus,
 text-not-colour status indicators, and reduced-motion support, and publishes an accessibility
 statement listing the residual limitations of JupyterLab-based content.

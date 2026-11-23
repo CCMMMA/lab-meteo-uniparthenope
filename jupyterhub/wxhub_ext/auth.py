@@ -6,19 +6,19 @@
 * ``azuread`` – Microsoft Entra ID (Azure AD), e.g. a university Microsoft 365 tenant;
 * ``google``  – Google Workspace for Education restricted to institutional hosted domains.
 
-Every class receives the WxHub pages through ``get_handlers`` so that the extension works without
+Every class receives the lab.meteo@uniparthenope pages through ``get_handlers`` so that the extension works without
 JupyterHub's deprecated ``extra_handlers`` option.
 """
 
 from __future__ import annotations
 
 from .handlers import get_handlers
-from .settings import WxHubSettings
+from .settings import LabMeteoSettings
 
 AUTHENTICATORS = {"native", "azuread", "google"}
 
 
-def build_authenticator_class(wxhub: WxHubSettings, assets_path: str):
+def build_authenticator_class(wxhub: LabMeteoSettings, assets_path: str):
     kind = wxhub.authenticator
     if kind == "native":
         from nativeauthenticator import NativeAuthenticator as base
@@ -32,4 +32,4 @@ def build_authenticator_class(wxhub: WxHubSettings, assets_path: str):
     def handlers(self, app):
         return list(base.get_handlers(self, app)) + get_handlers(wxhub, assets_path)
 
-    return type(f"WxHub{base.__name__}", (base,), {"get_handlers": handlers})
+    return type(f"LabMeteo{base.__name__}", (base,), {"get_handlers": handlers})

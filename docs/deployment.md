@@ -68,10 +68,10 @@ the initial password at `/hub/change-password`. For Microsoft or Google sign-in,
    report `ro`, `~/work` `rw`, and both privilege checks `PASSED`.
 4. Run `templates/local_archives.ipynb` (copied to `~/work`): it reads a WRF file and a station CSV
    and reports that the archive is read-only.
-5. As administrator, open `/hub/wxhub/admin`: the live audit reports no writable shared mount and
+5. As administrator, open `/hub/lab/admin`: the live audit reports no writable shared mount and
    the archive tables show recent days. A regular user receives HTTP 403 there.
 6. Restart the user server and the Hub; confirm workspace files and sessions persist.
-7. Open `/hub/wxhub/privacy` and `/hub/wxhub/accessibility` without signing in.
+7. Open `/hub/lab/privacy` and `/hub/lab/accessibility` without signing in.
 8. Run one model, one live-instrument, and one AI notebook in the gallery; an explicit upstream
    timeout message is acceptable, an unhandled traceback is not.
 
@@ -111,16 +111,17 @@ the `https://` URL, and set `WXHUB_BIND_ADDRESS=127.0.0.1`. See [Security](secur
 | `WXHUB_COOKIE_MAX_AGE_DAYS` | `7` | Session cookie lifetime |
 | `WXHUB_RETENTION_DAYS` | `365` | Inactivity period after which accounts are reviewed |
 | `WXHUB_PRIVACY_CONTROLLER` | University of Naples “Parthenope” | Controller named in the privacy notice |
-| `WXHUB_PRIVACY_CONTACT`, `WXHUB_DPO_CONTACT` | empty | Contacts shown in the privacy notice |
-| `WXHUB_ACCESSIBILITY_CONTACT` | empty | Feedback channel in the accessibility statement |
-| `WXHUB_BRAND_NAME`, `WXHUB_BRAND_SUBTITLE` | meteo@uniparthenope WxHub; Weather and marine data workspace | Identity text |
+| `WXHUB_PRIVACY_CONTACT` | privacy@uniparthenope.it, privacy@pec.uniparthenope.it (University Privacy Office) | Privacy contact in the notice |
+| `WXHUB_DPO_CONTACT` | dpo.privacy@uniparthenope.it | University DPO in the notice |
+| `WXHUB_ACCESSIBILITY_CONTACT` | meteo@uniparthenope.it or the University accessibility page https://www.uniparthenope.it/Portale-Ateneo/accessibilita | Feedback channel in the accessibility statement |
+| `WXHUB_BRAND_NAME`, `WXHUB_BRAND_SUBTITLE` | lab.meteo@uniparthenope; Weather and marine data workspace | Identity text |
 | `WXHUB_BRAND_PRIMARY`, `WXHUB_BRAND_SECONDARY`, `WXHUB_BRAND_ACCENT` | `#1f4e79`, `#2a91eb`, `#181c63` | Palette shared with the meteo@uniparthenope portals |
 | `WXHUB_BRAND_SITE_URL`, `WXHUB_BRAND_NETWORK_URL` | meteo and network portal URLs | Navigation links |
 | `METEO_API_BASE_URL` | `https://api.meteo.uniparthenope.it` | API base URL passed to user servers |
 
 Colours must use `#RRGGBB`; the light-mode link colour is the primary colour so that link text
 keeps at least 4.5:1 contrast. The gallery and lab share the default palette through
-`demos/wxhub.css` (published as `wxhub-v3.css`; bump the name when changing it so that browser
+`demos/wxhub.css` (published as `lab-meteo-v4.css`; bump the name when changing it so that browser
 service-worker caches refresh). Recreate the affected containers after configuration changes.
 
 ## Upgrade and rollback

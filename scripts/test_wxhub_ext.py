@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Offline tests for the dependency-free parts of the WxHub Hub extension."""
+"""Offline tests for the dependency-free parts of the lab.meteo@uniparthenope Hub extension."""
 
 from __future__ import annotations
 
@@ -72,4 +72,4 @@ with tempfile.TemporaryDirectory() as directory:
     test_catalog(Path(directory))
     test_store(Path(directory))
 test_settings()
-print("WxHub extension tests passed")
+print("lab.meteo@uniparthenope extension tests passed")

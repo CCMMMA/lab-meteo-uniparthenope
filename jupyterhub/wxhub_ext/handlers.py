@@ -15,16 +15,16 @@ from tornado.escape import url_escape
 
 from . import catalog
 from .requests_store import REQUEST_TYPES, RequestStore
-from .settings import WxHubSettings
+from .settings import LabMeteoSettings
 
 # A child of JupyterHub's application logger, so audit lines reach the Hub log handlers.
-_audit_logger = logging.getLogger("JupyterHub.wxhub.audit")
+_audit_logger = logging.getLogger("JupyterHub.lab.meteo.audit")
 
 
 class _Audit:
     @staticmethod
     def info(message: str, *args) -> None:
-        _audit_logger.info("wxhub.audit " + message, *args)
+        _audit_logger.info("lab.meteo.audit " + message, *args)
 
 
 audit = _Audit()
@@ -73,10 +73,10 @@ def docker_client():
     return docker.from_env(timeout=15)
 
 
-class WxHubHandler(BaseHandler):
-    """Common helpers for WxHub pages."""
+class LabMeteoHandler(BaseHandler):
+    """Common helpers for lab.meteo@uniparthenope pages."""
 
-    def initialize(self, wxhub: WxHubSettings):
+    def initialize(self, wxhub: LabMeteoSettings):
         self.wxhub = wxhub
         self.store = RequestStore(wxhub.requests_file)
 
@@ -104,17 +104,17 @@ class WxHubHandler(BaseHandler):
         return sorted(name for name in binds if not name.startswith("/"))
 
 
-class PrivacyHandler(WxHubHandler):
+class PrivacyHandler(LabMeteoHandler):
     async def get(self):
         await self.render_page("wxhub_privacy.html")
 
 
-class AccessibilityHandler(WxHubHandler):
+class AccessibilityHandler(LabMeteoHandler):
     async def get(self):
         await self.render_page("wxhub_accessibility.html")
 
 
-class AccountHandler(WxHubHandler):
+class AccountHandler(LabMeteoHandler):
     """Show, export, and raise requests about the signed-in user's personal data."""
 
     def personal_data(self, user) -> dict:
@@ -159,7 +159,7 @@ class AccountHandler(WxHubHandler):
             self.set_header("Content-Type", "application/json; charset=utf-8")
             self.set_header("Cache-Control", "no-store")
             self.set_header(
-                "Content-Disposition", f'attachment; filename="wxhub-personal-data-{user.name}.json"'
+                "Content-Disposition", f'attachment; filename="lab-meteo-personal-data-{user.name}.json"'
             )
             self.finish(json.dumps(data, indent=2, ensure_ascii=False))
             return
@@ -185,10 +185,10 @@ class AccountHandler(WxHubHandler):
             item = self.store.add(user.name, kind, note)
             audit.info("privacy-request id=%s user=%s type=%s", item["id"], user.name, kind)
             message = "Your request has been registered. An administrator will handle it."
-        self.redirect(f"{self.hub.base_url}wxhub/account?message=" + url_escape(message))
+        self.redirect(f"{self.hub.base_url}lab/account?message=" + url_escape(message))
 
 
-class AdminHandler(WxHubHandler):
+class AdminHandler(LabMeteoHandler):
     """Platform-administration dashboard. Viewing needs ``admin-ui``; changes need admin."""
 
     def require_view(self):
@@ -302,7 +302,7 @@ class AdminHandler(WxHubHandler):
         )
 
     def _back(self, message: str, anchor: str = "") -> None:
-        url = f"{self.hub.base_url}wxhub/admin?message={url_escape(message)}"
+        url = f"{self.hub.base_url}lab/admin?message={url_escape(message)}"
         self.redirect(url + (f"#{anchor}" if anchor else ""))
 
     async def _remove_volumes(self, names: list[str]) -> list[str]:
@@ -398,12 +398,12 @@ class AdminHandler(WxHubHandler):
         raise web.HTTPError(400, "Unknown action")
 
 
-def get_handlers(wxhub: WxHubSettings, assets_path: str) -> list[tuple]:
+def get_handlers(wxhub: LabMeteoSettings, assets_path: str) -> list[tuple]:
     kwargs = {"wxhub": wxhub}
     return [
-        (r"/wxhub/privacy", PrivacyHandler, kwargs),
-        (r"/wxhub/accessibility", AccessibilityHandler, kwargs),
-        (r"/wxhub/account", AccountHandler, kwargs),
-        (r"/wxhub/admin", AdminHandler, kwargs),
-        (r"/wxhub/static/(.*)", web.StaticFileHandler, {"path": assets_path}),
+        (r"/lab/privacy", PrivacyHandler, kwargs),
+        (r"/lab/accessibility", AccessibilityHandler, kwargs),
+        (r"/lab/account", AccountHandler, kwargs),
+        (r"/lab/admin", AdminHandler, kwargs),
+        (r"/lab/static/(.*)", web.StaticFileHandler, {"path": assets_path}),
     ]

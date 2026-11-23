@@ -6,7 +6,7 @@
   <div class="page-kicker mb-2">Directive (EU) 2016/2102 · Law 4/2004 · EN 301 549</div>
   <h1 class="page-title mb-4">Accessibility statement</h1>
 
-  <div class="wxhub-card mb-4">
+  <div class="lab-card mb-4">
     <h2 class="h5">Conformance status</h2>
     <p class="mb-0">{{ wxhub_brand_name }} aims to conform to the Web Content Accessibility Guidelines
       (WCAG) 2.1, level AA, as required by EN 301 549 and the AgID accessibility guidelines.
@@ -36,9 +36,9 @@
 
   <h2 class="h4 mt-4">Feedback and enforcement</h2>
   <p>Report accessibility problems or request content in an accessible format
-    {% if wxhub_privacy.accessibility_contact %}to {{ wxhub_privacy.accessibility_contact }}{% else %}through the University's official channels{% endif %}.
+    {% if wxhub_privacy.accessibility_contact %}to {{ wxhub_privacy.accessibility_contact | urlize }}{% else %}through the University's official channels{% endif %}.
     If the answer is unsatisfactory, you may use the enforcement procedure of the Agency for Digital
     Italy (<a href="https://www.agid.gov.it" rel="noopener">AgID</a>) under Article 3-quinquies of Law 4/2004.</p>
-  <p class="small wxhub-muted">This statement is based on a self-assessment and is reviewed with each release.</p>
+  <p class="small lab-muted">This statement is based on a self-assessment and is reviewed with each release.</p>
 </div>
 {% endblock main %}

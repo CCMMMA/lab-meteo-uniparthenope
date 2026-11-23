@@ -5,9 +5,9 @@
   {{ super() }}
   <style>
     .kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1rem; }
-    .kpi div { background: var(--wxhub-surface); border-radius: var(--wxhub-radius); box-shadow: var(--wxhub-shadow); padding: 1rem 1.25rem; }
+    .kpi div { background: var(--lab-surface); border-radius: var(--lab-radius); box-shadow: var(--lab-shadow); padding: 1rem 1.25rem; }
     .kpi strong { display: block; font-size: 1.9rem; letter-spacing: -.03em; }
-    .kpi span { color: var(--wxhub-muted); font-size: .85rem; }
+    .kpi span { color: var(--lab-muted); font-size: .85rem; }
     .state-ok::before { content: "✓ "; }
     .state-bad::before { content: "✗ "; }
     .state-ok { color: #146c2e; font-weight: 600; }
@@ -41,10 +41,10 @@
   <section id="users" class="card mb-4" aria-labelledby="users-title">
     <div class="card-header p-4">
       <h2 id="users-title" class="h4 mb-1">Users and roles</h2>
-      <p class="wxhub-muted mb-0">Roles: <strong>Student</strong> (2 GB / 1 CPU tier), <strong>User</strong> and
+      <p class="lab-muted mb-0">Roles: <strong>Student</strong> (2 GB / 1 CPU tier), <strong>User</strong> and
         <strong>Instructor</strong> (standard tier; instructors may view users and start or stop student servers),
         <strong>Researcher</strong> and <strong>Administrator</strong> (large tier). Grant or revoke administrator
-        rights in the <a href="{{ base_url }}admin">server control panel</a> or with <code>WXHUB_ADMIN_USERS</code>.
+        rights in the <a href="{{ base_url }}admin">server control panel</a> or in the deployment configuration.
         {% if dash.pending %}<a href="{{ base_url }}authorize">Approve {{ dash.pending | length }} pending sign-up(s)</a>.{% endif %}</p>
     </div>
     <div class="table-responsive">
@@ -60,8 +60,8 @@
               <td>{% if u.running %}<span class="state-ok">running</span>{% else %}stopped{% endif %}</td>
               {% if can_change %}
                 <td>
-                  {% if u.admin %}<span class="small wxhub-muted">administrator</span>{% else %}
-                  <form method="post" action="{{ base_url }}wxhub/admin" class="d-flex gap-2">
+                  {% if u.admin %}<span class="small lab-muted">administrator</span>{% else %}
+                  <form method="post" action="{{ base_url }}lab/admin" class="d-flex gap-2">
                     <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                     <input type="hidden" name="action" value="set_role">
                     <input type="hidden" name="username" value="{{ u.name }}">
@@ -89,7 +89,7 @@
   <section id="data" class="card mb-4" aria-labelledby="data-title">
     <div class="card-header p-4">
       <h2 id="data-title" class="h4 mb-1">Data sources</h2>
-      <p class="wxhub-muted mb-0">Every shared source is bound read-only into user servers; user containers run
+      <p class="lab-muted mb-0">Every shared source is bound read-only into user servers; user containers run
         without Linux capabilities and with <code>no-new-privileges</code>, so a mount cannot be made writable.</p>
     </div>
     <div class="table-responsive">
@@ -103,7 +103,7 @@
               <td><code>{{ entry.source.host_path }}</code></td>
               <td><code>{{ entry.source.container_path }}</code></td>
               <td><span class="state-ok">read-only</span>
-                {% if entry.hub_read_only is true %}<span class="small wxhub-muted">(verified on Hub mount)</span>{% elif entry.hub_read_only is false %}<span class="state-bad">Hub mount writable</span>{% endif %}</td>
+                {% if entry.hub_read_only is true %}<span class="small lab-muted">(verified on Hub mount)</span>{% elif entry.hub_read_only is false %}<span class="state-bad">Hub mount writable</span>{% endif %}</td>
             </tr>
           {% endfor %}
         </tbody>
@@ -128,7 +128,7 @@
             {% if entry.source.kind == "opendap" %}
               <caption class="visually-hidden">Model products and latest available day</caption>
               <thead><tr><th scope="col">Model</th><th scope="col">Domain</th><th scope="col">Product</th><th scope="col">Latest</th></tr></thead>
-              <tbody>{% for row in entry.inventory %}<tr><th scope="row">{{ row.model }} <span class="small wxhub-muted">{{ row.label }}</span></th><td>{{ row.domain }}</td><td>{{ row.product }}</td><td>{{ row.latest or "—" }}</td></tr>{% endfor %}</tbody>
+              <tbody>{% for row in entry.inventory %}<tr><th scope="row">{{ row.model }} <span class="small lab-muted">{{ row.label }}</span></th><td>{{ row.domain }}</td><td>{{ row.product }}</td><td>{{ row.latest or "—" }}</td></tr>{% endfor %}</tbody>
             {% else %}
               <caption class="visually-hidden">Weather stations and latest available day</caption>
               <thead><tr><th scope="col">Station</th><th scope="col">Latest</th></tr></thead>
@@ -143,7 +143,7 @@
   <section id="requests" class="card mb-4" aria-labelledby="requests-title">
     <div class="card-header p-4">
       <h2 id="requests-title" class="h4 mb-1">Privacy requests</h2>
-      <p class="wxhub-muted mb-0">Answer within one month (GDPR Art. 12(3)). Erasure stops the server, deletes the
+      <p class="lab-muted mb-0">Answer within one month (GDPR Art. 12(3)). Erasure stops the server, deletes the
         account and the user's workspace volume, and closes the user's open requests. It cannot be undone.</p>
     </div>
     <div class="table-responsive">
@@ -154,15 +154,15 @@
           {% for r in dash.requests %}
             <tr>
               <th scope="row">{{ r.username }}</th>
-              <td>{{ wxhub_request_types[r.type] }}{% if r.note %}<div class="small wxhub-muted">{{ r.note }}</div>{% endif %}</td>
+              <td>{{ wxhub_request_types[r.type] }}{% if r.note %}<div class="small lab-muted">{{ r.note }}</div>{% endif %}</td>
               <td>{{ r.created[:16] | replace("T", " ") }}</td>
-              <td>{{ r.status }}{% if r.closed %} <span class="small wxhub-muted">by {{ r.closed_by }}</span>{% endif %}</td>
+              <td>{{ r.status }}{% if r.closed %} <span class="small lab-muted">by {{ r.closed_by }}</span>{% endif %}</td>
               {% if can_change %}
                 <td>
                   {% if r.status == "open" %}
                     <div class="d-flex flex-wrap gap-2">
                       {% if r.type == "erasure" %}
-                        <form method="post" action="{{ base_url }}wxhub/admin" class="d-flex gap-2">
+                        <form method="post" action="{{ base_url }}lab/admin" class="d-flex gap-2">
                           <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                           <input type="hidden" name="action" value="erase_user">
                           <input type="hidden" name="username" value="{{ r.username }}">
@@ -171,14 +171,14 @@
                           <button class="btn btn-sm btn-danger" type="submit">Erase</button>
                         </form>
                       {% endif %}
-                      <form method="post" action="{{ base_url }}wxhub/admin">
+                      <form method="post" action="{{ base_url }}lab/admin">
                         <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                         <input type="hidden" name="action" value="close_request">
                         <input type="hidden" name="request_id" value="{{ r.id }}">
                         <input type="hidden" name="status" value="completed">
                         <button class="btn btn-sm btn-outline-primary" type="submit">Mark completed</button>
                       </form>
-                      <form method="post" action="{{ base_url }}wxhub/admin">
+                      <form method="post" action="{{ base_url }}lab/admin">
                         <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                         <input type="hidden" name="action" value="close_request">
                         <input type="hidden" name="request_id" value="{{ r.id }}">
@@ -201,7 +201,7 @@
   <section id="volumes" class="card mb-4" aria-labelledby="volumes-title">
     <div class="card-header p-4">
       <h2 id="volumes-title" class="h4 mb-1">Orphaned workspaces</h2>
-      <p class="wxhub-muted mb-0">Workspace volumes whose account no longer exists. Erase them to complete an
+      <p class="lab-muted mb-0">Workspace volumes whose account no longer exists. Erase them to complete an
         erasure performed elsewhere (storage limitation, GDPR Art. 5(1)(e)).</p>
     </div>
     <div class="card-body">
@@ -210,7 +210,7 @@
           {% for name in dash.docker.orphans %}
             <li class="d-flex flex-wrap align-items-center gap-2 mb-2"><code>{{ name }}</code>
               {% if can_change %}
-                <form method="post" action="{{ base_url }}wxhub/admin" class="d-flex gap-2">
+                <form method="post" action="{{ base_url }}lab/admin" class="d-flex gap-2">
                   <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                   <input type="hidden" name="action" value="erase_volume">
                   <input type="hidden" name="volume" value="{{ name }}">

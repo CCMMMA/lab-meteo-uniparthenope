@@ -1,7 +1,7 @@
 # Privacy and GDPR
 
-This page records how WxHub implements Regulation (EU) 2016/679 (GDPR) and the ePrivacy cookie
-rules. The user-facing notice is served at `/hub/wxhub/privacy`; this document is for operators.
+This page records how lab.meteo@uniparthenope implements Regulation (EU) 2016/679 (GDPR) and the ePrivacy cookie
+rules. The user-facing notice is served at `/hub/lab/privacy`; this document is for operators.
 Legal review by the University's Data Protection Officer remains necessary before production use.
 
 ## Processing inventory (Art. 30 input)
@@ -24,7 +24,7 @@ University. No special categories of data are needed; users are told not to stor
 - **Storage limitation (Art. 5(1)(e)):** idle culling, account review after
   `WXHUB_RETENTION_DAYS`, erasure of accounts and orphaned workspace volumes.
 - **Transparency (Arts. 12–14):** privacy notice linked from every page and from sign-in.
-- **Access and portability (Arts. 15, 20):** `/hub/wxhub/account` shows the stored data and
+- **Access and portability (Arts. 15, 20):** `/hub/lab/account` shows the stored data and
   exports it as JSON; workspace files are downloadable from JupyterLab.
 - **Rectification, erasure, restriction (Arts. 16–18):** users submit requests on *My data*;
   administrators handle them on the dashboard within one month (Art. 12(3)).
@@ -60,5 +60,10 @@ volumes under *Orphaned workspaces* so the erasure can be completed.
 
 ## Configuration
 
-`WXHUB_PRIVACY_CONTROLLER`, `WXHUB_PRIVACY_CONTACT`, and `WXHUB_DPO_CONTACT` fill the controller and
-contact details in the notice; set them before opening the service to users.
+The notice names the University of Naples “Parthenope” as controller and, by default, the contacts
+published on the University privacy page (https://www.uniparthenope.it/Portale-Ateneo/privacy,
+checked 23 November 2026): the Privacy Office (`privacy@uniparthenope.it`, PEC
+`privacy@pec.uniparthenope.it`) and the Data Protection Officer (`dpo.privacy@uniparthenope.it`).
+The service operator is reachable at `meteo@uniparthenope.it`. Override them with
+`WXHUB_PRIVACY_CONTROLLER`, `WXHUB_PRIVACY_CONTACT`, and `WXHUB_DPO_CONTACT`, and re-check them
+whenever the University updates its page. The notice should be reviewed by the DPO.

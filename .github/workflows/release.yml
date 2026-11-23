@@ -32,7 +32,7 @@ jobs:
         id: metadata
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/wxhub-${{ matrix.name }}
+          images: ghcr.io/${{ github.repository_owner }}/lab-meteo-uniparthenope-${{ matrix.name }}
           tags: |
             type=ref,event=tag
             type=sha

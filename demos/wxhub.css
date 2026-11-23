@@ -1,17 +1,17 @@
 :root {
-  --wxhub-primary: #1f4e79;
-  --wxhub-secondary: #2a91eb;
-  --wxhub-accent: #181c63;
-  --jp-brand-color0: var(--wxhub-primary);
-  --jp-brand-color1: var(--wxhub-primary);
-  --jp-brand-color2: var(--wxhub-secondary);
+  --lab-primary: #1f4e79;
+  --lab-secondary: #2a91eb;
+  --lab-accent: #181c63;
+  --jp-brand-color0: var(--lab-primary);
+  --jp-brand-color1: var(--lab-primary);
+  --jp-brand-color2: var(--lab-secondary);
   --jp-layout-color0: #f4f7fa;
   --jp-layout-color1: #ffffff;
   --jp-ui-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 #jp-top-panel {
-  background: linear-gradient(120deg, var(--wxhub-primary), var(--wxhub-accent)) !important;
+  background: linear-gradient(120deg, var(--lab-primary), var(--lab-accent)) !important;
   box-shadow: 0 .25rem 1.5rem rgba(0, 26, 48, .2);
 }
 
@@ -22,7 +22,7 @@
 }
 
 #jp-menu-panel::before {
-  content: "Wx  meteo@uniparthenope";
+  content: "lab.meteo@uniparthenope";
   display: inline-flex;
   align-items: center;
   min-width: 15rem;
@@ -52,12 +52,12 @@
 }
 
 @media (max-width: 760px) {
-  #jp-menu-panel::before { content: "WxHub"; min-width: auto; }
+  #jp-menu-panel::before { content: "lab.meteo@uniparthenope"; min-width: auto; }
 }
 
 /* Accessibility: visible keyboard focus and reduced motion, matching the Hub pages. */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--wxhub-secondary) 70%, #000);
+  outline: 3px solid color-mix(in srgb, var(--lab-secondary) 70%, #000);
   outline-offset: 2px;
 }
 

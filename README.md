@@ -1,11 +1,11 @@
-# wxhub
+# lab.meteo@uniparthenope
 
 > A reproducible, containerized JupyterHub workspace for weather and marine-data analysis.
 
-[![CI](https://github.com/raffmont/wxhub/actions/workflows/ci.yml/badge.svg)](https://github.com/raffmont/wxhub/actions/workflows/ci.yml)
+[![CI](https://github.com/CCMMMA/lab-meteo-uniparthenope/actions/workflows/ci.yml/badge.svg)](https://github.com/CCMMMA/lab-meteo-uniparthenope/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-wxhub follows a Colab-style, two-tier model. Anonymous visitors land on a gallery of thirty
+lab.meteo@uniparthenope follows a Colab-style, two-tier model. Anonymous visitors land on a gallery of thirty
 meteo@uniparthenope notebooks and run them with one click in a JupyterLite lab whose Python kernel
 executes in WebAssembly inside the browser; their code never runs on the deployment host. Signed-in
 members connect to a persistent, isolated JupyterLab server with Xarray, Dask, Zarr, NetCDF4,
@@ -130,7 +130,7 @@ Data lineage, checksums, outputs, and limitations are documented in
 | `.github/workflows/` | Continuous integration configuration |
 
 Pushing a tag such as `v1.0.0` runs the release workflow and publishes versioned images as
-`ghcr.io/raffmont/wxhub-jupyterhub:<tag>` and `ghcr.io/raffmont/wxhub-singleuser:<tag>` with
+`ghcr.io/ccmmma/lab-meteo-uniparthenope-jupyterhub:<tag>` and `ghcr.io/ccmmma/lab-meteo-uniparthenope-singleuser:<tag>` with
 provenance and SBOM attestations.
 
 ## Validate a checkout

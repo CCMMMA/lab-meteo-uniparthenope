@@ -75,8 +75,8 @@ TEMPLATE = """<!DOCTYPE html>
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#1f4e79">
 <meta name="description" content="Run meteo@uniparthenope weather, ocean, and sensor notebooks in your browser.">
-<title>Notebook gallery · meteo@uniparthenope WxHub</title>
-<link rel="icon" href="/services/demos/wxhub-logo.png" type="image/png">
+<title>Notebook gallery · lab.meteo@uniparthenope</title>
+<link rel="icon" href="/services/demos/lab-meteo-logo.png" type="image/png">
 <style>
 :root { --primary:#1f4e79; --secondary:#2a91eb; --accent:#181c63; --page:#f4f7fa; --surface:#fff;
   --ink:#13283a; --muted:#55687a; --link:#1f4e79; --line:#dbe3ea; --radius:1rem;
@@ -138,8 +138,8 @@ footer a { color:inherit; margin-right:1rem; }
 <a class="skip" href="#main">Skip to main content</a>
 <header>
   <div class="bar">
-    <a class="brand" href="/services/demos/"><img src="/services/demos/wxhub-logo.png" alt="">
-      <span><strong>meteo@uniparthenope WxHub</strong><small>Weather and marine data workspace</small></span></a>
+    <a class="brand" href="/services/demos/"><img src="/services/demos/lab-meteo-logo.png" alt="">
+      <span><strong>lab.meteo@uniparthenope</strong><small>Weather and marine data workspace</small></span></a>
     <nav aria-label="Main navigation">
       <a href="lab/index.html">Notebook lab</a>
       <a href="https://meteo.uniparthenope.it" rel="noopener">Forecasts</a>
@@ -178,11 +178,11 @@ footer a { color:inherit; margin-right:1rem; }
 </main>
 <footer>
   <div class="shell">
-    <div><strong>meteo@uniparthenope WxHub</strong><br><span>Forecasts are generated automatically and are
+    <div><strong>lab.meteo@uniparthenope</strong><br><span>Forecasts are generated automatically and are
       not official warnings. Times are UTC.</span></div>
     <nav aria-label="Legal and related links">
-      <a href="/hub/wxhub/privacy">Privacy &amp; data protection</a>
-      <a href="/hub/wxhub/accessibility">Accessibility</a>
+      <a href="/hub/lab/privacy">Privacy &amp; data protection</a>
+      <a href="/hub/lab/accessibility">Accessibility</a>
       <a href="https://meteo.uniparthenope.it" rel="noopener">meteo@uniparthenope</a>
     </nav>
   </div>

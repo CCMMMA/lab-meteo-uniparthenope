@@ -9,16 +9,16 @@ docker compose logs --tail=200 demos
 docker stats
 docker volume ls --filter name=-user-
 docker compose exec -T jupyterhub python -m wxhub_ext.manage_users list
-docker compose logs jupyterhub | grep wxhub.audit
+docker compose logs jupyterhub | grep lab.meteo.audit
 ```
 
-The platform dashboard (`/hub/wxhub/admin`) is the first place to look: it summarises accounts,
+The platform dashboard (`/hub/lab/admin`) is the first place to look: it summarises accounts,
 running servers, pending sign-ups, open privacy requests, archive freshness, a live read-only mount
 audit, orphaned workspaces, and the security posture.
 
 Back up `jupyterhub-data` (database, cookie secret, privacy-request register), all user workspace
 volumes, and the curated data path from a consistent snapshot. The operational archives are owned
-by the production chain and are not modified by WxHub. Restore the Hub SQLite database and cookie secret together. Never use
+by the production chain and are not modified by lab.meteo@uniparthenope. Restore the Hub SQLite database and cookie secret together. Never use
 `docker compose down -v` during normal operations because it deletes persistent state.
 
 ## Recurring duties

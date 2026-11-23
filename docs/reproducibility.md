@@ -11,11 +11,11 @@ Regenerate and execute them in the pinned runtime with:
 
 ```bash
 python3 scripts/build_demo_notebooks.py
-mkdir -p /tmp/wxhub-demo-executed
+mkdir -p /tmp/lab-meteo-demo-executed
 docker run --rm \
   -e METEO_API_BASE_URL=https://api.meteo.uniparthenope.it \
   -v "$PWD/demos:/home/jovyan/demos:ro" \
-  -v /tmp/wxhub-demo-executed:/home/jovyan/executed \
+  -v /tmp/lab-meteo-demo-executed:/home/jovyan/executed \
   wxhub-singleuser:check bash -lc \
   'for notebook in /home/jovyan/demos/*.ipynb; do jupyter nbconvert --execute --to notebook \
   --ExecutePreprocessor.kernel_name=python3 --ExecutePreprocessor.timeout=90 \

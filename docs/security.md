@@ -1,6 +1,6 @@
 # Security
 
-WxHub is a single-host service for a university laboratory, not a hardened multi-tenant cloud.
+lab.meteo@uniparthenope is a single-host service for a university laboratory, not a hardened multi-tenant cloud.
 This page states the trust boundaries, the controls in place, and what must be added before
 internet-wide exposure.
 
@@ -16,7 +16,7 @@ internet-wide exposure.
 ## Read-only scientific data
 
 Model archives, station data, curated products, and templates must never be modified from
-WxHub. The guarantee is layered:
+lab.meteo@uniparthenope. The guarantee is layered:
 
 1. DockerSpawner binds every shared source through `read_only_volumes` (`ro` bind mounts).
 2. User containers start with `cap_drop: ALL` and `no-new-privileges`, so no process can remount
