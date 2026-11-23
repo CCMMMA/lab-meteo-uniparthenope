@@ -5,6 +5,7 @@
 ```bash
 docker compose ps
 docker compose logs --tail=200 jupyterhub
+docker compose logs --tail=200 demos
 docker stats
 docker volume ls --filter name=jupyterhub-user-
 ```
@@ -42,5 +43,13 @@ diff. The snapshot may contain platform-specific base-image references. The pinn
   described in [Security](security.md). Changing colors or text cannot establish browser trust.
 - **Branding is unchanged:** confirm the `jupyterhub/templates` bind mount is present, inspect the
   `WXHUB_BRAND_*` values in `docker compose config`, and recreate the Hub container.
+- **Notebook lab returns 503:** confirm `wxhub-demos` is healthy enough to serve port 80, then
+  check the Hub service route and `docker compose logs demos`.
+- **Root URL shows the login page:** confirm `JupyterHub.default_url` is `/services/demos/` and
+  recreate the Hub container. Authenticated users should use `/hub/login` directly.
+- **A browser notebook reports an API error:** request the API `/version` endpoint in the same
+  browser and inspect its developer console for network, TLS, or CORS errors.
+- **Demo changes are missing:** run `python3 scripts/build_demo_notebooks.py`, validate that outputs
+  are clear, and recreate the `demos` service.
 - **Notebook fails:** confirm the requested WRF range and grid file exist, the output is writable,
   and `manifest.csv` contains no relevant download errors.

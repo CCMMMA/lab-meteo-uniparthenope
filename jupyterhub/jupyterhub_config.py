@@ -14,6 +14,13 @@ c.JupyterHub.hub_connect_ip = os.environ.get("HUB_IP", "jupyterhub")
 c.JupyterHub.db_url = "sqlite:///data/jupyterhub.sqlite"
 # Keep the cookie secret in persistent storage so sessions survive Hub restarts.
 c.JupyterHub.cookie_secret_file = "/srv/jupyterhub/data/jupyterhub_cookie_secret"
+c.JupyterHub.services = [
+    {
+        "name": "demos",
+        "url": "http://wxhub-demos:80",
+        "display": True,
+    }
+]
 
 #-----------------------------------------------------------------------------
 # Authentication
@@ -44,6 +51,10 @@ c.JupyterHub.template_paths = [
     f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"
 ]
 c.JupyterHub.template_vars = {
+    "announcement_login": (
+        '<strong>Explore without an account:</strong> '
+        '<a href="/services/demos/">run the public meteo@uniparthenope notebook demos</a>.'
+    ),
     "wxhub_brand_name": os.environ.get("WXHUB_BRAND_NAME", "meteo@uniparthenope WxHub"),
     "wxhub_brand_subtitle": os.environ.get(
         "WXHUB_BRAND_SUBTITLE", "Weather and marine data workspace"
@@ -106,12 +117,15 @@ c.DockerSpawner.volumes = {
 c.Spawner.environment = {
     "JUPYTERHUB_SINGLEUSER_APP": "jupyter_server.serverapp.ServerApp",
     "PREFERED_URL_SCHEME": "http",
+    "METEO_API_BASE_URL": os.environ.get(
+        "METEO_API_BASE_URL", "https://api.meteo.uniparthenope.it"
+    ),
 }
 
 #-------------------------------------------------------------------------------
 #User experience
 #----------------------------------------------------------------------------------
-c.JupyterHub.default_url = "/hub/home"
+c.JupyterHub.default_url = "/services/demos/"
 
 #------------------------------------------------------------------------------
 #Idle cleanup left out for Phase 1 to keep the pilot simple

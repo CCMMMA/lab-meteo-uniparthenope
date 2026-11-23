@@ -8,6 +8,9 @@
 wxhub gives every authenticated user an isolated JupyterLab server with a ready-to-use scientific
 stack: Xarray, Dask, Zarr, NetCDF4, cfgrib, Cartopy, Voilà, and Papermill. Shared source data and
 notebook templates are mounted read-only; each user's work lives in a persistent Docker volume.
+Anonymous visitors receive a Colab-like JupyterLite workspace with ten editable
+meteo@uniparthenope notebooks. Python executes in WebAssembly inside the browser, and each visitor's
+files persist only in that browser; anonymous code never runs on the deployment host.
 
 The repository accompanies the Computer Science bachelor thesis *Development and production
 deployment of an interactive environment based on Jupyter Notebook* at the University of Naples
@@ -18,6 +21,7 @@ deployment of an interactive environment based on Jupyter Notebook* at the Unive
 - Per-user, persistent JupyterLab containers managed by JupyterHub and DockerSpawner.
 - A versioned scientific runtime and an auditable environment snapshot.
 - Read-only shared weather data and starter notebooks.
+- Ten anonymous, ready-to-use meteo@uniparthenope API demonstrations.
 - A reproducible WRF Campania case study with maps, time series, Zarr output, and a Voilà dashboard.
 - Scripts for data acquisition, headless execution, permission checks, and performance measurements.
 - Continuous validation of code, notebooks, documentation links, Compose configuration, and images.
@@ -29,7 +33,8 @@ deployment of an interactive environment based on Jupyter Notebook* at the Unive
 browser ──► JupyterHub :8000 ──► DockerSpawner ──► jupyter-<username>
                     │                                  │
                     ├── persistent Hub state           ├── persistent /home/jovyan/work
-                    └── Docker socket                  └── read-only data and templates
+                    ├── Docker socket                  └── read-only data and templates
+                    └── /services/demos/ ──► browser-based JupyterLite lab
 ```
 
 See [Architecture](docs/architecture.md) for the complete component and storage model.
@@ -57,6 +62,10 @@ docker compose logs -f jupyterhub
 
 Open `http://localhost:8000`, sign up as `admin`, and start the server. The deployment intentionally
 uses HTTP for a trusted pilot network; put it behind TLS before exposing it publicly.
+
+Opening `http://localhost:8000/` sends anonymous visitors directly to the notebook gallery without
+a login step. Authenticated users can sign in explicitly at `/hub/login`. The demonstrations execute
+live requests against `https://api.meteo.uniparthenope.it` in a resource-limited container.
 
 Host paths can be changed without editing source files:
 
@@ -102,6 +111,7 @@ Data lineage, checksums, outputs, and limitations are documented in
 | `jupyterhub/` | Hub image and DockerSpawner configuration |
 | `image/` | Versioned single-user scientific image and environment snapshot |
 | `notebooks/` | Executable WRF analysis and Voilà dashboard |
+| `demos/` | JupyterLite image and ten browser-executed API notebooks |
 | `templates/` | Read-only starter notebooks |
 | `scripts/` | Acquisition, validation, execution, and benchmark utilities |
 | `measurements/` | Committed pilot benchmark evidence |

@@ -16,6 +16,18 @@ Before public exposure:
 5. Add monitoring, log retention, backups, vulnerability scanning, and an upgrade policy.
 6. Evaluate a socket proxy or an orchestrator that does not grant unrestricted Docker access.
 
+## Anonymous notebook execution
+
+Anonymous access under `/services/demos/` is a JupyterLite application. It intentionally exposes an
+editable notebook and file interface, but its Python kernel is WebAssembly running in the visitor's
+browser. Browser-local storage holds changes and uploads. The static Nginx service has no notebook
+kernel, Docker socket, secrets, scientific-data mounts, or writable content directory.
+
+Browser code remains subject to the browser security model and can reach public CORS-enabled
+services, including the meteo API. Never place credentials or non-public datasets in the static
+JupyterLite image. This isolation does not apply to authenticated JupyterHub user containers, which
+remain server-side and retain their existing resource and read-only data controls.
+
 ## Browser phishing warnings
 
 Branding makes the service identity clear to people but does not establish browser trust. A login

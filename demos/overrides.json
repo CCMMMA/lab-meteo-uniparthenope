@@ -1,0 +1,9 @@
+{
+  "@jupyterlab/apputils-extension:themes": {
+    "theme": "JupyterLab Light"
+  },
+  "@jupyterlab/filebrowser-extension:browser": {
+    "navigateToCurrentDirectory": true,
+    "showLastModifiedColumn": true
+  }
+}

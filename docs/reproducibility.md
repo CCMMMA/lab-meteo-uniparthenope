@@ -1,5 +1,33 @@
 # Reproducibility
 
+## Public API demonstrations
+
+The ten notebooks in `demos/` are generated from `scripts/build_demo_notebooks.py`. They use the
+public meteo@uniparthenope API configured by `METEO_API_BASE_URL`; consequently, their numerical
+results change with each forecast cycle and upstream catalog revision. The notebooks record no
+transient outputs in Git and use explicit request timeouts and UTC parsing.
+
+Regenerate and execute them in the pinned runtime with:
+
+```bash
+python3 scripts/build_demo_notebooks.py
+mkdir -p /tmp/wxhub-demo-executed
+docker run --rm \
+  -e METEO_API_BASE_URL=https://api.meteo.uniparthenope.it \
+  -v "$PWD/demos:/home/jovyan/demos:ro" \
+  -v /tmp/wxhub-demo-executed:/home/jovyan/executed \
+  wxhub-singleuser:check bash -lc \
+  'for notebook in /home/jovyan/demos/*.ipynb; do jupyter nbconvert --execute --to notebook \
+  --ExecutePreprocessor.timeout=90 --output-dir /home/jovyan/executed "$notebook"; done'
+```
+
+Executed copies are verification artifacts and must not be committed.
+
+The anonymous environment is built from the pinned dependencies and image digests in
+`demos/Dockerfile`. `docker compose build demos` generates the static JupyterLite application and
+indexes the ten notebooks. In that environment, Pyodide executes Python in the browser and calls
+the fixed public API URL directly; results still vary with the live forecast cycle.
+
 ## Contract
 
 The repository fixes source code, direct and newly resolved Python dependencies, dated upstream

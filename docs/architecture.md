@@ -10,13 +10,21 @@ wxhub is a single-host JupyterHub deployment for a controlled teaching or resear
 | NativeAuthenticator | Local signup and passwords for the configured allow-list |
 | DockerSpawner | One isolated single-user container per account |
 | Single-user image | JupyterLab and the weather-analysis Python stack |
+| Anonymous notebook lab | Serves JupyterLite and a Pyodide browser kernel |
 | ConfigurableHTTPProxy | Routes `/user/<username>/` to its container |
 | Docker volumes | Persist Hub state and each user's workspace |
 | Host bind mounts | Expose templates and weather data read-only |
 | Custom Hub template | Applies configurable meteo@uniparthenope identity and colors |
 
 All containers join `wxhub-net`. JupyterHub is reachable as `jupyterhub` on that network, and
-DockerSpawner uses internal container addresses.
+DockerSpawner uses internal container addresses. The Hub proxy routes `/services/demos/` to the
+static JupyterLite service. Anonymous visitors get a JupyterLab-style editor, file browser, uploads,
+downloads, and a Pyodide Python kernel without creating a Hub user.
+
+The service container is only an Nginx static-file server with a read-only root filesystem, 256 MB
+RAM, 0.5 CPU, and 64-process limits. Notebook execution and uploaded files remain in the visitor's
+browser. Browser code can call the public meteo API because it permits cross-origin requests, but
+cannot access the host, Docker socket, authenticated user volumes, or server-side data mounts.
 
 ## Storage model
 

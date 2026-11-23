@@ -10,10 +10,10 @@ services:
       - ./jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
       - ./jupyterhub/templates:/srv/jupyterhub/templates:ro
       -  jupyterhub-data:/srv/jupyterhub/data
-      - ./templates:/srv/templates:ro
-      - /opt/weather/data/raw/sensors:/srv/data/raw/sensors:ro
-      - /opt/weather/data/raw/models:/srv/data/raw/models:ro
-      - /opt/weather/data/curated:/srv/data/curated
+      - ${WXHUB_TEMPLATES_HOST:-${PWD}/templates}:/srv/templates:ro
+      - ${WXHUB_SENSORS_HOST:-/opt/weather/data/raw/sensors}:/srv/data/raw/sensors:ro
+      - ${WXHUB_MODELS_HOST:-/opt/weather/data/raw/models}:/srv/data/raw/models:ro
+      - ${WXHUB_CURATED_HOST:-/opt/weather/data/curated}:/srv/data/curated
     environment:
       DOCKER_NOTEBOOK_IMAGE: wxhub-singleuser:latest
       PUBLIC_HOST: ${WXHUB_PUBLIC_HOST:-http://localhost:8000}
@@ -30,8 +30,33 @@ services:
       WXHUB_BRAND_ACCENT: ${WXHUB_BRAND_ACCENT:-#181c63}
       WXHUB_BRAND_SITE_URL: ${WXHUB_BRAND_SITE_URL:-https://meteo.uniparthenope.it}
       WXHUB_BRAND_NETWORK_URL: ${WXHUB_BRAND_NETWORK_URL:-https://network.meteo.uniparthenope.it}
+      METEO_API_BASE_URL: ${METEO_API_BASE_URL:-https://api.meteo.uniparthenope.it}
     networks:
       - wxhub-net
+
+  demos:
+    build:
+      context: .
+      dockerfile: demos/Dockerfile
+    image: wxhub-demos:latest
+    container_name: wxhub-demos
+    restart: unless-stopped
+    read_only: true
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
+    tmpfs:
+      - /var/cache/nginx:rw,nosuid,nodev,size=16m
+      - /var/run:rw,nosuid,nodev,size=4m
+      - /tmp:rw,nosuid,nodev,size=16m
+    networks:
+      - wxhub-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/services/demos/lab/index.html || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
 networks:
   wxhub-net:

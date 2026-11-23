@@ -29,6 +29,11 @@ set `WXHUB_ENABLE_SIGNUP=true` while provisioning an allowed account, then unset
 the Hub. New accounts require administrator approval unless `WXHUB_OPEN_SIGNUP=true`; avoid open
 signup on an internet-facing deployment. Edit the allow-list before onboarding real users.
 
+Verify that `/` redirects anonymous visitors to `/services/demos/lab/`. The JupyterLite workspace
+should list exactly ten editable notebooks, start a Pyodide kernel, and require no Hub cookie. Run a
+cell that calls the meteo API and confirm browser-local save and download. The authenticated,
+server-side environment remains available explicitly at `/hub/login`.
+
 For internet-facing use, terminate HTTPS at a maintained reverse proxy on a trusted DNS name and
 set `WXHUB_PUBLIC_HOST` to that `https://` URL. A branded login form on a raw HTTP IP address can
 still trigger browser phishing protection and exposes passwords in transit.
@@ -61,6 +66,7 @@ still trigger browser phishing protection and exposes passwords in transit.
 | `WXHUB_BRAND_ACCENT` | `#181c63` | Six-digit navigation-gradient accent color |
 | `WXHUB_BRAND_SITE_URL` | `https://meteo.uniparthenope.it` | Forecast-site navigation link |
 | `WXHUB_BRAND_NETWORK_URL` | `https://network.meteo.uniparthenope.it` | Sensor-network navigation link |
+| `METEO_API_BASE_URL` | `https://api.meteo.uniparthenope.it` | API base URL passed to authenticated user servers |
 
 The default palette is derived from the public meteo@uniparthenope forecast and sensor-network
 sites. Override the variables in `.env`; color values must use `#RRGGBB`, and link values must be

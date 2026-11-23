@@ -20,7 +20,11 @@ def fail(message: str) -> None:
 
 
 def validate_notebooks() -> None:
-    for path in sorted((*ROOT.glob("notebooks/*.ipynb"), *ROOT.glob("templates/*.ipynb"))):
+    demo_paths = sorted(ROOT.glob("demos/*.ipynb"))
+    if len(demo_paths) != 10:
+        fail(f"expected 10 public demo notebooks, found {len(demo_paths)}")
+    paths = sorted((*ROOT.glob("notebooks/*.ipynb"), *ROOT.glob("templates/*.ipynb"), *demo_paths))
+    for path in paths:
         try:
             notebook = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
@@ -29,6 +33,9 @@ def validate_notebooks() -> None:
         for index, cell in enumerate(notebook.get("cells", []), start=1):
             if cell.get("cell_type") != "code":
                 continue
+            if path.parent.name == "demos":
+                if cell.get("execution_count") is not None or cell.get("outputs"):
+                    fail(f"{path.relative_to(ROOT)} code cell {index} contains transient output")
             source = "".join(cell.get("source", []))
             if not source.strip() or source.lstrip().startswith(("%", "!")):
                 continue
