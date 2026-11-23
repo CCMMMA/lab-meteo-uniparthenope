@@ -18,7 +18,8 @@ docker run --rm \
   -v /tmp/wxhub-demo-executed:/home/jovyan/executed \
   wxhub-singleuser:check bash -lc \
   'for notebook in /home/jovyan/demos/*.ipynb; do jupyter nbconvert --execute --to notebook \
-  --ExecutePreprocessor.timeout=90 --output-dir /home/jovyan/executed "$notebook"; done'
+  --ExecutePreprocessor.kernel_name=python3 --ExecutePreprocessor.timeout=90 \
+  --output-dir /home/jovyan/executed "$notebook"; done'
 ```
 
 Executed copies are verification artifacts and must not be committed.
@@ -31,6 +32,10 @@ the fixed public API URL directly; results still vary with the live forecast cyc
 Notebooks 11–15 exercise model products, while notebooks 16–20 use the official live instrument
 weather-report endpoints. Live observations can be delayed or temporarily unavailable upstream;
 the notebooks report that condition without substituting another data source.
+
+The committed notebook metadata selects `Python (Pyodide)` for anonymous browser execution. The
+headless verification command above explicitly selects the pinned image's `python3` kernel; this is
+a validation adaptation, not a change of data source or scientific derivation.
 
 ## Contract
 

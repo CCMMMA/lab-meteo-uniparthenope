@@ -8,7 +8,7 @@
 wxhub gives every authenticated user an isolated JupyterLab server with a ready-to-use scientific
 stack: Xarray, Dask, Zarr, NetCDF4, cfgrib, Cartopy, Voilà, and Papermill. Shared source data and
 notebook templates are mounted read-only; each user's work lives in a persistent Docker volume.
-Anonymous visitors receive a Colab-like JupyterLite workspace with ten editable
+Anonymous visitors receive a Colab-like JupyterLite workspace with twenty editable
 meteo@uniparthenope notebooks. Python executes in WebAssembly inside the browser, and each visitor's
 files persist only in that browser; anonymous code never runs on the deployment host.
 
@@ -21,7 +21,8 @@ deployment of an interactive environment based on Jupyter Notebook* at the Unive
 - Per-user, persistent JupyterLab containers managed by JupyterHub and DockerSpawner.
 - A versioned scientific runtime and an auditable environment snapshot.
 - Read-only shared weather data and starter notebooks.
-- Ten anonymous, ready-to-use meteo@uniparthenope API demonstrations.
+- Twenty anonymous demonstrations: ten introductory API examples, five model analyses, and five
+  live-instrument analyses.
 - A reproducible WRF Campania case study with maps, time series, Zarr output, and a Voilà dashboard.
 - Scripts for data acquisition, headless execution, permission checks, and performance measurements.
 - Continuous validation of code, notebooks, documentation links, Compose configuration, and images.
@@ -65,7 +66,8 @@ uses HTTP for a trusted pilot network; put it behind TLS before exposing it publ
 
 Opening `http://localhost:8000/` sends anonymous visitors directly to the notebook gallery without
 a login step. Authenticated users can sign in explicitly at `/hub/login`. The demonstrations execute
-live requests against `https://api.meteo.uniparthenope.it` in a resource-limited container.
+live requests against `https://api.meteo.uniparthenope.it` from a browser-isolated Pyodide kernel;
+the resource-limited Nginx container serves only static files.
 
 Host paths can be changed without editing source files:
 

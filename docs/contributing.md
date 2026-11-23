@@ -10,3 +10,9 @@ Follow [AGENTS.md](../AGENTS.md). Pin every direct dependency. Rebuild and exerc
 refreshing `scripts/freeze_env.sh` output. Keep notebook prose in Markdown cells, code executable,
 and transient output cleared. Full WRF execution is excluded from CI because input is large and
 remotely hosted.
+
+Public demos are generated, not edited independently. Update `scripts/build_demo_notebooks.py`, run
+it, and commit the resulting twenty output-free files. If the catalog size changes, update the
+validator, `demos/README.md`, and the deployment acceptance count together. Branding changes must
+cover both `jupyterhub/templates/page.html` and `demos/wxhub.css`; bump the published stylesheet
+asset name when an existing JupyterLite service-worker cache would otherwise retain old CSS.

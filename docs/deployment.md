@@ -17,7 +17,7 @@ Docker daemon, not the Hub container, resolves them.
 ```bash
 ./scripts/validate_repo.sh
 docker build -t wxhub-singleuser:latest ./image
-docker compose build jupyterhub
+docker compose build jupyterhub demos
 docker compose up -d
 docker compose ps
 docker compose logs -f jupyterhub
@@ -30,7 +30,8 @@ the Hub. New accounts require administrator approval unless `WXHUB_OPEN_SIGNUP=t
 signup on an internet-facing deployment. Edit the allow-list before onboarding real users.
 
 Verify that `/` redirects anonymous visitors to `/services/demos/lab/`. The JupyterLite workspace
-should list exactly ten editable notebooks, start a Pyodide kernel, and require no Hub cookie. Run a
+should list exactly twenty editable notebooks, start a Pyodide kernel, and require no Hub cookie.
+Confirm that notebooks 11–15 cover model products and notebooks 16–20 cover live instruments. Run a
 cell that calls the meteo API and confirm browser-local save and download. The authenticated,
 server-side environment remains available explicitly at `/hub/login`.
 
@@ -45,6 +46,10 @@ still trigger browser phishing protection and exposes passwords in transit.
 3. Run `scripts/test_permissions.sh` from a repository copy available to the user server.
 4. Restart the user server and confirm workspace persistence.
 5. Restart the Hub and confirm its database and sessions persist.
+6. Open `/services/demos/lab/` anonymously, confirm the WxHub gradient matches `/hub/login`, and
+   verify that all twenty notebooks appear.
+7. Run one model demo and one live-instrument demo. An explicit upstream-timeout message is an
+   acceptable instrument-service result, but an unhandled traceback is not.
 
 ## Configuration
 
@@ -73,8 +78,8 @@ sites. Override the variables in `.env`; color values must use `#RRGGBB`, and li
 absolute HTTP or HTTPS URLs. Recreate the Hub container after changes.
 
 The anonymous lab carries the same default palette in `demos/wxhub.css`; the image publishes it
-under a versioned asset name so existing service-worker caches receive branding updates. When changing default
-brand colors, update that stylesheet with the `WXHUB_BRAND_*` defaults, rebuild `demos`, and
+under a versioned asset name so existing service-worker caches receive branding updates. When
+changing default brand colors, update that stylesheet with the `WXHUB_BRAND_*` defaults, rebuild `demos`, and
 recreate both services to keep `/hub/login` and `/services/demos/lab/` visually consistent.
 
 ## Upgrade and rollback

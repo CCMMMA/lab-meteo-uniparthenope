@@ -24,9 +24,15 @@ browser. Browser-local storage holds changes and uploads. The static Nginx servi
 kernel, Docker socket, secrets, scientific-data mounts, or writable content directory.
 
 Browser code remains subject to the browser security model and can reach public CORS-enabled
-services, including the meteo API. Never place credentials or non-public datasets in the static
+services, including the meteo API model and live weather-report endpoints. The public notebooks do
+not mount or expose the host model and sensor directories; those mounts remain exclusive to
+authenticated user containers and read-only. Never place credentials or non-public datasets in the static
 JupyterLite image. This isolation does not apply to authenticated JupyterHub user containers, which
 remain server-side and retain their existing resource and read-only data controls.
+
+The live-instrument notebooks display public observations returned by the upstream API. They handle
+timeouts as availability failures and do not fall back to host CSV files, alternate networks, or
+cached private observations.
 
 ## Browser phishing warnings
 
