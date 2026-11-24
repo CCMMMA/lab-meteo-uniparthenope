@@ -1,7 +1,7 @@
 # Privacy and GDPR
 
 This page records how lab.meteo@uniparthenope implements Regulation (EU) 2016/679 (GDPR) and the ePrivacy cookie
-rules. The user-facing notice is served at `/hub/lab/privacy`; this document is for operators.
+rules. The user-facing notice is served at `/privacy`; this document is for operators.
 Legal review by the University's Data Protection Officer remains necessary before production use.
 
 ## Processing inventory (Art. 30 input)
@@ -24,7 +24,7 @@ University. No special categories of data are needed; users are told not to stor
 - **Storage limitation (Art. 5(1)(e)):** idle culling, account review after
   `WXHUB_RETENTION_DAYS`, erasure of accounts and orphaned workspace volumes.
 - **Transparency (Arts. 12–14):** privacy notice linked from every page and from sign-in.
-- **Access and portability (Arts. 15, 20):** `/hub/lab/account` shows the stored data and
+- **Access and portability (Arts. 15, 20):** `/account` shows the stored data and
   exports it as JSON; workspace files are downloadable from JupyterLab.
 - **Rectification, erasure, restriction (Arts. 16–18):** users submit requests on *My data*;
   administrators handle them on the dashboard within one month (Art. 12(3)).
@@ -55,7 +55,7 @@ visitor's IP address. To remove these transfers, self-host Pyodide by configurin
 4. Erasure is irreversible. Backups follow their own retention; record the request date so that
    restored backups are re-purged.
 
-Accounts deleted directly in `/hub/admin` leave their volume behind; the dashboard lists such
+Accounts deleted directly in `/admin` leave their volume behind; the dashboard lists such
 volumes under *Orphaned workspaces* so the erasure can be completed.
 
 ## Configuration

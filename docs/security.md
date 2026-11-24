@@ -12,6 +12,8 @@ internet-wide exposure.
 - **User containers:** run arbitrary user code as the unprivileged `jovyan` user, with no Docker
   socket, no capabilities, and no way to gain privileges.
 - **Public gallery:** static files only; anonymous code runs in the visitor's browser sandbox.
+- **Front proxy (`web`):** read-only, unprivileged Nginx container and the only published port; the
+  Hub port is reachable only inside the Compose network.
 
 ## Read-only scientific data
 
@@ -41,6 +43,10 @@ file that mounts a `WXHUB_*_HOST` path without `:ro`.
   [Identity and roles](identity-and-roles.md)); no password is stored.
 - Session cookies are `SameSite=Lax`, `Secure` under HTTPS, and expire after
   `WXHUB_COOKIE_MAX_AGE_DAYS` (default 7).
+- Hub pages are served without the `/hub/` prefix, so the front proxy re-scopes Hub cookies to `/`
+  and strips the Hub login cookie (`jupyterhub-hub-login`) from every request forwarded to user
+  servers and services. Code in a user's server therefore never sees a Hub session, preserving
+  JupyterHub's isolation model; access to another user's server returns HTTP 403.
 - The idle culler stops servers after `WXHUB_IDLE_TIMEOUT` seconds of inactivity.
 
 ## HTTP security headers
@@ -55,8 +61,8 @@ A login form served over HTTP from a raw IP address transmits passwords in clear
 flagged by browsers as phishing. Branding cannot establish browser trust. Before public use:
 
 1. assign a DNS name and certificate and put a maintained HTTPS reverse proxy in front;
-2. set `WXHUB_PUBLIC_HOST=https://<name>` and bind the Hub port to localhost
-   (`WXHUB_BIND_ADDRESS=127.0.0.1`) so only the proxy is exposed;
+2. set `WXHUB_PUBLIC_HOST=https://<name>` and bind the published port of the built-in `web`
+   proxy to localhost (`WXHUB_BIND_ADDRESS=127.0.0.1`) so only the HTTPS proxy is exposed;
 3. prefer academic SSO to local passwords.
 
 The direct `http://IP:port` endpoint is for acceptance testing on a trusted network.

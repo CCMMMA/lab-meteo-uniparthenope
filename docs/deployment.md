@@ -56,23 +56,25 @@ printf 'admin %s\n' "$PASSWORD" >> .secrets/credentials.txt && chmod 600 .secret
 ```
 
 Repeat with `--role user|student|researcher|instructor` for other accounts. Ask every user to change
-the initial password at `/hub/change-password`. For Microsoft or Google sign-in, follow
+the initial password at `/change-password`. For Microsoft or Google sign-in, follow
 [Identity and roles](identity-and-roles.md) instead.
 
 ## Acceptance checks
 
 1. `/` sends anonymous visitors to the gallery at `/services/demos/`, which lists thirty notebooks
    in four sections; a card opens its notebook in the lab and a Pyodide kernel starts.
-2. `/hub/login` shows the branded sign-in card; signing in as a regular user reaches *My runtime*.
+2. `/login` shows the branded sign-in card; signing in as a regular user reaches *My runtime*.
 3. Start a server, open a terminal, and run `scripts/test_permissions.sh`: every shared path must
    report `ro`, `~/work` `rw`, and both privilege checks `PASSED`.
 4. Run `templates/local_archives.ipynb` (copied to `~/work`): it reads a WRF file and a station CSV
    and reports that the archive is read-only.
-5. As administrator, open `/hub/lab/admin`: the live audit reports no writable shared mount and
+5. As administrator, open `/dashboard`: the live audit reports no writable shared mount and
    the archive tables show recent days. A regular user receives HTTP 403 there.
 6. Restart the user server and the Hub; confirm workspace files and sessions persist.
-7. Open `/hub/lab/privacy` and `/hub/lab/accessibility` without signing in.
-8. Run one model, one live-instrument, and one AI notebook in the gallery; an explicit upstream
+7. Open `/privacy` and `/accessibility` without signing in.
+8. Old links such as `/hub/login` redirect to `/login`; no page shows a `/hub/` URL, and a user
+   server opens at `/user/<name>/lab` with working kernels (see [Architecture](architecture.md#clean-urls-and-the-front-proxy)).
+9. Run one model, one live-instrument, and one AI notebook in the gallery; an explicit upstream
    timeout message is acceptable, an unhandled traceback is not.
 
 For internet-facing use, terminate HTTPS at a maintained reverse proxy, set `WXHUB_PUBLIC_HOST` to
@@ -83,8 +85,8 @@ the `https://` URL, and set `WXHUB_BIND_ADDRESS=127.0.0.1`. See [Security](secur
 | Variable | Default | Meaning |
 |---|---|---|
 | `WXHUB_INSTANCE` | `wxhub` | Prefix for containers, network, user containers/volumes, and the gallery image |
-| `WXHUB_PORT` | `8000` | Host TCP port |
-| `WXHUB_BIND_ADDRESS` | `0.0.0.0` | Host address the port binds to; use `127.0.0.1` behind a proxy |
+| `WXHUB_PORT` | `8000` | Host TCP port of the front proxy (`web`), the only published port |
+| `WXHUB_BIND_ADDRESS` | `0.0.0.0` | Host address the port binds to; use `127.0.0.1` behind an HTTPS proxy |
 | `WXHUB_PUBLIC_HOST` | `http://localhost:8000` | Public base URL; `https://` enables secure cookies, HSTS, and SSO callbacks |
 | `WXHUB_SINGLEUSER_IMAGE` | `wxhub-singleuser:latest` | Image spawned for users |
 | `WXHUB_TEMPLATES_HOST` | `${PWD}/templates` | Starter notebooks (read-only) |

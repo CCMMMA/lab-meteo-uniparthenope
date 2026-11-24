@@ -14,7 +14,8 @@ The reasoning behind each choice is in [Design rationale](design-rationale.md).
 | Single-user image | JupyterLab and the weather-analysis Python stack |
 | Idle culler | Stops servers idle longer than `WXHUB_IDLE_TIMEOUT` |
 | Public gallery and lab | Static Nginx service: notebook gallery plus JupyterLite with a Pyodide kernel |
-| ConfigurableHTTPProxy | Routes `/user/<username>/` and `/services/demos/` |
+| Front proxy (`web`, Nginx) | Sole public entry point; serves Hub pages at clean URLs without `/hub/` |
+| ConfigurableHTTPProxy | Inside the Hub container; routes `/user/<username>/` and `/services/demos/` |
 | Docker volumes | Persist Hub state and each user's workspace |
 | Host bind mounts | Expose templates, operational archives, and station data read-only |
 | Custom Hub templates | meteo@uniparthenope identity, accessible layout, sign-in, runtime page |
@@ -23,14 +24,40 @@ The extension contributes its pages through the authenticator's `get_handlers` h
 itself is not patched and upgrades remain a pinned-version change.
 
 ```text
-browser ──► :WXHUB_PORT ──► proxy ──┬─► /hub/…            JupyterHub + wxhub_ext pages
-                                    ├─► /services/demos/  gallery + JupyterLite (static, browser kernel)
-                                    └─► /user/<name>/     <instance>-user-<name> container
+browser ──► :WXHUB_PORT ──► web (Nginx) ──► hub:8000 (CHP) ──┬─► /hub/…   JupyterHub + wxhub_ext pages
+             /login, /home, /dashboard, … ── rewritten to ───┘
+                                                             ├─► /services/demos/  gallery + JupyterLite
+                                                             └─► /user/<name>/     <instance>-user-<name> container
                                                            ├─ ~/work            read/write volume
                                                            ├─ ~/data/opendap    read-only model archive
                                                            ├─ ~/data/network    read-only station data
                                                            └─ ~/templates, ~/data/raw, ~/data/curated  read-only
 ```
+
+## Clean URLs and the front proxy
+
+JupyterHub serves its own pages under a fixed `/hub/` prefix. The `web` service
+([`proxy/nginx.conf`](../proxy/nginx.conf)) hides it, and is the only published port; the Hub
+container listens on port 8000 inside the Compose network only.
+
+| Public URL | Served by |
+|---|---|
+| `/` | Redirect to the public gallery `/services/demos/` |
+| `/login`, `/logout`, `/home`, `/spawn`, `/token`, `/change-password`, `/signup`, `/authorize`, `/admin`, `/oauth_callback` | JupyterHub, rewritten internally to `/hub/…` |
+| `/dashboard`, `/account`, `/privacy`, `/accessibility` | `wxhub_ext` pages, rewritten to `/hub/…` |
+| `/api/…` and `/hub/api/…` | Hub REST API (both forms work; JupyterLab and OAuth use the latter) |
+| `/hub/user/<name>/…` | Hub "start or wait for server" handler, kept under `/hub/` because `/user/<name>/` is the server itself |
+| other `/hub/…` | `GET` redirects to the clean URL; other methods are forwarded |
+| `/user/<name>/…`, `/services/…` | Unchanged |
+
+The proxy rewrites `Location` headers and `/hub/` links in Hub HTML. Because Hub pages now live at
+the root, it re-scopes the Hub cookies from `/hub/` to `/`. JupyterHub's isolation relies on the
+login cookie never reaching user servers, so the proxy removes `jupyterhub-hub-login` from every
+request forwarded to `/user/` and `/services/`. When a browser sends both the Hub's and the user
+server's `_xsrf` cookie, the proxy keeps only the user server's (the first, longer-path cookie).
+Per-path request headers are chosen with `map` blocks, not `proxy_set_header` inside locations,
+because a location that sets any proxy header loses the server-level `Upgrade` and `Connection`
+headers that kernel WebSockets need.
 
 ## Instances
 
@@ -38,7 +65,7 @@ browser ──► :WXHUB_PORT ──► proxy ──┬─► /hub/…          
 
 | Object | Default instance `wxhub` | Other instance, e.g. `labmeteo` |
 |---|---|---|
-| Hub / gallery containers | `wxhub-jupyterhub`, `wxhub-demos` | `labmeteo-jupyterhub`, `labmeteo-demos` |
+| Hub / gallery / proxy containers | `wxhub-jupyterhub`, `wxhub-demos`, `wxhub-web` | `labmeteo-jupyterhub`, `labmeteo-demos`, `labmeteo-web` |
 | Network | `wxhub-net` | `labmeteo-net` |
 | User containers | `jupyter-<user>` | `labmeteo-user-<user>` |
 | User volumes | `jupyterhub-user-<user>` | `labmeteo-user-<user>` |

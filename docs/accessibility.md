@@ -1,7 +1,7 @@
 # Accessibility
 
 lab.meteo@uniparthenope targets WCAG 2.1 level AA, the level required by EN 301 549 and, in Italy, by Law 4/2004
-and the AgID guidelines. The public statement is served at `/hub/lab/accessibility`. Its feedback channel defaults to
+and the AgID guidelines. The public statement is served at `/accessibility`. Its feedback channel defaults to
 `meteo@uniparthenope.it` and the University accessibility page
 (https://www.uniparthenope.it/Portale-Ateneo/accessibilita); override it with
 `WXHUB_ACCESSIBILITY_CONTACT`.

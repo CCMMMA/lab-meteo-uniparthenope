@@ -12,12 +12,12 @@
 
 Single sign-on needs a stable HTTPS name because identity providers only redirect to registered
 HTTPS callback URLs. Set `WXHUB_PUBLIC_HOST=https://<name>`; the callback is
-`https://<name>/hub/oauth_callback`.
+`https://<name>/oauth_callback`.
 
 ### Microsoft Entra ID
 
 1. In the university tenant, register an application of type *Web* with redirect URI
-   `https://<name>/hub/oauth_callback`, and create a client secret.
+   `https://<name>/oauth_callback`, and create a client secret.
 2. Configure:
 
    ```bash
@@ -56,20 +56,20 @@ docker compose exec -T jupyterhub python -m wxhub_ext.manage_users list
 
 `--update` resets an existing password. Passwords need at least 12 characters; NativeAuthenticator
 blocks a username for ten minutes after five failed attempts. Users change their own password at
-`/hub/change-password`. If `WXHUB_ENABLE_SIGNUP=true`, requests appear under *Administration →
+`/change-password`. If `WXHUB_ENABLE_SIGNUP=true`, requests appear under *Administration →
 Approve sign-ups*; keep `WXHUB_OPEN_SIGNUP=false` on any reachable deployment.
 
 ## Roles
 
 | Role | How it is granted | Effect |
 |---|---|---|
-| Administrator | `WXHUB_ADMIN_USERS`, or the *admin* checkbox in `/hub/admin` | Full control, platform dashboard changes |
+| Administrator | `WXHUB_ADMIN_USERS`, or the *admin* checkbox in `/admin` | Full control, platform dashboard changes |
 | Instructor | group `instructors` | Read-only dashboard and user list; start/stop servers of group `students` |
 | Researcher | group `researchers` | Large resource tier |
 | Student | group `students` | Small resource tier |
 | User | approved account without a role group | Standard tier |
 
-Administrators assign roles on the platform dashboard (`/hub/lab/admin#users`); changes apply at
+Administrators assign roles on the platform dashboard (`/dashboard#users`); changes apply at
 the next server start. Groups can also be seeded at start-up with `WXHUB_STUDENTS`,
 `WXHUB_RESEARCHERS`, and `WXHUB_INSTRUCTORS` (comma-separated usernames); seeding adds members but
 never removes them. Instructors receive JupyterHub's `admin-ui` scope only to read; they cannot
@@ -79,10 +79,10 @@ access other users' notebooks.
 
 | Page | Who | Purpose |
 |---|---|---|
-| `/hub/lab/admin` | administrators (change), instructors (view) | Accounts and roles, data-mount audit, archive freshness, privacy requests, orphaned workspaces, security posture |
-| `/hub/admin` | administrators | JupyterHub control panel: add/delete users, admin flag, groups, start/stop servers |
-| `/hub/authorize` | administrators, local accounts only | Approve or revoke sign-up requests |
-| `/hub/lab/account` | every user | Personal data, JSON export, data-protection requests |
+| `/dashboard` | administrators (change), instructors (view) | Accounts and roles, data-mount audit, archive freshness, privacy requests, orphaned workspaces, security posture |
+| `/admin` | administrators | JupyterHub control panel: add/delete users, admin flag, groups, start/stop servers |
+| `/authorize` | administrators, local accounts only | Approve or revoke sign-up requests |
+| `/account` | every user | Personal data, JSON export, data-protection requests |
 
 Every change made from the platform dashboard is written to the Hub log with the `lab.meteo.audit`
 logger (role changes, erasures, request decisions).

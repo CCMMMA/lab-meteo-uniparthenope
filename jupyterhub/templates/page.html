@@ -8,7 +8,7 @@
 {% block title %}{{ wxhub_brand_name }}{% endblock title %}
 
 {% block favicon %}
-  <link rel="icon" href="{{ base_url }}lab/static/favicon.png" type="image/png">
+  <link rel="icon" href="{{ base_url }}assets/favicon.png" type="image/png">
 {% endblock favicon %}
 
 {% block meta %}
@@ -157,7 +157,7 @@
           {% if user %}
             {% block nav_bar_left_items %}
               <li class="nav-item"><a class="nav-link" href="{{ base_url }}home">My runtime</a></li>
-              <li class="nav-item"><a class="nav-link" href="{{ base_url }}lab/account">My data</a></li>
+              <li class="nav-item"><a class="nav-link" href="{{ base_url }}account">My data</a></li>
               <li class="nav-item"><a class="nav-link" href="{{ base_url }}token">Tokens</a></li>
               {% if wxhub_authenticator == "native" %}
                 <li class="nav-item"><a class="nav-link" href="{{ base_url }}change-password">Password</a></li>
@@ -166,7 +166,7 @@
                 <li class="nav-item dropdown">
                   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">Administration</a>
                   <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="{{ base_url }}lab/admin">Platform dashboard</a></li>
+                    <li><a class="dropdown-item" href="{{ base_url }}dashboard">Platform dashboard</a></li>
                     <li><a class="dropdown-item" href="{{ base_url }}admin">Users and servers</a></li>
                     {% if user.admin and wxhub_authenticator == "native" %}
                       <li><a class="dropdown-item" href="{{ base_url }}authorize">Approve sign-ups</a></li>

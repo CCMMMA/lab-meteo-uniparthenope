@@ -61,7 +61,7 @@
               {% if can_change %}
                 <td>
                   {% if u.admin %}<span class="small lab-muted">administrator</span>{% else %}
-                  <form method="post" action="{{ base_url }}lab/admin" class="d-flex gap-2">
+                  <form method="post" action="{{ base_url }}dashboard" class="d-flex gap-2">
                     <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                     <input type="hidden" name="action" value="set_role">
                     <input type="hidden" name="username" value="{{ u.name }}">
@@ -162,7 +162,7 @@
                   {% if r.status == "open" %}
                     <div class="d-flex flex-wrap gap-2">
                       {% if r.type == "erasure" %}
-                        <form method="post" action="{{ base_url }}lab/admin" class="d-flex gap-2">
+                        <form method="post" action="{{ base_url }}dashboard" class="d-flex gap-2">
                           <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                           <input type="hidden" name="action" value="erase_user">
                           <input type="hidden" name="username" value="{{ r.username }}">
@@ -171,14 +171,14 @@
                           <button class="btn btn-sm btn-danger" type="submit">Erase</button>
                         </form>
                       {% endif %}
-                      <form method="post" action="{{ base_url }}lab/admin">
+                      <form method="post" action="{{ base_url }}dashboard">
                         <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                         <input type="hidden" name="action" value="close_request">
                         <input type="hidden" name="request_id" value="{{ r.id }}">
                         <input type="hidden" name="status" value="completed">
                         <button class="btn btn-sm btn-outline-primary" type="submit">Mark completed</button>
                       </form>
-                      <form method="post" action="{{ base_url }}lab/admin">
+                      <form method="post" action="{{ base_url }}dashboard">
                         <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                         <input type="hidden" name="action" value="close_request">
                         <input type="hidden" name="request_id" value="{{ r.id }}">
@@ -210,7 +210,7 @@
           {% for name in dash.docker.orphans %}
             <li class="d-flex flex-wrap align-items-center gap-2 mb-2"><code>{{ name }}</code>
               {% if can_change %}
-                <form method="post" action="{{ base_url }}lab/admin" class="d-flex gap-2">
+                <form method="post" action="{{ base_url }}dashboard" class="d-flex gap-2">
                   <input type="hidden" name="_xsrf" value="{{ xsrf }}">
                   <input type="hidden" name="action" value="erase_volume">
                   <input type="hidden" name="volume" value="{{ name }}">

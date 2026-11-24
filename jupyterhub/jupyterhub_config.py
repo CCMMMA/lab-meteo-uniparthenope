@@ -129,7 +129,7 @@ else:
     oauth = c.AzureAdOAuthenticator if WX.authenticator == "azuread" else c.GoogleOAuthenticator
     oauth.client_id = wxsettings.env_str("WXHUB_OAUTH_CLIENT_ID")
     oauth.client_secret = wxsettings.env_str("WXHUB_OAUTH_CLIENT_SECRET")
-    oauth.oauth_callback_url = f"{WX.public_host}/hub/oauth_callback"
+    oauth.oauth_callback_url = f"{WX.public_host}/oauth_callback"
     if not (oauth.client_id and oauth.client_secret):
         raise ValueError("WXHUB_OAUTH_CLIENT_ID and WXHUB_OAUTH_CLIENT_SECRET are required for SSO")
     if WX.authenticator == "azuread":

@@ -42,7 +42,8 @@ deployment of an interactive environment based on Jupyter Notebook* at the Unive
 ## Architecture
 
 ```text
-browser ──► JupyterHub :WXHUB_PORT ──► DockerSpawner ──► <instance>-user-<username>
+browser ──► web proxy :WXHUB_PORT ──► JupyterHub ──► DockerSpawner ──► <instance>-user-<username>
+   clean URLs: /login, /home, /dashboard, /account, /privacy (no /hub/ prefix)
                     │                                      │
                     ├── Hub state, roles, wxhub_ext pages  ├── persistent ~/work
                     ├── Docker socket                      ├── read-only ~/data/opendap, ~/data/network

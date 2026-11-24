@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Measure JupyterLab server startup time through the JupyterHub REST API.
 
-Run on the host with an administrator token generated at /hub/token:
+Run on the host with an administrator token generated at /token:
     export JUPYTERHUB_TOKEN=...            # administrator token
     python3 scripts/measure_spawn.py --users 1 --runs 5      # single user, 5 runs
     python3 scripts/measure_spawn.py --users 5 --runs 3      # 5 concurrent users

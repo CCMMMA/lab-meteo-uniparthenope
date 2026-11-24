@@ -12,7 +12,7 @@ docker compose exec -T jupyterhub python -m wxhub_ext.manage_users list
 docker compose logs jupyterhub | grep lab.meteo.audit
 ```
 
-The platform dashboard (`/hub/lab/admin`) is the first place to look: it summarises accounts,
+The platform dashboard (`/dashboard`) is the first place to look: it summarises accounts,
 running servers, pending sign-ups, open privacy requests, archive freshness, a live read-only mount
 audit, orphaned workspaces, and the security posture.
 
@@ -33,7 +33,7 @@ by the production chain and are not modified by lab.meteo@uniparthenope. Restore
 ## Performance measurements
 
 ```bash
-export JUPYTERHUB_TOKEN='<administrator token from /hub/token>'
+export JUPYTERHUB_TOKEN='<administrator token from /token>'
 python3 scripts/measure_spawn.py --users 1 --runs 5
 python3 scripts/measure_spawn.py --users 5 --runs 3 --keep
 ./scripts/measure_load.sh 5
@@ -60,7 +60,7 @@ diff. The snapshot may contain platform-specific base-image references. The pinn
   `WXHUB_NETWORK_HOST` in `docker compose config` and that the network file system is mounted on
   the host; the inventory is cached for ten minutes.
 - **SSO login fails with a redirect error:** the callback URL registered with the identity
-  provider must equal `${WXHUB_PUBLIC_HOST}/hub/oauth_callback` and use HTTPS.
+  provider must equal `${WXHUB_PUBLIC_HOST}/oauth_callback` and use HTTPS.
 - **A user is locked out:** wait ten minutes after five failed attempts, or reset the password with
   `manage_users create <name> --update`.
 - **Gallery opens but the lab stays blank:** the JupyterLite root `index.html` must remain the
@@ -72,8 +72,15 @@ diff. The snapshot may contain platform-specific base-image references. The pinn
   `WXHUB_BRAND_*` values in `docker compose config`, and recreate the Hub container.
 - **Notebook lab returns 503:** confirm `wxhub-demos` is healthy enough to serve port 80, then
   check the Hub service route and `docker compose logs demos`.
-- **Root URL shows the login page:** confirm `JupyterHub.default_url` is `/services/demos/` and
-  recreate the Hub container. Authenticated users use *Sign in* or `/hub/login` directly.
+- **Root URL shows the login page:** `/` is redirected to the gallery by the `web` proxy; confirm
+  `labmeteo-web` (or `<instance>-web`) is running. Authenticated users use *Sign in* or `/login` directly.
+- **A change to `proxy/nginx.conf` has no effect:** the file is bind-mounted as a single file, and
+  copying a new version replaces its inode. Run `docker compose restart web`, not only
+  `nginx -s reload`, and check it with `docker compose exec web nginx -t`.
+- **"Too many redirects" on `/user/<name>/…`:** `/hub/user/` must stay a pass-through location in
+  `proxy/nginx.conf`; redirecting it to `/user/` loops while the server is stopped.
+- **JupyterLab opens but kernels never connect:** WebSocket upgrades need the server-level
+  `Upgrade` and `Connection` headers; do not add `proxy_set_header` inside a `location`.
 - **A browser notebook reports an API error:** request the API `/version` endpoint in the same
   browser and inspect its developer console for network, TLS, or CORS errors.
 - **A live-instrument notebook reports temporary unavailability:** check the public API

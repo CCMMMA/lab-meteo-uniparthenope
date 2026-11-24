@@ -10,7 +10,7 @@
   <section class="lab-card mb-4" aria-labelledby="record-title">
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
       <h2 id="record-title" class="h5 mb-0">What this service stores about you</h2>
-      <a class="btn btn-outline-primary btn-sm" href="{{ base_url }}lab/account?format=json" download>
+      <a class="btn btn-outline-primary btn-sm" href="{{ base_url }}account?format=json" download>
         Download as JSON (Art. 15, 20)</a>
     </div>
     <dl class="row mb-0">
@@ -37,7 +37,7 @@
       <p>Open requests:</p>
       <ul>{% for r in open_requests %}<li>{{ wxhub_request_types[r.type] }} — submitted {{ r.created }}</li>{% endfor %}</ul>
     {% endif %}
-    <form method="post" action="{{ base_url }}lab/account">
+    <form method="post" action="{{ base_url }}account">
       <input type="hidden" name="_xsrf" value="{{ xsrf }}">
       <fieldset class="mb-3">
         <legend class="form-label fs-6">Request type</legend>
@@ -61,7 +61,7 @@
       <button class="btn btn-primary" type="submit">Submit request</button>
     </form>
     <p class="small lab-muted mt-3 mb-0">Requests are answered within one month (Art. 12(3) GDPR).
-      See the <a href="{{ base_url }}lab/privacy#rights">privacy notice</a>.</p>
+      See the <a href="{{ base_url }}privacy#rights">privacy notice</a>.</p>
   </section>
 </div>
 {% endblock main %}

@@ -185,7 +185,7 @@ class AccountHandler(LabMeteoHandler):
             item = self.store.add(user.name, kind, note)
             audit.info("privacy-request id=%s user=%s type=%s", item["id"], user.name, kind)
             message = "Your request has been registered. An administrator will handle it."
-        self.redirect(f"{self.hub.base_url}lab/account?message=" + url_escape(message))
+        self.redirect(f"{self.hub.base_url}account?message=" + url_escape(message))
 
 
 class AdminHandler(LabMeteoHandler):
@@ -302,7 +302,7 @@ class AdminHandler(LabMeteoHandler):
         )
 
     def _back(self, message: str, anchor: str = "") -> None:
-        url = f"{self.hub.base_url}lab/admin?message={url_escape(message)}"
+        url = f"{self.hub.base_url}dashboard?message={url_escape(message)}"
         self.redirect(url + (f"#{anchor}" if anchor else ""))
 
     async def _remove_volumes(self, names: list[str]) -> list[str]:
@@ -401,9 +401,9 @@ class AdminHandler(LabMeteoHandler):
 def get_handlers(wxhub: LabMeteoSettings, assets_path: str) -> list[tuple]:
     kwargs = {"wxhub": wxhub}
     return [
-        (r"/lab/privacy", PrivacyHandler, kwargs),
-        (r"/lab/accessibility", AccessibilityHandler, kwargs),
-        (r"/lab/account", AccountHandler, kwargs),
-        (r"/lab/admin", AdminHandler, kwargs),
-        (r"/lab/static/(.*)", web.StaticFileHandler, {"path": assets_path}),
+        (r"/privacy", PrivacyHandler, kwargs),
+        (r"/accessibility", AccessibilityHandler, kwargs),
+        (r"/account", AccountHandler, kwargs),
+        (r"/dashboard", AdminHandler, kwargs),
+        (r"/assets/(.*)", web.StaticFileHandler, {"path": assets_path}),
     ]

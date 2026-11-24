@@ -144,7 +144,7 @@ footer a { color:inherit; margin-right:1rem; }
       <a href="lab/index.html">Notebook lab</a>
       <a href="https://meteo.uniparthenope.it" rel="noopener">Forecasts</a>
       <a href="https://network.meteo.uniparthenope.it" rel="noopener">Sensor network</a>
-      <a class="signin" href="/hub/login">Sign in</a>
+      <a class="signin" href="/login">Sign in</a>
     </nav>
   </div>
 </header>
@@ -159,7 +159,7 @@ footer a { color:inherit; margin-right:1rem; }
         <div class="actions">
           <a class="btn btn-primary" href="lab/index.html?path=01_api_catalog.ipynb">Open the first notebook</a>
           <a class="btn btn-outline" href="lab/index.html">Open the notebook lab</a>
-          <a class="btn btn-outline" href="/hub/login">Sign in for a server runtime</a>
+          <a class="btn btn-outline" href="/login">Sign in for a server runtime</a>
         </div>
       </div>
       <aside class="panel" aria-labelledby="how">
@@ -181,8 +181,8 @@ footer a { color:inherit; margin-right:1rem; }
     <div><strong>lab.meteo@uniparthenope</strong><br><span>Forecasts are generated automatically and are
       not official warnings. Times are UTC.</span></div>
     <nav aria-label="Legal and related links">
-      <a href="/hub/lab/privacy">Privacy &amp; data protection</a>
-      <a href="/hub/lab/accessibility">Accessibility</a>
+      <a href="/privacy">Privacy &amp; data protection</a>
+      <a href="/accessibility">Accessibility</a>
       <a href="https://meteo.uniparthenope.it" rel="noopener">meteo@uniparthenope</a>
     </nav>
   </div>
