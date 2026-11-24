@@ -13,7 +13,7 @@ check() {  # $1 = path, $2 = expected mode (ro|rw), $3 = optional (1 = skip when
     failures=$((failures + 1))
     return
   fi
-  f="$1/.wxhub_write_test_$$"
+  f="$1/.lab_write_test_$$"
   if touch "$f" 2>/dev/null; then got=rw; rm -f "$f"; else got=ro; fi
   if [ "$got" = "$2" ]; then result=PASSED; else result=FAILED; failures=$((failures + 1)); fi
   printf "%-32s expected=%s actual=%s  %s\n" "$1" "$2" "$got" "$result"

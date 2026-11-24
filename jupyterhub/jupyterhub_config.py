@@ -8,8 +8,8 @@ sys.path.insert(0, "/srv/jupyterhub")
 from dockerspawner import DockerSpawner  # noqa: E402
 import nativeauthenticator  # noqa: E402
 
-from wxhub_ext import settings as wxsettings  # noqa: E402
-from wxhub_ext.auth import build_authenticator_class  # noqa: E402
+from lab_ext import settings as wxsettings  # noqa: E402
+from lab_ext.auth import build_authenticator_class  # noqa: E402
 
 c = get_config()  # noqa: F821
 
@@ -27,7 +27,7 @@ c.JupyterHub.db_url = "sqlite:////srv/jupyterhub/data/jupyterhub.sqlite"
 c.JupyterHub.cookie_secret_file = "/srv/jupyterhub/data/jupyterhub_cookie_secret"
 c.JupyterHub.logo_file = f"{ASSETS}/logo.png"
 c.JupyterHub.default_url = "/services/demos/"
-c.JupyterHub.cookie_max_age_days = wxsettings.env_int("WXHUB_COOKIE_MAX_AGE_DAYS", 7, minimum=1)
+c.JupyterHub.cookie_max_age_days = wxsettings.env_int("LAB_COOKIE_MAX_AGE_DAYS", 7, minimum=1)
 
 # Security headers for every Hub page. Hub pages load no third-party resources.
 security_headers = {
@@ -62,7 +62,7 @@ if WX.idle_timeout > 0:
     })
     c.JupyterHub.load_roles.append({
         "name": "idle-culler",
-        "description": "Stop servers that have been idle longer than WXHUB_IDLE_TIMEOUT",
+        "description": "Stop servers that have been idle longer than LAB_IDLE_TIMEOUT",
         "scopes": ["list:users", "read:users:activity", "read:servers", "delete:servers"],
         "services": ["idle-culler"],
     })
@@ -70,14 +70,14 @@ if WX.idle_timeout > 0:
 #------------------------------------------------------------------------------
 # Roles and groups
 #
-# administrator – JupyterHub's built-in admin role (WXHUB_ADMIN_USERS)
+# administrator – JupyterHub's built-in admin role (LAB_ADMIN_USERS)
 # instructor    – group "instructors": read-only user oversight and start/stop of student servers
 # researcher    – group "researchers": larger resource tier
 # student       – group "students": standard teaching tier
 # user          – any approved account without a group
 #------------------------------------------------------------------------------
 c.JupyterHub.load_roles.append({
-    "name": "wxhub-instructor",
+    "name": "lab-instructor",
     "description": "Teaching staff: view users and activity, start and stop student servers",
     "scopes": [
         "self", "admin-ui", "list:users", "read:users", "read:users:activity",
@@ -86,28 +86,28 @@ c.JupyterHub.load_roles.append({
     "groups": ["instructors"],
 })
 c.JupyterHub.load_groups = {
-    "students": {"users": wxsettings.env_list("WXHUB_STUDENTS")},
-    "researchers": {"users": wxsettings.env_list("WXHUB_RESEARCHERS")},
-    "instructors": {"users": wxsettings.env_list("WXHUB_INSTRUCTORS")},
+    "students": {"users": wxsettings.env_list("LAB_STUDENTS")},
+    "researchers": {"users": wxsettings.env_list("LAB_RESEARCHERS")},
+    "instructors": {"users": wxsettings.env_list("LAB_INSTRUCTORS")},
 }
 
 RESOURCE_TIERS = {
-    "researcher": (os.environ.get("WXHUB_RESEARCHER_MEM_LIMIT", "8G"),
-                   float(os.environ.get("WXHUB_RESEARCHER_CPU_LIMIT", "4"))),
-    "instructor": (os.environ.get("WXHUB_MEM_LIMIT", "4G"),
-                   float(os.environ.get("WXHUB_CPU_LIMIT", "2"))),
-    "user": (os.environ.get("WXHUB_MEM_LIMIT", "4G"),
-             float(os.environ.get("WXHUB_CPU_LIMIT", "2"))),
-    "student": (os.environ.get("WXHUB_STUDENT_MEM_LIMIT", "2G"),
-                float(os.environ.get("WXHUB_STUDENT_CPU_LIMIT", "1"))),
+    "researcher": (os.environ.get("LAB_RESEARCHER_MEM_LIMIT", "8G"),
+                   float(os.environ.get("LAB_RESEARCHER_CPU_LIMIT", "4"))),
+    "instructor": (os.environ.get("LAB_MEM_LIMIT", "4G"),
+                   float(os.environ.get("LAB_CPU_LIMIT", "2"))),
+    "user": (os.environ.get("LAB_MEM_LIMIT", "4G"),
+             float(os.environ.get("LAB_CPU_LIMIT", "2"))),
+    "student": (os.environ.get("LAB_STUDENT_MEM_LIMIT", "2G"),
+                float(os.environ.get("LAB_STUDENT_CPU_LIMIT", "1"))),
 }
 
 #------------------------------------------------------------------------------
 # Authentication: local accounts or academic single sign-on
 #------------------------------------------------------------------------------
 c.JupyterHub.authenticator_class = build_authenticator_class(WX, ASSETS)
-c.Authenticator.admin_users = set(wxsettings.env_list("WXHUB_ADMIN_USERS") or ["admin"])
-explicit_allow = set(wxsettings.env_list("WXHUB_ALLOWED_USERS"))
+c.Authenticator.admin_users = set(wxsettings.env_list("LAB_ADMIN_USERS") or ["admin"])
+explicit_allow = set(wxsettings.env_list("LAB_ALLOWED_USERS"))
 if explicit_allow:
     c.Authenticator.allowed_users = explicit_allow | c.Authenticator.admin_users
     c.Authenticator.allow_existing_users = True
@@ -117,8 +117,8 @@ if WX.authenticator == "native":
     # approved local account may log in.
     if not explicit_allow:
         c.Authenticator.allow_all = True
-    c.NativeAuthenticator.enable_signup = wxsettings.env_bool("WXHUB_ENABLE_SIGNUP")
-    c.NativeAuthenticator.open_signup = wxsettings.env_bool("WXHUB_OPEN_SIGNUP")
+    c.NativeAuthenticator.enable_signup = wxsettings.env_bool("LAB_ENABLE_SIGNUP")
+    c.NativeAuthenticator.open_signup = wxsettings.env_bool("LAB_OPEN_SIGNUP")
     c.NativeAuthenticator.minimum_password_length = 12
     c.NativeAuthenticator.check_common_password = True
     c.NativeAuthenticator.allowed_failed_logins = 5
@@ -127,29 +127,29 @@ if WX.authenticator == "native":
     c.NativeAuthenticator.ask_email_on_signup = False
 else:
     oauth = c.AzureAdOAuthenticator if WX.authenticator == "azuread" else c.GoogleOAuthenticator
-    oauth.client_id = wxsettings.env_str("WXHUB_OAUTH_CLIENT_ID")
-    oauth.client_secret = wxsettings.env_str("WXHUB_OAUTH_CLIENT_SECRET")
+    oauth.client_id = wxsettings.env_str("LAB_OAUTH_CLIENT_ID")
+    oauth.client_secret = wxsettings.env_str("LAB_OAUTH_CLIENT_SECRET")
     oauth.oauth_callback_url = f"{WX.public_host}/oauth_callback"
     if not (oauth.client_id and oauth.client_secret):
-        raise ValueError("WXHUB_OAUTH_CLIENT_ID and WXHUB_OAUTH_CLIENT_SECRET are required for SSO")
+        raise ValueError("LAB_OAUTH_CLIENT_ID and LAB_OAUTH_CLIENT_SECRET are required for SSO")
     if WX.authenticator == "azuread":
-        tenant = wxsettings.env_str("WXHUB_OAUTH_TENANT_ID")
+        tenant = wxsettings.env_str("LAB_OAUTH_TENANT_ID")
         if not tenant or tenant in {"common", "organizations", "consumers"}:
-            raise ValueError("WXHUB_OAUTH_TENANT_ID must name the university's Entra ID tenant")
+            raise ValueError("LAB_OAUTH_TENANT_ID must name the university's Entra ID tenant")
         c.AzureAdOAuthenticator.tenant_id = tenant
         c.AzureAdOAuthenticator.username_claim = wxsettings.env_str(
-            "WXHUB_OAUTH_USERNAME_CLAIM", "upn"
+            "LAB_OAUTH_USERNAME_CLAIM", "upn"
         )
         c.AzureAdOAuthenticator.login_service = "Microsoft (university account)"
     else:
-        domains = wxsettings.env_list("WXHUB_OAUTH_HOSTED_DOMAINS")
+        domains = wxsettings.env_list("LAB_OAUTH_HOSTED_DOMAINS")
         if not domains:
-            raise ValueError("WXHUB_OAUTH_HOSTED_DOMAINS is required for Google sign-in")
+            raise ValueError("LAB_OAUTH_HOSTED_DOMAINS is required for Google sign-in")
         c.GoogleOAuthenticator.hosted_domain = domains
         c.GoogleOAuthenticator.login_service = "Google (university account)"
     # The identity provider restricts sign-in to the institution's tenant or hosted domains.
     if not explicit_allow:
-        oauth.allow_all = wxsettings.env_bool("WXHUB_OAUTH_ALLOW_ALL", True)
+        oauth.allow_all = wxsettings.env_bool("LAB_OAUTH_ALLOW_ALL", True)
 
 #------------------------------------------------------------------------------
 # Templates and branding
@@ -161,9 +161,9 @@ c.JupyterHub.template_paths = [
 c.JupyterHub.template_vars = {
     **WX.brand,
     "announcement_login": "",
-    "wxhub_authenticator": WX.authenticator,
-    "wxhub_https": WX.https,
-    "wxhub_cookie_days": c.JupyterHub.cookie_max_age_days,
+    "lab_authenticator": WX.authenticator,
+    "lab_https": WX.https,
+    "lab_cookie_days": c.JupyterHub.cookie_max_age_days,
 }
 
 #------------------------------------------------------------------------------
@@ -203,8 +203,8 @@ c.Spawner.environment = {
     "METEO_API_BASE_URL": os.environ.get(
         "METEO_API_BASE_URL", "https://api.meteo.uniparthenope.it"
     ),
-    "WXHUB_OPENDAP_DIR": "/home/jovyan/data/opendap",
-    "WXHUB_NETWORK_DIR": "/home/jovyan/data/network",
+    "LAB_OPENDAP_DIR": "/home/jovyan/data/opendap",
+    "LAB_NETWORK_DIR": "/home/jovyan/data/network",
 }
 
 
@@ -223,7 +223,7 @@ def pre_spawn_hook(spawner):
     """Apply the role's resource tier and refuse to start with any writable shared mount."""
     tier = resource_tier(spawner.user)
     spawner.mem_limit, spawner.cpu_limit = RESOURCE_TIERS[tier]
-    spawner.environment = {**spawner.environment, "WXHUB_ROLE": tier}
+    spawner.environment = {**spawner.environment, "LAB_ROLE": tier}
     for host_path, spec in spawner.volume_binds.items():
         if spec["bind"] in READ_ONLY_TARGETS and spec["mode"] != "ro":
             raise RuntimeError(f"refusing to spawn: {spec['bind']} would be writable")

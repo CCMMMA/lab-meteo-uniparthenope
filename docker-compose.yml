@@ -7,7 +7,7 @@ x-logging: &default-logging
 services:
   jupyterhub:
     build: ./jupyterhub
-    container_name: ${WXHUB_INSTANCE:-wxhub}-jupyterhub
+    container_name: ${LAB_INSTANCE:-lab}-jupyterhub
     restart: unless-stopped
     # Not published: the front proxy (service "web") is the only public entry point.
     expose:
@@ -19,68 +19,68 @@ services:
       - ./jupyterhub/templates:/srv/jupyterhub/templates:ro
       - jupyterhub-data:/srv/jupyterhub/data
       # Read-only views used only by the administration dashboard inventory.
-      - ${WXHUB_OPENDAP_HOST:-./jupyterhub/empty}:/srv/data/opendap:ro
-      - ${WXHUB_NETWORK_HOST:-./jupyterhub/empty}:/srv/data/network:ro
+      - ${LAB_OPENDAP_HOST:-./jupyterhub/empty}:/srv/data/opendap:ro
+      - ${LAB_NETWORK_HOST:-./jupyterhub/empty}:/srv/data/network:ro
     environment:
-      WXHUB_INSTANCE: ${WXHUB_INSTANCE:-wxhub}
-      HUB_IP: ${WXHUB_INSTANCE:-wxhub}-jupyterhub
-      DOCKER_NOTEBOOK_IMAGE: ${WXHUB_SINGLEUSER_IMAGE:-wxhub-singleuser:latest}
-      WXHUB_PUBLIC_HOST: ${WXHUB_PUBLIC_HOST:-http://localhost:8000}
-      WXHUB_TEMPLATES_HOST: ${WXHUB_TEMPLATES_HOST:-${PWD}/templates}
-      WXHUB_SENSORS_HOST: ${WXHUB_SENSORS_HOST:-/opt/weather/data/raw/sensors}
-      WXHUB_MODELS_HOST: ${WXHUB_MODELS_HOST:-/opt/weather/data/raw/models}
-      WXHUB_CURATED_HOST: ${WXHUB_CURATED_HOST:-/opt/weather/data/curated}
-      WXHUB_OPENDAP_HOST: ${WXHUB_OPENDAP_HOST:-}
-      WXHUB_NETWORK_HOST: ${WXHUB_NETWORK_HOST:-}
-      WXHUB_AUTHENTICATOR: ${WXHUB_AUTHENTICATOR:-native}
-      WXHUB_ADMIN_USERS: ${WXHUB_ADMIN_USERS:-admin}
-      WXHUB_ALLOWED_USERS: ${WXHUB_ALLOWED_USERS:-}
-      WXHUB_STUDENTS: ${WXHUB_STUDENTS:-}
-      WXHUB_RESEARCHERS: ${WXHUB_RESEARCHERS:-}
-      WXHUB_INSTRUCTORS: ${WXHUB_INSTRUCTORS:-}
-      WXHUB_ENABLE_SIGNUP: ${WXHUB_ENABLE_SIGNUP:-false}
-      WXHUB_OPEN_SIGNUP: ${WXHUB_OPEN_SIGNUP:-false}
-      WXHUB_OAUTH_CLIENT_ID: ${WXHUB_OAUTH_CLIENT_ID:-}
-      WXHUB_OAUTH_CLIENT_SECRET: ${WXHUB_OAUTH_CLIENT_SECRET:-}
-      WXHUB_OAUTH_TENANT_ID: ${WXHUB_OAUTH_TENANT_ID:-}
-      WXHUB_OAUTH_USERNAME_CLAIM: ${WXHUB_OAUTH_USERNAME_CLAIM:-upn}
-      WXHUB_OAUTH_HOSTED_DOMAINS: ${WXHUB_OAUTH_HOSTED_DOMAINS:-}
-      WXHUB_OAUTH_ALLOW_ALL: ${WXHUB_OAUTH_ALLOW_ALL:-true}
-      WXHUB_MEM_LIMIT: ${WXHUB_MEM_LIMIT:-4G}
-      WXHUB_CPU_LIMIT: ${WXHUB_CPU_LIMIT:-2}
-      WXHUB_STUDENT_MEM_LIMIT: ${WXHUB_STUDENT_MEM_LIMIT:-2G}
-      WXHUB_STUDENT_CPU_LIMIT: ${WXHUB_STUDENT_CPU_LIMIT:-1}
-      WXHUB_RESEARCHER_MEM_LIMIT: ${WXHUB_RESEARCHER_MEM_LIMIT:-8G}
-      WXHUB_RESEARCHER_CPU_LIMIT: ${WXHUB_RESEARCHER_CPU_LIMIT:-4}
-      WXHUB_IDLE_TIMEOUT: ${WXHUB_IDLE_TIMEOUT:-3600}
-      WXHUB_COOKIE_MAX_AGE_DAYS: ${WXHUB_COOKIE_MAX_AGE_DAYS:-7}
-      WXHUB_RETENTION_DAYS: ${WXHUB_RETENTION_DAYS:-365}
-      WXHUB_PRIVACY_CONTROLLER: ${WXHUB_PRIVACY_CONTROLLER:-University of Naples “Parthenope”}
-      WXHUB_PRIVACY_CONTACT: ${WXHUB_PRIVACY_CONTACT:-privacy@uniparthenope.it, privacy@pec.uniparthenope.it (University Privacy Office)}
-      WXHUB_DPO_CONTACT: ${WXHUB_DPO_CONTACT:-dpo.privacy@uniparthenope.it}
-      WXHUB_ACCESSIBILITY_CONTACT: ${WXHUB_ACCESSIBILITY_CONTACT:-meteo@uniparthenope.it or the University accessibility page https://www.uniparthenope.it/Portale-Ateneo/accessibilita}
-      WXHUB_BRAND_NAME: ${WXHUB_BRAND_NAME:-lab.meteo@uniparthenope}
-      WXHUB_BRAND_SUBTITLE: ${WXHUB_BRAND_SUBTITLE:-Weather and marine data workspace}
-      WXHUB_BRAND_PRIMARY: ${WXHUB_BRAND_PRIMARY:-#1f4e79}
-      WXHUB_BRAND_SECONDARY: ${WXHUB_BRAND_SECONDARY:-#2a91eb}
-      WXHUB_BRAND_ACCENT: ${WXHUB_BRAND_ACCENT:-#181c63}
-      WXHUB_BRAND_SITE_URL: ${WXHUB_BRAND_SITE_URL:-https://meteo.uniparthenope.it}
-      WXHUB_BRAND_NETWORK_URL: ${WXHUB_BRAND_NETWORK_URL:-https://network.meteo.uniparthenope.it}
+      LAB_INSTANCE: ${LAB_INSTANCE:-lab}
+      HUB_IP: ${LAB_INSTANCE:-lab}-jupyterhub
+      DOCKER_NOTEBOOK_IMAGE: ${LAB_SINGLEUSER_IMAGE:-lab-singleuser:latest}
+      LAB_PUBLIC_HOST: ${LAB_PUBLIC_HOST:-http://localhost:8000}
+      LAB_TEMPLATES_HOST: ${LAB_TEMPLATES_HOST:-${PWD}/templates}
+      LAB_SENSORS_HOST: ${LAB_SENSORS_HOST:-/opt/weather/data/raw/sensors}
+      LAB_MODELS_HOST: ${LAB_MODELS_HOST:-/opt/weather/data/raw/models}
+      LAB_CURATED_HOST: ${LAB_CURATED_HOST:-/opt/weather/data/curated}
+      LAB_OPENDAP_HOST: ${LAB_OPENDAP_HOST:-}
+      LAB_NETWORK_HOST: ${LAB_NETWORK_HOST:-}
+      LAB_AUTHENTICATOR: ${LAB_AUTHENTICATOR:-native}
+      LAB_ADMIN_USERS: ${LAB_ADMIN_USERS:-admin}
+      LAB_ALLOWED_USERS: ${LAB_ALLOWED_USERS:-}
+      LAB_STUDENTS: ${LAB_STUDENTS:-}
+      LAB_RESEARCHERS: ${LAB_RESEARCHERS:-}
+      LAB_INSTRUCTORS: ${LAB_INSTRUCTORS:-}
+      LAB_ENABLE_SIGNUP: ${LAB_ENABLE_SIGNUP:-false}
+      LAB_OPEN_SIGNUP: ${LAB_OPEN_SIGNUP:-false}
+      LAB_OAUTH_CLIENT_ID: ${LAB_OAUTH_CLIENT_ID:-}
+      LAB_OAUTH_CLIENT_SECRET: ${LAB_OAUTH_CLIENT_SECRET:-}
+      LAB_OAUTH_TENANT_ID: ${LAB_OAUTH_TENANT_ID:-}
+      LAB_OAUTH_USERNAME_CLAIM: ${LAB_OAUTH_USERNAME_CLAIM:-upn}
+      LAB_OAUTH_HOSTED_DOMAINS: ${LAB_OAUTH_HOSTED_DOMAINS:-}
+      LAB_OAUTH_ALLOW_ALL: ${LAB_OAUTH_ALLOW_ALL:-true}
+      LAB_MEM_LIMIT: ${LAB_MEM_LIMIT:-4G}
+      LAB_CPU_LIMIT: ${LAB_CPU_LIMIT:-2}
+      LAB_STUDENT_MEM_LIMIT: ${LAB_STUDENT_MEM_LIMIT:-2G}
+      LAB_STUDENT_CPU_LIMIT: ${LAB_STUDENT_CPU_LIMIT:-1}
+      LAB_RESEARCHER_MEM_LIMIT: ${LAB_RESEARCHER_MEM_LIMIT:-8G}
+      LAB_RESEARCHER_CPU_LIMIT: ${LAB_RESEARCHER_CPU_LIMIT:-4}
+      LAB_IDLE_TIMEOUT: ${LAB_IDLE_TIMEOUT:-3600}
+      LAB_COOKIE_MAX_AGE_DAYS: ${LAB_COOKIE_MAX_AGE_DAYS:-7}
+      LAB_RETENTION_DAYS: ${LAB_RETENTION_DAYS:-365}
+      LAB_PRIVACY_CONTROLLER: ${LAB_PRIVACY_CONTROLLER:-University of Naples “Parthenope”}
+      LAB_PRIVACY_CONTACT: ${LAB_PRIVACY_CONTACT:-privacy@uniparthenope.it, privacy@pec.uniparthenope.it (University Privacy Office)}
+      LAB_DPO_CONTACT: ${LAB_DPO_CONTACT:-dpo.privacy@uniparthenope.it}
+      LAB_ACCESSIBILITY_CONTACT: ${LAB_ACCESSIBILITY_CONTACT:-meteo@uniparthenope.it or the University accessibility page https://www.uniparthenope.it/Portale-Ateneo/accessibilita}
+      LAB_BRAND_NAME: ${LAB_BRAND_NAME:-lab.meteo@uniparthenope}
+      LAB_BRAND_SUBTITLE: ${LAB_BRAND_SUBTITLE:-Weather and marine data workspace}
+      LAB_BRAND_PRIMARY: ${LAB_BRAND_PRIMARY:-#1f4e79}
+      LAB_BRAND_SECONDARY: ${LAB_BRAND_SECONDARY:-#2a91eb}
+      LAB_BRAND_ACCENT: ${LAB_BRAND_ACCENT:-#181c63}
+      LAB_BRAND_SITE_URL: ${LAB_BRAND_SITE_URL:-https://meteo.uniparthenope.it}
+      LAB_BRAND_NETWORK_URL: ${LAB_BRAND_NETWORK_URL:-https://network.meteo.uniparthenope.it}
       METEO_API_BASE_URL: ${METEO_API_BASE_URL:-https://api.meteo.uniparthenope.it}
     networks:
-      wxhub-net:
+      lab-net:
         aliases:
           - hub
 
   # Front proxy that serves the Hub without its /hub/ URL prefix (see proxy/nginx.conf).
   web:
     image: nginx:1.29.6-alpine@sha256:f46cb72c7df02710e693e863a983ac42f6a9579058a59a35f1ae36c9958e4ce0
-    container_name: ${WXHUB_INSTANCE:-wxhub}-web
+    container_name: ${LAB_INSTANCE:-lab}-web
     restart: unless-stopped
     depends_on:
       - jupyterhub
     ports:
-      - "${WXHUB_BIND_ADDRESS:-0.0.0.0}:${WXHUB_PORT:-8000}:80"
+      - "${LAB_BIND_ADDRESS:-0.0.0.0}:${LAB_PORT:-8000}:80"
     read_only: true
     mem_limit: 256m
     pids_limit: 128
@@ -94,7 +94,7 @@ services:
       - /var/run:rw,nosuid,nodev,size=4m
       - /tmp:rw,nosuid,nodev,size=64m
     networks:
-      - wxhub-net
+      - lab-net
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/services/demos/ || exit 1"]
       interval: 30s
@@ -106,8 +106,8 @@ services:
     build:
       context: .
       dockerfile: demos/Dockerfile
-    image: ${WXHUB_INSTANCE:-wxhub}-demos:latest
-    container_name: ${WXHUB_INSTANCE:-wxhub}-demos
+    image: ${LAB_INSTANCE:-lab}-demos:latest
+    container_name: ${LAB_INSTANCE:-lab}-demos
     restart: unless-stopped
     read_only: true
     mem_limit: 256m
@@ -121,7 +121,7 @@ services:
       - /var/run:rw,nosuid,nodev,size=4m
       - /tmp:rw,nosuid,nodev,size=16m
     networks:
-      - wxhub-net
+      - lab-net
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/services/demos/lab/index.html || exit 1"]
       interval: 30s
@@ -132,12 +132,12 @@ services:
   # Build-only target for the per-user image: `docker compose --profile images build singleuser`.
   singleuser:
     build: ./image
-    image: ${WXHUB_SINGLEUSER_IMAGE:-wxhub-singleuser:latest}
+    image: ${LAB_SINGLEUSER_IMAGE:-lab-singleuser:latest}
     profiles: ["images"]
 
 networks:
-  wxhub-net:
-    name: ${WXHUB_INSTANCE:-wxhub}-net
+  lab-net:
+    name: ${LAB_INSTANCE:-lab}-net
 
 volumes:
   jupyterhub-data:

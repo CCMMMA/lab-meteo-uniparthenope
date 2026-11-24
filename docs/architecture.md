@@ -9,10 +9,10 @@ The reasoning behind each choice is in [Design rationale](design-rationale.md).
 |---|---|
 | JupyterHub 5 | Authentication, RBAC, routing, server lifecycle, Hub database |
 | Authenticator | Local accounts (NativeAuthenticator) or academic SSO (Microsoft Entra ID, Google) |
-| `wxhub_ext` Hub extension | Privacy notice, accessibility statement, *My data* page, platform dashboard |
+| `lab_ext` Hub extension | Privacy notice, accessibility statement, *My data* page, platform dashboard |
 | DockerSpawner | One isolated, unprivileged container per user |
 | Single-user image | JupyterLab and the weather-analysis Python stack |
-| Idle culler | Stops servers idle longer than `WXHUB_IDLE_TIMEOUT` |
+| Idle culler | Stops servers idle longer than `LAB_IDLE_TIMEOUT` |
 | Public gallery and lab | Static Nginx service: notebook gallery plus JupyterLite with a Pyodide kernel |
 | Front proxy (`web`, Nginx) | Sole public entry point; serves Hub pages at clean URLs without `/hub/` |
 | ConfigurableHTTPProxy | Inside the Hub container; routes `/user/<username>/` and `/services/demos/` |
@@ -24,7 +24,7 @@ The extension contributes its pages through the authenticator's `get_handlers` h
 itself is not patched and upgrades remain a pinned-version change.
 
 ```text
-browser ──► :WXHUB_PORT ──► web (Nginx) ──► hub:8000 (CHP) ──┬─► /hub/…   JupyterHub + wxhub_ext pages
+browser ──► :LAB_PORT ──► web (Nginx) ──► hub:8000 (CHP) ──┬─► /hub/…   JupyterHub + lab_ext pages
              /login, /home, /dashboard, … ── rewritten to ───┘
                                                              ├─► /services/demos/  gallery + JupyterLite
                                                              └─► /user/<name>/     <instance>-user-<name> container
@@ -44,7 +44,7 @@ container listens on port 8000 inside the Compose network only.
 |---|---|
 | `/` | Redirect to the public gallery `/services/demos/` |
 | `/login`, `/logout`, `/home`, `/spawn`, `/token`, `/change-password`, `/signup`, `/authorize`, `/admin`, `/oauth_callback` | JupyterHub, rewritten internally to `/hub/…` |
-| `/dashboard`, `/account`, `/privacy`, `/accessibility` | `wxhub_ext` pages, rewritten to `/hub/…` |
+| `/dashboard`, `/account`, `/privacy`, `/accessibility` | `lab_ext` pages, rewritten to `/hub/…` |
 | `/api/…` and `/hub/api/…` | Hub REST API (both forms work; JupyterLab and OAuth use the latter) |
 | `/hub/user/<name>/…` | Hub "start or wait for server" handler, kept under `/hub/` because `/user/<name>/` is the server itself |
 | other `/hub/…` | `GET` redirects to the clean URL; other methods are forwarded |
@@ -61,15 +61,15 @@ headers that kernel WebSockets need.
 
 ## Instances
 
-`WXHUB_INSTANCE` scopes every Docker object so that several deployments can share a host:
+`LAB_INSTANCE` scopes every Docker object so that several deployments can share a host:
 
-| Object | Default instance `wxhub` | Other instance, e.g. `labmeteo` |
+| Object | Default instance `lab` | Other instance, e.g. `labmeteo` |
 |---|---|---|
-| Hub / gallery / proxy containers | `wxhub-jupyterhub`, `wxhub-demos`, `wxhub-web` | `labmeteo-jupyterhub`, `labmeteo-demos`, `labmeteo-web` |
-| Network | `wxhub-net` | `labmeteo-net` |
+| Hub / gallery / proxy containers | `lab-jupyterhub`, `lab-demos`, `lab-web` | `labmeteo-jupyterhub`, `labmeteo-demos`, `labmeteo-web` |
+| Network | `lab-net` | `labmeteo-net` |
 | User containers | `jupyter-<user>` | `labmeteo-user-<user>` |
 | User volumes | `jupyterhub-user-<user>` | `labmeteo-user-<user>` |
-| Images | `wxhub-demos`, `WXHUB_SINGLEUSER_IMAGE` | `labmeteo-demos`, `WXHUB_SINGLEUSER_IMAGE` |
+| Images | `lab-demos`, `LAB_SINGLEUSER_IMAGE` | `labmeteo-demos`, `LAB_SINGLEUSER_IMAGE` |
 
 The default instance keeps the historical names so that existing volumes survive upgrades.
 
@@ -78,12 +78,12 @@ The default instance keeps the historical names so that existing volumes survive
 | Data | Host source | Container destination | Access |
 |---|---|---|---|
 | User workspace | `<prefix>-user-{username}` volume | `/home/jovyan/work` | read/write |
-| Templates | `WXHUB_TEMPLATES_HOST` | `/home/jovyan/templates` | read-only |
-| Operational model archive | `WXHUB_OPENDAP_HOST` | `/home/jovyan/data/opendap` | read-only |
-| Weather-station network | `WXHUB_NETWORK_HOST` | `/home/jovyan/data/network` | read-only |
-| Raw sensor mirror | `WXHUB_SENSORS_HOST` | `/home/jovyan/data/raw/sensors` | read-only |
-| Raw model mirror | `WXHUB_MODELS_HOST` | `/home/jovyan/data/raw/models` | read-only |
-| Curated data | `WXHUB_CURATED_HOST` | `/home/jovyan/data/curated` | read-only |
+| Templates | `LAB_TEMPLATES_HOST` | `/home/jovyan/templates` | read-only |
+| Operational model archive | `LAB_OPENDAP_HOST` | `/home/jovyan/data/opendap` | read-only |
+| Weather-station network | `LAB_NETWORK_HOST` | `/home/jovyan/data/network` | read-only |
+| Raw sensor mirror | `LAB_SENSORS_HOST` | `/home/jovyan/data/raw/sensors` | read-only |
+| Raw model mirror | `LAB_MODELS_HOST` | `/home/jovyan/data/raw/models` | read-only |
+| Curated data | `LAB_CURATED_HOST` | `/home/jovyan/data/curated` | read-only |
 | Hub state | `jupyterhub-data` | `/srv/jupyterhub/data` | Hub only |
 
 The archive layouts are kept unchanged:
@@ -106,7 +106,7 @@ the platform dashboard.
 
 | Role | Source | Resource tier | Extra permissions |
 |---|---|---|---|
-| Administrator | `WXHUB_ADMIN_USERS` or the control panel | researcher (8 GB, 4 CPU) | everything |
+| Administrator | `LAB_ADMIN_USERS` or the control panel | researcher (8 GB, 4 CPU) | everything |
 | Researcher | group `researchers` | 8 GB, 4 CPU | — |
 | Instructor | group `instructors` | 4 GB, 2 CPU | view users and activity, start/stop student servers |
 | User | approved account without a role group | 4 GB, 2 CPU | — |

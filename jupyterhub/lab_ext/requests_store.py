@@ -41,7 +41,7 @@ class RequestStore:
 
     def _write(self, items: list[dict]) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        fd, tmp = tempfile.mkstemp(dir=self.path.parent, prefix=".wxhub-requests-")
+        fd, tmp = tempfile.mkstemp(dir=self.path.parent, prefix=".lab-requests-")
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             json.dump(items, handle, indent=2)
         os.chmod(tmp, 0o600)

@@ -25,13 +25,13 @@ TIMES="$OUTDIR/load_${N}users_${TS}_times.csv"
 echo "timestamp,container,cpu_percent,memory_usage,memory_percent,phase" > "$STATS"
 for i in $(seq 10); do
   docker stats --no-stream --format "{{.Name}},{{.CPUPerc}},{{.MemUsage}},{{.MemPerc}}" \
-    | grep -E 'jupyter-|wxhub-jupyterhub' | sed "s/^/$(date +%s),/;s/$/,idle/" >> "$STATS"
+    | grep -E 'jupyter-|lab-jupyterhub' | sed "s/^/$(date +%s),/;s/$/,idle/" >> "$STATS"
 done
 
 # 3) Sample in the background during the load test.
 ( while true; do
     docker stats --no-stream --format "{{.Name}},{{.CPUPerc}},{{.MemUsage}},{{.MemPerc}}" \
-      | grep -E 'jupyter-|wxhub-jupyterhub' | sed "s/^/$(date +%s),/;s/$/,load/" >> "$STATS"
+      | grep -E 'jupyter-|lab-jupyterhub' | sed "s/^/$(date +%s),/;s/$/,load/" >> "$STATS"
   done ) &
 SAMPLER=$!
 trap 'kill "$SAMPLER" 2>/dev/null || true' EXIT INT TERM

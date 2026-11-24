@@ -4,7 +4,7 @@ lab.meteo@uniparthenope targets WCAG 2.1 level AA, the level required by EN 301 
 and the AgID guidelines. The public statement is served at `/accessibility`. Its feedback channel defaults to
 `meteo@uniparthenope.it` and the University accessibility page
 (https://www.uniparthenope.it/Portale-Ateneo/accessibilita); override it with
-`WXHUB_ACCESSIBILITY_CONTACT`.
+`LAB_ACCESSIBILITY_CONTACT`.
 
 ## Implemented measures
 
@@ -35,4 +35,4 @@ and the AgID guidelines. The public statement is served at `/accessibility`. Its
 2. Check contrast of new colours with a WCAG contrast checker in both themes.
 3. Zoom to 400 % (or a 320 px viewport) and confirm content reflows.
 4. Run an automated checker (for example axe or WAVE) and review its findings manually.
-5. Update the statement in `jupyterhub/templates/wxhub_accessibility.html` if conformance changes.
+5. Update the statement in `jupyterhub/templates/lab_accessibility.html` if conformance changes.

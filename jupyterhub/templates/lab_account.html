@@ -1,5 +1,5 @@
 {% extends "page.html" %}
-{% block title %}My data · {{ wxhub_brand_name }}{% endblock title %}
+{% block title %}My data · {{ lab_brand_name }}{% endblock title %}
 
 {% block main %}
 <div class="page-shell" style="max-width: 1000px;">
@@ -35,13 +35,13 @@
     <h2 id="request-title" class="h5">Submit a data-protection request</h2>
     {% if open_requests %}
       <p>Open requests:</p>
-      <ul>{% for r in open_requests %}<li>{{ wxhub_request_types[r.type] }} — submitted {{ r.created }}</li>{% endfor %}</ul>
+      <ul>{% for r in open_requests %}<li>{{ lab_request_types[r.type] }} — submitted {{ r.created }}</li>{% endfor %}</ul>
     {% endif %}
     <form method="post" action="{{ base_url }}account">
       <input type="hidden" name="_xsrf" value="{{ xsrf }}">
       <fieldset class="mb-3">
         <legend class="form-label fs-6">Request type</legend>
-        {% for key, label in wxhub_request_types.items() %}
+        {% for key, label in lab_request_types.items() %}
           <div class="form-check">
             <input class="form-check-input" type="radio" name="type" id="type-{{ key }}" value="{{ key }}" {% if loop.first %}checked{% endif %}>
             <label class="form-check-label" for="type-{{ key }}">{{ label }}</label>

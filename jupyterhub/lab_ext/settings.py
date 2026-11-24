@@ -46,9 +46,9 @@ def env_http_url(name: str, default: str) -> str:
 
 
 def env_instance() -> str:
-    value = env_str("WXHUB_INSTANCE", "wxhub")
+    value = env_str("LAB_INSTANCE", "lab")
     if not re.fullmatch(r"[a-z][a-z0-9-]{1,30}", value):
-        raise ValueError("WXHUB_INSTANCE must be 2-31 lowercase letters, digits, or hyphens")
+        raise ValueError("LAB_INSTANCE must be 2-31 lowercase letters, digits, or hyphens")
     return value
 
 
@@ -88,25 +88,25 @@ def load() -> LabMeteoSettings:
     instance = env_instance()
     # Keep historical Docker object names for the default instance so that existing
     # deployments retain their per-user volumes after an upgrade.
-    legacy = instance == "wxhub"
+    legacy = instance == "lab"
     sources: list[DataSource] = [
-        DataSource("templates", "Starter notebooks", env_str("WXHUB_TEMPLATES_HOST"),
+        DataSource("templates", "Starter notebooks", env_str("LAB_TEMPLATES_HOST"),
                    "/home/jovyan/templates", kind="templates"),
-        DataSource("sensors", "Raw sensor mirror", env_str("WXHUB_SENSORS_HOST"),
+        DataSource("sensors", "Raw sensor mirror", env_str("LAB_SENSORS_HOST"),
                    "/home/jovyan/data/raw/sensors"),
-        DataSource("models", "Raw model mirror", env_str("WXHUB_MODELS_HOST"),
+        DataSource("models", "Raw model mirror", env_str("LAB_MODELS_HOST"),
                    "/home/jovyan/data/raw/models"),
-        DataSource("curated", "Curated products", env_str("WXHUB_CURATED_HOST"),
+        DataSource("curated", "Curated products", env_str("LAB_CURATED_HOST"),
                    "/home/jovyan/data/curated"),
     ]
-    if env_str("WXHUB_OPENDAP_HOST"):
+    if env_str("LAB_OPENDAP_HOST"):
         sources.append(DataSource(
-            "opendap", "Operational model archive", env_str("WXHUB_OPENDAP_HOST"),
+            "opendap", "Operational model archive", env_str("LAB_OPENDAP_HOST"),
             "/home/jovyan/data/opendap", "/srv/data/opendap", kind="opendap",
         ))
-    if env_str("WXHUB_NETWORK_HOST"):
+    if env_str("LAB_NETWORK_HOST"):
         sources.append(DataSource(
-            "network", "Weather-station network", env_str("WXHUB_NETWORK_HOST"),
+            "network", "Weather-station network", env_str("LAB_NETWORK_HOST"),
             "/home/jovyan/data/network", "/srv/data/network", kind="network",
         ))
     for source in sources:
@@ -114,35 +114,35 @@ def load() -> LabMeteoSettings:
             raise ValueError(f"host path for {source.key} must be absolute: {source.host_path}")
 
     brand = {
-        "wxhub_brand_name": env_str("WXHUB_BRAND_NAME", "lab.meteo@uniparthenope"),
-        "wxhub_brand_subtitle": env_str("WXHUB_BRAND_SUBTITLE", "Weather and marine data workspace"),
-        "wxhub_brand_primary": env_color("WXHUB_BRAND_PRIMARY", "#1f4e79"),
-        "wxhub_brand_secondary": env_color("WXHUB_BRAND_SECONDARY", "#2a91eb"),
-        "wxhub_brand_accent": env_color("WXHUB_BRAND_ACCENT", "#181c63"),
-        "wxhub_brand_site_url": env_http_url("WXHUB_BRAND_SITE_URL", "https://meteo.uniparthenope.it"),
-        "wxhub_brand_network_url": env_http_url(
-            "WXHUB_BRAND_NETWORK_URL", "https://network.meteo.uniparthenope.it"
+        "lab_brand_name": env_str("LAB_BRAND_NAME", "lab.meteo@uniparthenope"),
+        "lab_brand_subtitle": env_str("LAB_BRAND_SUBTITLE", "Weather and marine data workspace"),
+        "lab_brand_primary": env_color("LAB_BRAND_PRIMARY", "#1f4e79"),
+        "lab_brand_secondary": env_color("LAB_BRAND_SECONDARY", "#2a91eb"),
+        "lab_brand_accent": env_color("LAB_BRAND_ACCENT", "#181c63"),
+        "lab_brand_site_url": env_http_url("LAB_BRAND_SITE_URL", "https://meteo.uniparthenope.it"),
+        "lab_brand_network_url": env_http_url(
+            "LAB_BRAND_NETWORK_URL", "https://network.meteo.uniparthenope.it"
         ),
     }
     privacy = {
         "controller": env_str(
-            "WXHUB_PRIVACY_CONTROLLER", "University of Naples “Parthenope”"
+            "LAB_PRIVACY_CONTROLLER", "University of Naples “Parthenope”"
         ),
-        "contact": env_str("WXHUB_PRIVACY_CONTACT", "privacy@uniparthenope.it, privacy@pec.uniparthenope.it (University Privacy Office)"),
-        "dpo_contact": env_str("WXHUB_DPO_CONTACT", "dpo.privacy@uniparthenope.it"),
-        "accessibility_contact": env_str("WXHUB_ACCESSIBILITY_CONTACT",
+        "contact": env_str("LAB_PRIVACY_CONTACT", "privacy@uniparthenope.it, privacy@pec.uniparthenope.it (University Privacy Office)"),
+        "dpo_contact": env_str("LAB_DPO_CONTACT", "dpo.privacy@uniparthenope.it"),
+        "accessibility_contact": env_str("LAB_ACCESSIBILITY_CONTACT",
                                        "meteo@uniparthenope.it or the University accessibility page https://www.uniparthenope.it/Portale-Ateneo/accessibilita"),
     }
     return LabMeteoSettings(
         instance=instance,
-        public_host=env_str("WXHUB_PUBLIC_HOST", "http://localhost:8000").rstrip("/"),
-        authenticator=env_str("WXHUB_AUTHENTICATOR", "native").lower(),
+        public_host=env_str("LAB_PUBLIC_HOST", "http://localhost:8000").rstrip("/"),
+        authenticator=env_str("LAB_AUTHENTICATOR", "native").lower(),
         brand=brand,
         privacy=privacy,
         data_sources=tuple(s for s in sources if s.host_path),
         volume_prefix="jupyterhub" if legacy else instance,
         container_prefix="jupyter" if legacy else f"{instance}-user",
-        requests_file=Path("/srv/jupyterhub/data/wxhub_privacy_requests.json"),
-        idle_timeout=env_int("WXHUB_IDLE_TIMEOUT", 3600),
-        retention_days=env_int("WXHUB_RETENTION_DAYS", 365, minimum=1),
+        requests_file=Path("/srv/jupyterhub/data/lab_privacy_requests.json"),
+        idle_timeout=env_int("LAB_IDLE_TIMEOUT", 3600),
+        retention_days=env_int("LAB_RETENTION_DAYS", 365, minimum=1),
     )

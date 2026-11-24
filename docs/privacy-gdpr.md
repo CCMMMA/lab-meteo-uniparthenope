@@ -11,7 +11,7 @@ Legal review by the University's Data Protection Officer remains necessary befor
 | Username, role, groups, creation and last-activity times | Hub SQLite database (`jupyterhub-data`) | While the account exists |
 | Password hash (local accounts) | Hub database, bcrypt | Deleted with the account |
 | Workspace files | Volume `<prefix>-user-<name>` | Until the user deletes them or the account is erased |
-| Data-subject request register | `jupyterhub-data/wxhub_privacy_requests.json` (mode 600) | Kept as evidence of compliance |
+| Data-subject request register | `jupyterhub-data/lab_privacy_requests.json` (mode 600) | Kept as evidence of compliance |
 | Container logs (IP address, path, time) | Docker `json-file` logs, rotated at 10 MB × 5 | Bounded by rotation |
 
 Lawful basis: Art. 6(1)(e), research and teaching tasks carried out in the public interest by the
@@ -22,7 +22,7 @@ University. No special categories of data are needed; users are told not to stor
 - **Minimisation (Art. 5(1)(c)):** no e-mail at sign-up, no analytics, no third-party resources on
   Hub pages, no tracking cookies.
 - **Storage limitation (Art. 5(1)(e)):** idle culling, account review after
-  `WXHUB_RETENTION_DAYS`, erasure of accounts and orphaned workspace volumes.
+  `LAB_RETENTION_DAYS`, erasure of accounts and orphaned workspace volumes.
 - **Transparency (Arts. 12–14):** privacy notice linked from every page and from sign-in.
 - **Access and portability (Arts. 15, 20):** `/account` shows the stored data and
   exports it as JSON; workspace files are downloadable from JupyterLab.
@@ -35,9 +35,9 @@ University. No special categories of data are needed; users are told not to stor
 
 Only strictly necessary cookies are set, which are exempt from consent under Art. 5(3) of
 Directive 2002/58/EC: `jupyterhub-hub-login`, `jupyterhub-session-id`, `jupyterhub-user-<name>`
-(session and routing, at most `WXHUB_COOKIE_MAX_AGE_DAYS`), and `_xsrf` (forgery protection). The
+(session and routing, at most `LAB_COOKIE_MAX_AGE_DAYS`), and `_xsrf` (forgery protection). The
 banner is therefore informational. Local storage keeps the theme choice and the notice
-acknowledgement. Cookies are `SameSite=Lax` and become `Secure` when `WXHUB_PUBLIC_HOST` uses HTTPS.
+acknowledgement. Cookies are `SameSite=Lax` and become `Secure` when `LAB_PUBLIC_HOST` uses HTTPS.
 
 ## Public gallery
 
@@ -65,5 +65,5 @@ published on the University privacy page (https://www.uniparthenope.it/Portale-A
 checked 23 November 2026): the Privacy Office (`privacy@uniparthenope.it`, PEC
 `privacy@pec.uniparthenope.it`) and the Data Protection Officer (`dpo.privacy@uniparthenope.it`).
 The service operator is reachable at `meteo@uniparthenope.it`. Override them with
-`WXHUB_PRIVACY_CONTROLLER`, `WXHUB_PRIVACY_CONTACT`, and `WXHUB_DPO_CONTACT`, and re-check them
+`LAB_PRIVACY_CONTROLLER`, `LAB_PRIVACY_CONTACT`, and `LAB_DPO_CONTACT`, and re-check them
 whenever the University updates its page. The notice should be reviewed by the DPO.

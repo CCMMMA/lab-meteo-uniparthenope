@@ -76,17 +76,17 @@ def docker_client():
 class LabMeteoHandler(BaseHandler):
     """Common helpers for lab.meteo@uniparthenope pages."""
 
-    def initialize(self, wxhub: LabMeteoSettings):
-        self.wxhub = wxhub
-        self.store = RequestStore(wxhub.requests_file)
+    def initialize(self, lab: LabMeteoSettings):
+        self.lab = lab
+        self.store = RequestStore(lab.requests_file)
 
     def wx_namespace(self, **extra) -> dict:
         ns = {
-            "wxhub_settings": self.wxhub,
-            "wxhub_privacy": self.wxhub.privacy,
-            "wxhub_request_types": REQUEST_TYPES,
-            "wxhub_retention_days": self.wxhub.retention_days,
-            "wxhub_idle_timeout": self.wxhub.idle_timeout,
+            "lab_settings": self.lab,
+            "lab_privacy": self.lab.privacy,
+            "lab_request_types": REQUEST_TYPES,
+            "lab_retention_days": self.lab.retention_days,
+            "lab_idle_timeout": self.lab.idle_timeout,
         }
         ns.update(extra)
         return ns
@@ -106,12 +106,12 @@ class LabMeteoHandler(BaseHandler):
 
 class PrivacyHandler(LabMeteoHandler):
     async def get(self):
-        await self.render_page("wxhub_privacy.html")
+        await self.render_page("lab_privacy.html")
 
 
 class AccessibilityHandler(LabMeteoHandler):
     async def get(self):
-        await self.render_page("wxhub_accessibility.html")
+        await self.render_page("lab_accessibility.html")
 
 
 class AccountHandler(LabMeteoHandler):
@@ -121,13 +121,13 @@ class AccountHandler(LabMeteoHandler):
         orm_user = user.orm_user
         record = {
             "generated": iso(datetime.now(timezone.utc)),
-            "controller": self.wxhub.privacy["controller"],
-            "service": self.wxhub.brand["wxhub_brand_name"],
+            "controller": self.lab.privacy["controller"],
+            "service": self.lab.brand["lab_brand_name"],
             "username": user.name,
             "role": role_label(orm_user),
             "administrator": bool(orm_user.admin),
             "groups": sorted(group.name for group in orm_user.groups),
-            "authentication": self.wxhub.authenticator,
+            "authentication": self.lab.authenticator,
             "created": iso(orm_user.created),
             "last_activity": iso(orm_user.last_activity),
             "servers": {
@@ -164,7 +164,7 @@ class AccountHandler(LabMeteoHandler):
             self.finish(json.dumps(data, indent=2, ensure_ascii=False))
             return
         await self.render_page(
-            "wxhub_account.html",
+            "lab_account.html",
             record=data,
             open_requests=self.store.open_for(user.name),
             message=self.get_argument("message", ""),
@@ -206,11 +206,11 @@ class AdminHandler(LabMeteoHandler):
                  "error": None}
         try:
             client = docker_client()
-            prefix = f"{self.wxhub.volume_prefix}-user-"
+            prefix = f"{self.lab.volume_prefix}-user-"
             for volume in client.volumes.list(filters={"name": prefix}):
                 if volume.name.startswith(prefix) and volume.name not in known_volumes:
                     state["orphans"].append(volume.name)
-            container_prefix = f"{self.wxhub.container_prefix}-"
+            container_prefix = f"{self.lab.container_prefix}-"
             for container in client.containers.list(filters={"name": container_prefix}):
                 if not container.name.startswith(container_prefix):
                     continue
@@ -252,11 +252,11 @@ class AdminHandler(LabMeteoHandler):
         except Exception:
             self.db.rollback()
 
-        data_targets = {s.container_path for s in self.wxhub.data_sources}
+        data_targets = {s.container_path for s in self.lab.data_sources}
         docker_state = await asyncio.to_thread(self._docker_state, known_volumes, data_targets)
 
         sources = []
-        for source in self.wxhub.data_sources:
+        for source in self.lab.data_sources:
             entry = {"source": source, "hub_read_only": None, "inventory": None}
             if source.hub_path:
                 entry["hub_read_only"] = catalog.is_read_only_mount(source.hub_path)
@@ -279,12 +279,12 @@ class AdminHandler(LabMeteoHandler):
             "sources": sources,
             "docker": docker_state,
             "posture": {
-                "authenticator": self.wxhub.authenticator,
+                "authenticator": self.lab.authenticator,
                 "signup": bool(getattr(authenticator, "enable_signup", False)),
                 "open_signup": bool(getattr(authenticator, "open_signup", False)),
-                "https": self.wxhub.https,
-                "public_host": self.wxhub.public_host,
-                "idle_timeout": self.wxhub.idle_timeout,
+                "https": self.lab.https,
+                "public_host": self.lab.public_host,
+                "idle_timeout": self.lab.idle_timeout,
                 "admins": sum(1 for u in users if u["admin"]),
                 "running": sum(1 for u in users if u["running"]),
             },
@@ -295,7 +295,7 @@ class AdminHandler(LabMeteoHandler):
     async def get(self):
         self.require_view()
         await self.render_page(
-            "wxhub_admin.html",
+            "lab_admin.html",
             dash=await self.collect(),
             message=self.get_argument("message", ""),
             can_change=bool(self.current_user.admin),
@@ -310,7 +310,7 @@ class AdminHandler(LabMeteoHandler):
             errors = []
             client = docker_client()
             for name in names:
-                if not name.startswith(f"{self.wxhub.volume_prefix}-user-"):
+                if not name.startswith(f"{self.lab.volume_prefix}-user-"):
                     errors.append(f"{name}: not a workspace volume")
                     continue
                 try:
@@ -398,8 +398,8 @@ class AdminHandler(LabMeteoHandler):
         raise web.HTTPError(400, "Unknown action")
 
 
-def get_handlers(wxhub: LabMeteoSettings, assets_path: str) -> list[tuple]:
-    kwargs = {"wxhub": wxhub}
+def get_handlers(lab: LabMeteoSettings, assets_path: str) -> list[tuple]:
+    kwargs = {"lab": lab}
     return [
         (r"/privacy", PrivacyHandler, kwargs),
         (r"/accessibility", AccessibilityHandler, kwargs),

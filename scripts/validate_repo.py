@@ -79,14 +79,14 @@ def validate_read_only_data() -> None:
     """Shared model, sensor, and template data must never be writable."""
     compose = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
     for line in compose.splitlines():
-        match = re.search(r"\$\{(WXHUB_\w+_HOST)[^}]*\}:(\S+)", line)
+        match = re.search(r"\$\{(LAB_\w+_HOST)[^}]*\}:(\S+)", line)
         if match and not match.group(2).endswith(":ro"):
             fail(f"docker-compose.yml mounts {match.group(1)} without :ro")
     config = (ROOT / "jupyterhub" / "jupyterhub_config.py").read_text(encoding="utf-8")
     if "read_only_volumes" not in config or "pre_spawn_hook" not in config:
         fail("jupyterhub_config.py must bind shared data through read_only_volumes and check it")
-    for required in ("page.html", "native-login.html", "login.html", "home.html", "admin.html", "wxhub_admin.html", "wxhub_footer.html",
-                     "wxhub_account.html", "wxhub_privacy.html", "wxhub_accessibility.html"):
+    for required in ("page.html", "native-login.html", "login.html", "home.html", "admin.html", "lab_admin.html", "lab_footer.html",
+                     "lab_account.html", "lab_privacy.html", "lab_accessibility.html"):
         if not (ROOT / "jupyterhub" / "templates" / required).exists():
             fail(f"missing Hub template {required}")
 

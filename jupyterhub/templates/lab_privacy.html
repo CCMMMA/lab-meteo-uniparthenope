@@ -1,5 +1,5 @@
 {% extends "page.html" %}
-{% block title %}Privacy and data protection · {{ wxhub_brand_name }}{% endblock title %}
+{% block title %}Privacy and data protection · {{ lab_brand_name }}{% endblock title %}
 
 {% block main %}
 <div class="page-shell" style="max-width: 900px;">
@@ -8,13 +8,13 @@
 
   <div class="lab-card mb-4">
     <h2 class="h5">Controller and contacts</h2>
-    <p class="mb-1">Data controller: <strong>{{ wxhub_privacy.controller }}</strong>, operating
-      {{ wxhub_brand_name }} through the meteo@uniparthenope research centre.</p>
-    {% if wxhub_privacy.contact %}<p class="mb-1">Privacy contact: {{ wxhub_privacy.contact | urlize }}</p>{% endif %}
-    {% if wxhub_privacy.dpo_contact %}<p class="mb-1">Data protection officer (DPO) of the University: {{ wxhub_privacy.dpo_contact | urlize }}</p>{% endif %}
+    <p class="mb-1">Data controller: <strong>{{ lab_privacy.controller }}</strong>, operating
+      {{ lab_brand_name }} through the meteo@uniparthenope research centre.</p>
+    {% if lab_privacy.contact %}<p class="mb-1">Privacy contact: {{ lab_privacy.contact | urlize }}</p>{% endif %}
+    {% if lab_privacy.dpo_contact %}<p class="mb-1">Data protection officer (DPO) of the University: {{ lab_privacy.dpo_contact | urlize }}</p>{% endif %}
     <p class="mb-1">Service operator: meteo@uniparthenope research centre, <a href="mailto:meteo@uniparthenope.it">meteo@uniparthenope.it</a>.
       University privacy policy: <a href="https://www.uniparthenope.it/Portale-Ateneo/privacy" rel="noopener">uniparthenope.it/Portale-Ateneo/privacy</a>.</p>
-    {% if not wxhub_privacy.contact and not wxhub_privacy.dpo_contact %}
+    {% if not lab_privacy.contact and not lab_privacy.dpo_contact %}
       <p class="mb-0">Contact the platform administrators through the University's official channels;
         the University's Data Protection Officer can also be reached through the University website.</p>
     {% endif %}
@@ -28,7 +28,7 @@
       <tbody>
         <tr><th scope="row">Username; for single sign-on also the identifier released by the university identity provider</th>
           <td>Account, access control, roles</td><td>Art. 6(1)(e): research and teaching tasks in the public interest</td>
-          <td>While the account is active; inactive accounts are reviewed after {{ wxhub_retention_days }} days</td></tr>
+          <td>While the account is active; inactive accounts are reviewed after {{ lab_retention_days }} days</td></tr>
         <tr><th scope="row">Password (local accounts only)</th><td>Authentication</td><td>Art. 6(1)(e)</td>
           <td>Stored only as a salted bcrypt hash; deleted with the account</td></tr>
         <tr><th scope="row">Account creation, last activity, server start times, role and group</th>
@@ -59,7 +59,7 @@
   <ul>
     <li><code>jupyterhub-hub-login</code>, <code>jupyterhub-session-id</code>, and
       <code>jupyterhub-user-…</code>: keep you signed in and route you to your server; at most
-      {{ wxhub_cookie_days }} days or until you sign out.</li>
+      {{ lab_cookie_days }} days or until you sign out.</li>
     <li><code>_xsrf</code>: protects forms against cross-site request forgery; session.</li>
     <li>Browser local storage remembers your day/night theme and that you have read the cookie notice.</li>
   </ul>

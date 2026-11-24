@@ -6,5 +6,5 @@ RUN python3 -m pip install --no-cache-dir \
     oauthenticator==17.3.0 \
     jupyterhub-idle-culler==1.4.0
 
-COPY wxhub_ext /srv/jupyterhub/wxhub_ext
+COPY lab_ext /srv/jupyterhub/lab_ext
 COPY assets /srv/jupyterhub/assets

@@ -5,15 +5,15 @@
   a privacy/accessibility footer, and day/night themes. Colours meet WCAG 2.1 AA contrast.
 #}
 
-{% block title %}{{ wxhub_brand_name }}{% endblock title %}
+{% block title %}{{ lab_brand_name }}{% endblock title %}
 
 {% block favicon %}
   <link rel="icon" href="{{ base_url }}assets/favicon.png" type="image/png">
 {% endblock favicon %}
 
 {% block meta %}
-  <meta name="description" content="{{ wxhub_brand_subtitle }}">
-  <meta name="theme-color" content="{{ wxhub_brand_primary }}">
+  <meta name="description" content="{{ lab_brand_subtitle }}">
+  <meta name="theme-color" content="{{ lab_brand_primary }}">
   <meta name="color-scheme" content="light dark">
 {% endblock meta %}
 
@@ -21,17 +21,17 @@
   {{ super() }}
   <style>
     :root {
-      --lab-primary: {{ wxhub_brand_primary }};
-      --lab-secondary: {{ wxhub_brand_secondary }};
-      --lab-accent: {{ wxhub_brand_accent }};
+      --lab-primary: {{ lab_brand_primary }};
+      --lab-secondary: {{ lab_brand_secondary }};
+      --lab-accent: {{ lab_brand_accent }};
       --lab-page: #f4f7fa;
       --lab-surface: #ffffff;
       --lab-ink: #13283a;
       --lab-muted: #55687a;
-      --lab-link: {{ wxhub_brand_primary }};
+      --lab-link: {{ lab_brand_primary }};
       --lab-radius: 1rem;
       --lab-shadow: 0 .75rem 2.5rem rgba(5, 37, 63, .09);
-      --bs-primary: {{ wxhub_brand_primary }};
+      --bs-primary: {{ lab_brand_primary }};
       --bs-link-color: var(--lab-link);
       --bs-link-hover-color: var(--lab-accent);
     }
@@ -144,7 +144,7 @@
       {% block logo %}
         <a id="jupyterhub-logo" class="navbar-brand lab-brand" href="{{ logo_url or base_url }}">
           <img src="{{ base_url }}logo" alt="">
-          <span><strong>{{ wxhub_brand_name }}</strong><small>{{ wxhub_brand_subtitle }}</small></span>
+          <span><strong>{{ lab_brand_name }}</strong><small>{{ lab_brand_subtitle }}</small></span>
         </a>
       {% endblock logo %}
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#thenavbar"
@@ -159,7 +159,7 @@
               <li class="nav-item"><a class="nav-link" href="{{ base_url }}home">My runtime</a></li>
               <li class="nav-item"><a class="nav-link" href="{{ base_url }}account">My data</a></li>
               <li class="nav-item"><a class="nav-link" href="{{ base_url }}token">Tokens</a></li>
-              {% if wxhub_authenticator == "native" %}
+              {% if lab_authenticator == "native" %}
                 <li class="nav-item"><a class="nav-link" href="{{ base_url }}change-password">Password</a></li>
               {% endif %}
               {% if 'admin-ui' in parsed_scopes %}
@@ -168,7 +168,7 @@
                   <ul class="dropdown-menu dropdown-menu-end">
                     <li><a class="dropdown-item" href="{{ base_url }}dashboard">Platform dashboard</a></li>
                     <li><a class="dropdown-item" href="{{ base_url }}admin">Users and servers</a></li>
-                    {% if user.admin and wxhub_authenticator == "native" %}
+                    {% if user.admin and lab_authenticator == "native" %}
                       <li><a class="dropdown-item" href="{{ base_url }}authorize">Approve sign-ups</a></li>
                     {% endif %}
                   </ul>
@@ -176,8 +176,8 @@
               {% endif %}
             {% endblock nav_bar_left_items %}
           {% else %}
-            <li class="nav-item"><a class="nav-link" href="{{ wxhub_brand_site_url }}" rel="noopener">Forecasts</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ wxhub_brand_network_url }}" rel="noopener">Sensor network</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ lab_brand_site_url }}" rel="noopener">Forecasts</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ lab_brand_network_url }}" rel="noopener">Sensor network</a></li>
           {% endif %}
           {% block nav_bar_right_items %}
             <li class="nav-item">
@@ -209,11 +209,11 @@
 {% endblock nav_bar %}
 
 {% block announcement %}
-  {# The main landmark opens here and closes in wxhub_footer.html, wrapping every page's main block. #}
+  {# The main landmark opens here and closes in lab_footer.html, wrapping every page's main block. #}
   <main id="lab-main" tabindex="-1">
   {{ super() }}
 {% endblock announcement %}
 
 {% block footer %}
-  {% include "wxhub_footer.html" %}
+  {% include "lab_footer.html" %}
 {% endblock footer %}

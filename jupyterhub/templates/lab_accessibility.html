@@ -1,5 +1,5 @@
 {% extends "page.html" %}
-{% block title %}Accessibility statement · {{ wxhub_brand_name }}{% endblock title %}
+{% block title %}Accessibility statement · {{ lab_brand_name }}{% endblock title %}
 
 {% block main %}
 <div class="page-shell" style="max-width: 900px;">
@@ -8,7 +8,7 @@
 
   <div class="lab-card mb-4">
     <h2 class="h5">Conformance status</h2>
-    <p class="mb-0">{{ wxhub_brand_name }} aims to conform to the Web Content Accessibility Guidelines
+    <p class="mb-0">{{ lab_brand_name }} aims to conform to the Web Content Accessibility Guidelines
       (WCAG) 2.1, level AA, as required by EN 301 549 and the AgID accessibility guidelines.
       The service is <strong>partially conformant</strong>: the Hub pages, sign-in, gallery, and
       administration pages are designed to conform; the limitations below remain.</p>
@@ -36,7 +36,7 @@
 
   <h2 class="h4 mt-4">Feedback and enforcement</h2>
   <p>Report accessibility problems or request content in an accessible format
-    {% if wxhub_privacy.accessibility_contact %}to {{ wxhub_privacy.accessibility_contact | urlize }}{% else %}through the University's official channels{% endif %}.
+    {% if lab_privacy.accessibility_contact %}to {{ lab_privacy.accessibility_contact | urlize }}{% else %}through the University's official channels{% endif %}.
     If the answer is unsatisfactory, you may use the enforcement procedure of the Agency for Digital
     Italy (<a href="https://www.agid.gov.it" rel="noopener">AgID</a>) under Article 3-quinquies of Law 4/2004.</p>
   <p class="small lab-muted">This statement is based on a self-assessment and is reviewed with each release.</p>

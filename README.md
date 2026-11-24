@@ -42,10 +42,10 @@ deployment of an interactive environment based on Jupyter Notebook* at the Unive
 ## Architecture
 
 ```text
-browser ──► web proxy :WXHUB_PORT ──► JupyterHub ──► DockerSpawner ──► <instance>-user-<username>
+browser ──► web proxy :LAB_PORT ──► JupyterHub ──► DockerSpawner ──► <instance>-user-<username>
    clean URLs: /login, /home, /dashboard, /account, /privacy (no /hub/ prefix)
                     │                                      │
-                    ├── Hub state, roles, wxhub_ext pages  ├── persistent ~/work
+                    ├── Hub state, roles, lab_ext pages  ├── persistent ~/work
                     ├── Docker socket                      ├── read-only ~/data/opendap, ~/data/network
                     └── /services/demos/ ──► gallery + browser-based JupyterLite lab
 ```
@@ -80,11 +80,11 @@ Create the administrator account (the password is read from standard input):
 ```bash
 read -rs PASSWORD
 printf '%s\n' "$PASSWORD" | docker compose exec -T jupyterhub \
-  python -m wxhub_ext.manage_users create admin --role admin
+  python -m lab_ext.manage_users create admin --role admin
 ```
 
 Open `http://localhost:8000/` for the public gallery and *Sign in* for your server. Point
-`WXHUB_OPENDAP_HOST` and `WXHUB_NETWORK_HOST` at the operational archives to expose them read-only.
+`LAB_OPENDAP_HOST` and `LAB_NETWORK_HOST` at the operational archives to expose them read-only.
 The deployment uses HTTP for a trusted pilot network; put it behind TLS before exposing it publicly.
 
 Configuration lives in an untracked `.env` file; see the [Deployment guide](docs/deployment.md)
@@ -99,7 +99,7 @@ output from the meteo@uniparthenope OPeNDAP service (~3 km resolution, IODL 2.0)
 ```bash
 sudo docker run --rm --entrypoint python -u 1000 \
   -v /opt/weather/data/raw/models:/out -v "$PWD/scripts":/scripts:ro \
-  wxhub-singleuser:latest /scripts/fetch_wrf_d03.py \
+  lab-singleuser:latest /scripts/fetch_wrf_d03.py \
   --start 2026-11-13 --days 5 --out /out/wrf5_d03
 ```
 
@@ -120,7 +120,7 @@ Data lineage, checksums, outputs, and limitations are documented in
 | Path | Purpose |
 |---|---|
 | `jupyterhub/` | Hub image, DockerSpawner configuration, templates, and logo |
-| `jupyterhub/wxhub_ext/` | Hub extension: settings, SSO selection, admin/privacy/account pages, user CLI |
+| `jupyterhub/lab_ext/` | Hub extension: settings, SSO selection, admin/privacy/account pages, user CLI |
 | `image/` | Versioned single-user scientific image and environment snapshot |
 | `notebooks/` | Executable WRF analysis and Voilà dashboard |
 | `demos/` | Gallery generator, JupyterLite image, and thirty browser-executed notebooks |
@@ -139,7 +139,7 @@ provenance and SBOM attestations.
 ```bash
 ./scripts/validate_repo.sh
 docker compose build jupyterhub
-docker build -t wxhub-singleuser:check ./image
+docker build -t lab-singleuser:check ./image
 ```
 
 The first command is fast and offline. Image builds require network access. See

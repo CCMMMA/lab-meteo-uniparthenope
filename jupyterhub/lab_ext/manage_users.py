@@ -4,9 +4,9 @@
 Run inside the Hub container; passwords are read from standard input, never from arguments:
 
     printf '%s\n' "$PASSWORD" | docker compose exec -T jupyterhub \
-        python -m wxhub_ext.manage_users create alice --role researcher
+        python -m lab_ext.manage_users create alice --role researcher
 
-Administrators are declared with ``WXHUB_ADMIN_USERS``; the ``admin`` role here only records the
+Administrators are declared with ``LAB_ADMIN_USERS``; the ``admin`` role here only records the
 intent and approves the local account. Roles other than ``user`` and ``admin`` are Hub groups.
 """
 

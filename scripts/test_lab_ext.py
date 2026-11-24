@@ -11,8 +11,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "jupyterhub"))
 
-from wxhub_ext import catalog, settings  # noqa: E402
-from wxhub_ext.requests_store import RequestStore  # noqa: E402
+from lab_ext import catalog, settings  # noqa: E402
+from lab_ext.requests_store import RequestStore  # noqa: E402
 
 
 def touch(path: Path) -> None:
@@ -50,16 +50,16 @@ def test_store(tmp: Path) -> None:
 
 def test_settings() -> None:
     os.environ.update({
-        "WXHUB_INSTANCE": "labmeteo", "WXHUB_OPENDAP_HOST": "/srv/opendap",
-        "WXHUB_NETWORK_HOST": "/srv/network", "WXHUB_TEMPLATES_HOST": "/srv/templates",
-        "WXHUB_PUBLIC_HOST": "https://example.org/",
+        "LAB_INSTANCE": "labmeteo", "LAB_OPENDAP_HOST": "/srv/opendap",
+        "LAB_NETWORK_HOST": "/srv/network", "LAB_TEMPLATES_HOST": "/srv/templates",
+        "LAB_PUBLIC_HOST": "https://example.org/",
     })
     loaded = settings.load()
     assert loaded.volume_prefix == "labmeteo" and loaded.container_prefix == "labmeteo-user"
     assert loaded.https and loaded.public_host == "https://example.org"
     targets = {s.container_path for s in loaded.data_sources}
     assert {"/home/jovyan/data/opendap", "/home/jovyan/data/network"} <= targets
-    os.environ["WXHUB_INSTANCE"] = "Bad_Name"
+    os.environ["LAB_INSTANCE"] = "Bad_Name"
     try:
         settings.load()
     except ValueError:

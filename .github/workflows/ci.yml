@@ -38,18 +38,18 @@ jobs:
           context: ${{ matrix.context }}
           push: false
           load: true
-          tags: wxhub-${{ matrix.name }}:ci
+          tags: lab-${{ matrix.name }}:ci
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
       - name: Smoke-test single-user image
         if: matrix.name == 'singleuser'
         run: |
-          docker run --rm --entrypoint python wxhub-singleuser:ci -c \
+          docker run --rm --entrypoint python lab-singleuser:ci -c \
             'import cartopy, cfgrib, dask, netCDF4, pandas, voila, xarray, zarr'
-          docker run --rm wxhub-singleuser:ci jupyter server extension list 2>&1 \
+          docker run --rm lab-singleuser:ci jupyter server extension list 2>&1 \
             | grep -A2 'voila.server_extension' | grep 'OK'
       - name: Smoke-test Hub image
         if: matrix.name == 'jupyterhub'
         run: |
-          docker run --rm --entrypoint python wxhub-jupyterhub:ci -c \
+          docker run --rm --entrypoint python lab-jupyterhub:ci -c \
             'import dockerspawner, nativeauthenticator'

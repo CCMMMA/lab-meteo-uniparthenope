@@ -1,6 +1,6 @@
 """Authenticator selection: local accounts or academic single sign-on.
 
-``WXHUB_AUTHENTICATOR`` selects one of:
+``LAB_AUTHENTICATOR`` selects one of:
 
 * ``native``  – local accounts with administrator approval (NativeAuthenticator);
 * ``azuread`` – Microsoft Entra ID (Azure AD), e.g. a university Microsoft 365 tenant;
@@ -18,8 +18,8 @@ from .settings import LabMeteoSettings
 AUTHENTICATORS = {"native", "azuread", "google"}
 
 
-def build_authenticator_class(wxhub: LabMeteoSettings, assets_path: str):
-    kind = wxhub.authenticator
+def build_authenticator_class(lab: LabMeteoSettings, assets_path: str):
+    kind = lab.authenticator
     if kind == "native":
         from nativeauthenticator import NativeAuthenticator as base
     elif kind == "azuread":
@@ -27,9 +27,9 @@ def build_authenticator_class(wxhub: LabMeteoSettings, assets_path: str):
     elif kind == "google":
         from oauthenticator.google import GoogleOAuthenticator as base
     else:
-        raise ValueError(f"WXHUB_AUTHENTICATOR must be one of {sorted(AUTHENTICATORS)}, got {kind!r}")
+        raise ValueError(f"LAB_AUTHENTICATOR must be one of {sorted(AUTHENTICATORS)}, got {kind!r}")
 
     def handlers(self, app):
-        return list(base.get_handlers(self, app)) + get_handlers(wxhub, assets_path)
+        return list(base.get_handlers(self, app)) + get_handlers(lab, assets_path)
 
     return type(f"LabMeteo{base.__name__}", (base,), {"get_handlers": handlers})

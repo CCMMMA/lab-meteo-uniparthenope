@@ -8,7 +8,7 @@ docker compose logs --tail=200 jupyterhub
 docker compose logs --tail=200 demos
 docker stats
 docker volume ls --filter name=-user-
-docker compose exec -T jupyterhub python -m wxhub_ext.manage_users list
+docker compose exec -T jupyterhub python -m lab_ext.manage_users list
 docker compose logs jupyterhub | grep lab.meteo.audit
 ```
 
@@ -25,7 +25,7 @@ by the production chain and are not modified by lab.meteo@uniparthenope. Restore
 
 - **Weekly:** review pending sign-ups and open privacy requests; requests must be answered within
   one month (see [Privacy and GDPR](privacy-gdpr.md)).
-- **Monthly:** review accounts inactive for longer than `WXHUB_RETENTION_DAYS`, the administrator
+- **Monthly:** review accounts inactive for longer than `LAB_RETENTION_DAYS`, the administrator
   list, and orphaned workspaces.
 - **Each release:** run the acceptance checks in [Deployment](deployment.md) and the accessibility
   checks in [Accessibility](accessibility.md).
@@ -44,23 +44,42 @@ performance guarantees.
 
 ## Environment audit
 
-After intentionally rebuilding `wxhub-singleuser:latest`, run `scripts/freeze_env.sh` and review the
+After intentionally rebuilding `lab-singleuser:latest`, run `scripts/freeze_env.sh` and review the
 diff. The snapshot may contain platform-specific base-image references. The pinned base digest and
 `image/requirements.txt` are the portable build inputs.
 
+## Upgrading from the earlier variable names
+
+Earlier releases used the `WXHUB_` prefix for environment variables and `wxhub` for the default
+instance, extension, and image names; they are now `LAB_` and `lab`. Before redeploying an existing
+host:
+
+1. rename the variables in `.env`: `sed -i.bak 's/^WXHUB_/LAB_/' .env`;
+2. keep the previous `LAB_INSTANCE` value (for example `labmeteo`) so that container and volume
+   names stay the same; a deployment that relied on the old default must set `LAB_INSTANCE=lab` to
+   keep its historical user-volume names (`jupyterhub-user-<user>`);
+3. retag or rebuild the user image under its new name, for example
+   `docker tag wxhub-singleuser:latest lab-singleuser:latest`, or set `LAB_SINGLEUSER_IMAGE`;
+4. rename the privacy-request register in the Hub volume, while the Hub is running:
+   `docker exec <instance>-jupyterhub mv /srv/jupyterhub/data/wxhub_privacy_requests.json /srv/jupyterhub/data/lab_privacy_requests.json`
+   (skip this if the file does not exist);
+5. `docker compose up -d --build`.
+
+Performance measurements recorded before the rename keep the old container names as evidence.
+
 ## Troubleshooting
 
-- **Server does not start:** inspect Hub logs; confirm the user image and `wxhub-net` exist; verify
+- **Server does not start:** inspect Hub logs; confirm the user image and `lab-net` exist; verify
   every configured host path exists.
 - **Data is writable or missing:** run `scripts/test_permissions.sh` in the user server and compare
   `docker inspect <instance>-user-<username>` (or `jupyter-<username>` for the default instance)
   with [Architecture](architecture.md). A server whose mount plan would be writable is refused by
   the Hub with `refusing to spawn` in its log.
-- **Archive tables on the dashboard are empty:** check `WXHUB_OPENDAP_HOST` and
-  `WXHUB_NETWORK_HOST` in `docker compose config` and that the network file system is mounted on
+- **Archive tables on the dashboard are empty:** check `LAB_OPENDAP_HOST` and
+  `LAB_NETWORK_HOST` in `docker compose config` and that the network file system is mounted on
   the host; the inventory is cached for ten minutes.
 - **SSO login fails with a redirect error:** the callback URL registered with the identity
-  provider must equal `${WXHUB_PUBLIC_HOST}/oauth_callback` and use HTTPS.
+  provider must equal `${LAB_PUBLIC_HOST}/oauth_callback` and use HTTPS.
 - **A user is locked out:** wait ten minutes after five failed attempts, or reset the password with
   `manage_users create <name> --update`.
 - **Gallery opens but the lab stays blank:** the JupyterLite root `index.html` must remain the
@@ -69,8 +88,8 @@ diff. The snapshot may contain platform-specific base-image references. The pinn
 - **Browser reports phishing:** do not bypass the warning; deploy a trusted DNS name and HTTPS as
   described in [Security](security.md). Changing colors or text cannot establish browser trust.
 - **Branding is unchanged:** confirm the `jupyterhub/templates` bind mount is present, inspect the
-  `WXHUB_BRAND_*` values in `docker compose config`, and recreate the Hub container.
-- **Notebook lab returns 503:** confirm `wxhub-demos` is healthy enough to serve port 80, then
+  `LAB_BRAND_*` values in `docker compose config`, and recreate the Hub container.
+- **Notebook lab returns 503:** confirm `lab-demos` is healthy enough to serve port 80, then
   check the Hub service route and `docker compose logs demos`.
 - **Root URL shows the login page:** `/` is redirected to the gallery by the `web` proxy; confirm
   `labmeteo-web` (or `<instance>-web`) is running. Authenticated users use *Sign in* or `/login` directly.

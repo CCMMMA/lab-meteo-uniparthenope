@@ -16,7 +16,7 @@ docker run --rm \
   -e METEO_API_BASE_URL=https://api.meteo.uniparthenope.it \
   -v "$PWD/demos:/home/jovyan/demos:ro" \
   -v /tmp/lab-meteo-demo-executed:/home/jovyan/executed \
-  wxhub-singleuser:check bash -lc \
+  lab-singleuser:check bash -lc \
   'for notebook in /home/jovyan/demos/*.ipynb; do jupyter nbconvert --execute --to notebook \
   --ExecutePreprocessor.kernel_name=python3 --ExecutePreprocessor.timeout=90 \
   --output-dir /home/jovyan/executed "$notebook"; done'

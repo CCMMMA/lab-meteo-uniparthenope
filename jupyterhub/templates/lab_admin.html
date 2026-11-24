@@ -1,5 +1,5 @@
 {% extends "page.html" %}
-{% block title %}Platform dashboard · {{ wxhub_brand_name }}{% endblock title %}
+{% block title %}Platform dashboard · {{ lab_brand_name }}{% endblock title %}
 
 {% block stylesheet %}
   {{ super() }}
@@ -154,7 +154,7 @@
           {% for r in dash.requests %}
             <tr>
               <th scope="row">{{ r.username }}</th>
-              <td>{{ wxhub_request_types[r.type] }}{% if r.note %}<div class="small lab-muted">{{ r.note }}</div>{% endif %}</td>
+              <td>{{ lab_request_types[r.type] }}{% if r.note %}<div class="small lab-muted">{{ r.note }}</div>{% endif %}</td>
               <td>{{ r.created[:16] | replace("T", " ") }}</td>
               <td>{{ r.status }}{% if r.closed %} <span class="small lab-muted">by {{ r.closed_by }}</span>{% endif %}</td>
               {% if can_change %}

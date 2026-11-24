@@ -11,7 +11,7 @@ These instructions apply to the entire repository.
 - Preserve the single-host Docker Compose architecture unless explicitly changing orchestrators.
 - Never commit credentials, tokens, secrets, downloaded weather data, workspaces, or generated output.
 - Keep shared data and templates read-only in spawned user containers.
-- Keep host paths configurable through the `WXHUB_*_HOST` environment variables.
+- Keep host paths configurable through the `LAB_*_HOST` environment variables.
 - Pin container bases by tag and digest and pin direct Python dependencies.
 - Treat `image/requirements.lock` and `image/IMAGE_ID` as audit snapshots, not portable installers.
 
@@ -27,7 +27,7 @@ When Dockerfiles, dependencies, or Hub configuration change, also run:
 
 ```bash
 docker compose build jupyterhub
-docker build -t wxhub-singleuser:check ./image
+docker build -t lab-singleuser:check ./image
 ```
 
 When the WRF workflow changes and data is available, execute it through Papermill and verify
