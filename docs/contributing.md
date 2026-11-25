@@ -18,6 +18,22 @@ collect or expose personal data must update [Privacy and GDPR](privacy-gdpr.md) 
 `jupyterhub/templates/lab_privacy.html`. Cite only peer-reviewed sources with verified DOIs in
 [Design rationale](design-rationale.md).
 
+## Continuous integration
+
+`.github/workflows/ci.yml` runs on every push to `main`, on pull requests, and on manual dispatch.
+It runs `./scripts/validate_repo.sh`, then builds and smoke-tests the Hub and single-user images.
+`.github/workflows/release.yml` publishes both images on `v*` tags. Every action is pinned to a
+full commit SHA, with the release in a trailing comment; pinned actions run on the Node.js 24
+runtime. To upgrade an action, resolve the new release tag to its commit, check that its
+`action.yml` still accepts the inputs the workflows use, and run CI manually before merging:
+
+```bash
+gh workflow run ci.yml --ref main
+```
+
+The repository is a GitHub fork. GitHub disables workflows on new forks until a maintainer enables
+them under the Actions tab; if pushes to `main` start no CI run, check that setting first.
+
 Public demos are generated, not edited independently. Update `scripts/build_demo_notebooks.py`, run
 it, and commit the resulting thirty output-free files. If the catalog size changes, update the
 validator, `demos/README.md`, and the deployment acceptance count together. Branding changes must
