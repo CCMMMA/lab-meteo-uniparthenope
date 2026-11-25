@@ -83,6 +83,7 @@ access other users' notebooks.
 | `/admin` | administrators | JupyterHub control panel: add/delete users, admin flag, groups, start/stop servers |
 | `/authorize` | administrators, local accounts only | Approve or revoke sign-up requests |
 | `/account` | every user | Personal data, JSON export, data-protection requests |
+| `/home`, `/new`, `/github/…`, `/upload`, `/runtime` | every user, own runtime only | Colab-style start page and notebook workflows ([details](colab-workflows.md)) |
 
 Every change made from the platform dashboard is written to the Hub log with the `lab.meteo.audit`
 logger (role changes, erasures, request decisions).

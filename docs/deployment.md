@@ -76,6 +76,11 @@ the initial password at `/change-password`. For Microsoft or Google sign-in, fol
    server opens at `/user/<name>/lab` with working kernels (see [Architecture](architecture.md#clean-urls-and-the-front-proxy)).
 9. Run one model, one live-instrument, and one AI notebook in the gallery; an explicit upstream
    timeout message is acceptable, an unhandled traceback is not.
+10. Colab-style workflows (see [Colab-style workflows](colab-workflows.md)): with the runtime
+    stopped, `/new` starts it and opens `Untitled.ipynb` in Notebook 7; a gallery card's *Run on a
+    server* link opens a copy under `~/work/github/`, and opening it again opens the same copy;
+    uploading an `.ipynb` file opens it from `~/work/uploads/`, while a non-notebook file is
+    rejected with HTTP 400; *Restart runtime* reconnects; `Ctrl+M` `B` inserts a cell below.
 
 For internet-facing use, terminate HTTPS at a maintained reverse proxy, set `LAB_PUBLIC_HOST` to
 the `https://` URL, and set `LAB_BIND_ADDRESS=127.0.0.1`. See [Security](security.md).
@@ -90,6 +95,8 @@ the `https://` URL, and set `LAB_BIND_ADDRESS=127.0.0.1`. See [Security](securit
 | `LAB_PUBLIC_HOST` | `http://localhost:8000` | Public base URL; `https://` enables secure cookies, HSTS, and SSO callbacks |
 | `LAB_SINGLEUSER_IMAGE` | `lab-singleuser:latest` | Image spawned for users |
 | `LAB_TEMPLATES_HOST` | `${PWD}/templates` | Starter notebooks (read-only) |
+| `LAB_SINGLEUSER_CONFIG_HOST` | `${PWD}/singleuser` | Runtime defaults (Colab shortcuts, completion, autosave), bound read-only at `/opt/lab-meteo` |
+| `LAB_GITHUB_REPOSITORY` | `CCMMMA/lab-meteo-uniparthenope` | Repository whose `demos/` notebooks the start page's *Open in runtime* links import |
 | `LAB_OPENDAP_HOST` | empty | Operational model archive root (read-only); omitted when empty |
 | `LAB_NETWORK_HOST` | empty | Weather-station network root (read-only); omitted when empty |
 | `LAB_SENSORS_HOST` | `/opt/weather/data/raw/sensors` | Raw sensor mirror (read-only) |
@@ -123,7 +130,7 @@ the `https://` URL, and set `LAB_BIND_ADDRESS=127.0.0.1`. See [Security](securit
 
 Colours must use `#RRGGBB`; the light-mode link colour is the primary colour so that link text
 keeps at least 4.5:1 contrast. The gallery and lab share the default palette through
-`demos/lab.css` (published as `lab-meteo-v4.css`; bump the name when changing it so that browser
+`demos/lab.css` (published as `lab-meteo-v6.css`; bump the name when changing it so that browser
 service-worker caches refresh). Recreate the affected containers after configuration changes.
 
 ## Upgrade and rollback

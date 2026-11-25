@@ -1,7 +1,10 @@
 # Architecture
 
 lab.meteo@uniparthenope is a single-host JupyterHub deployment for teaching and research at meteo@uniparthenope.
-The reasoning behind each choice is in [Design rationale](design-rationale.md).
+The reasoning behind each choice is in [Design rationale](design-rationale.md); the user-facing
+behaviour is described in [Colab-style workflows](colab-workflows.md).
+
+![Architecture of lab.meteo@uniparthenope](images/architecture.svg)
 
 ## Components
 
@@ -9,9 +12,10 @@ The reasoning behind each choice is in [Design rationale](design-rationale.md).
 |---|---|
 | JupyterHub 5 | Authentication, RBAC, routing, server lifecycle, Hub database |
 | Authenticator | Local accounts (NativeAuthenticator) or academic SSO (Microsoft Entra ID, Google) |
-| `lab_ext` Hub extension | Privacy notice, accessibility statement, *My data* page, platform dashboard |
+| `lab_ext` Hub extension | Colab-style workspace routes (new notebook, GitHub import, upload, recent files, runtime controls), privacy notice, accessibility statement, *My data* page, platform dashboard |
 | DockerSpawner | One isolated, unprivileged container per user |
-| Single-user image | JupyterLab and the weather-analysis Python stack |
+| Single-user image | Jupyter Server, Notebook 7, JupyterLab, and the weather-analysis Python stack |
+| Runtime defaults (`singleuser/`) | Colab shortcuts, completion, autosave; bound read-only at `/opt/lab-meteo` and copied into user settings at start |
 | Idle culler | Stops servers idle longer than `LAB_IDLE_TIMEOUT` |
 | Public gallery and lab | Static Nginx service: notebook gallery plus JupyterLite with a Pyodide kernel |
 | Front proxy (`web`, Nginx) | Sole public entry point; serves Hub pages at clean URLs without `/hub/` |
@@ -45,6 +49,7 @@ container listens on port 8000 inside the Compose network only.
 | `/` | Redirect to the public gallery `/services/demos/` |
 | `/login`, `/logout`, `/home`, `/spawn`, `/token`, `/change-password`, `/signup`, `/authorize`, `/admin`, `/oauth_callback` | JupyterHub, rewritten internally to `/hub/…` |
 | `/dashboard`, `/account`, `/privacy`, `/accessibility` | `lab_ext` pages, rewritten to `/hub/…` |
+| `/new`, `/github/<owner>/<repo>/blob/<ref>/<path>.ipynb`, `/open?url=`, `/upload` (POST), `/recent`, `/runtime` (POST) | `lab_ext` Colab-style workspace routes (see below) |
 | `/api/…` and `/hub/api/…` | Hub REST API (both forms work; JupyterLab and OAuth use the latter) |
 | `/hub/user/<name>/…` | Hub "start or wait for server" handler, kept under `/hub/` because `/user/<name>/` is the server itself |
 | other `/hub/…` | `GET` redirects to the clean URL; other methods are forwarded |
@@ -58,6 +63,45 @@ server's `_xsrf` cookie, the proxy keeps only the user server's (the first, long
 Per-path request headers are chosen with `map` blocks, not `proxy_set_header` inside locations,
 because a location that sets any proxy header loses the server-level `Upgrade` and `Connection`
 headers that kernel WebSockets need.
+
+## Request routing
+
+```mermaid
+flowchart TD
+    B[Browser] --> W["web (Nginx) :LAB_PORT"]
+    W -->|"/"| R302["302 → /services/demos/"]
+    W -->|"/login, /home, /new, /github/…, /dashboard, …"| RW["rewrite to /hub/…, rewrite Location, re-scope cookies"]
+    W -->|"/user/&lt;name&gt;/…"| US["strip Hub login cookie, keep the server's _xsrf"]
+    W -->|"/services/…"| SV["strip Hub login cookie"]
+    W -->|"/hub/api/…, /hub/user/…"| PT[pass through]
+    RW --> CHP["configurable-http-proxy (Hub container)"]
+    US --> CHP
+    SV --> CHP
+    PT --> CHP
+    CHP -->|"/hub/…"| HUB[JupyterHub + lab_ext]
+    CHP -->|"/services/demos/…"| DEMOS["demos (Nginx, static)"]
+    CHP -->|"/user/&lt;name&gt;/…"| USER["&lt;instance&gt;-user-&lt;name&gt;"]
+```
+
+## Colab-style workspace routes
+
+The `lab_ext.workspace` module adds Colab's notebook workflows to the Hub. Each route requires a
+signed-in user and acts only on that user's own server:
+
+| Route | Behaviour |
+|---|---|
+| `GET /new` | Creates `~/work/UntitledN.ipynb` with one empty code cell and opens it |
+| `GET /github/<owner>/<repo>/blob/<ref>/<path>.ipynb` | Copies a public notebook into `~/work/github/<owner>/<repo>/<path>` (unless a copy exists; `?copy=1` forces a new copy) and opens it |
+| `GET /open?url=` | Accepts a `github.com` or `raw.githubusercontent.com` link and forwards to the route above |
+| `POST /upload` | Stores an uploaded notebook (≤ 25 MB, nbformat ≥ 4) in `~/work/uploads/` and opens it |
+| `GET /recent` | JSON list of the fifteen most recently modified notebooks in `~/work` |
+| `POST /runtime` | `action=restart` stops and restarts the server; `action=delete` stops it (the container is removed, `~/work` is kept) |
+
+If the runtime is not connected, `GET` routes redirect to `/spawn/<user>?next=<route>`, so the
+server starts and the action resumes afterwards. The Hub writes into the server through the
+Jupyter Server contents API with an API token that it creates for the request, restricted to the
+scope `access:servers!user=<name>`, valid for at most five minutes, and deleted as soon as the
+request ends. Notebooks open in the Notebook 7 interface at `/user/<name>/notebooks/<path>`.
 
 ## Instances
 

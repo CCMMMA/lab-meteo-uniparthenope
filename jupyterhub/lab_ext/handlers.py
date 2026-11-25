@@ -399,8 +399,10 @@ class AdminHandler(LabMeteoHandler):
 
 
 def get_handlers(lab: LabMeteoSettings, assets_path: str) -> list[tuple]:
+    from .workspace import get_workspace_handlers  # imported here: workspace builds on this module
+
     kwargs = {"lab": lab}
-    return [
+    return get_workspace_handlers(lab) + [
         (r"/privacy", PrivacyHandler, kwargs),
         (r"/accessibility", AccessibilityHandler, kwargs),
         (r"/account", AccountHandler, kwargs),

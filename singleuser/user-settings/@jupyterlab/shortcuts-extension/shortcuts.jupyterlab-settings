@@ -1,0 +1,113 @@
+{
+  "shortcuts": [
+    {
+      "command": "notebook:insert-cell-below",
+      "keys": [
+        "Ctrl M",
+        "B"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:insert-cell-above",
+      "keys": [
+        "Ctrl M",
+        "A"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:delete-cell",
+      "keys": [
+        "Ctrl M",
+        "D"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:change-cell-to-markdown",
+      "keys": [
+        "Ctrl M",
+        "M"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:change-cell-to-code",
+      "keys": [
+        "Ctrl M",
+        "Y"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:interrupt-kernel",
+      "keys": [
+        "Ctrl M",
+        "I"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:restart-kernel",
+      "keys": [
+        "Ctrl M",
+        "."
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:undo-cell-action",
+      "keys": [
+        "Ctrl M",
+        "Z"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:split-cell-at-cursor",
+      "keys": [
+        "Ctrl M",
+        "-"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:move-cell-up",
+      "keys": [
+        "Ctrl M",
+        "K"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:move-cell-down",
+      "keys": [
+        "Ctrl M",
+        "J"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:run-all-cells",
+      "keys": [
+        "Ctrl F9"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:run-all-above",
+      "keys": [
+        "Ctrl F8"
+      ],
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "notebook:run-all-below",
+      "keys": [
+        "Ctrl F10"
+      ],
+      "selector": ".jp-Notebook"
+    }
+  ]
+}

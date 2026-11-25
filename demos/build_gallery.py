@@ -11,8 +11,18 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import sys
 from pathlib import Path
+
+# Public repository holding these notebooks; "Run on a server" opens them through the Colab-style
+# /github/<owner>/<repo>/blob/<ref>/<path> route of the Hub.
+REPOSITORY = os.environ.get("LAB_GITHUB_REPOSITORY", "CCMMMA/lab-meteo-uniparthenope")
+REF = os.environ.get("LAB_GITHUB_REF", "main")
+
+
+def server_url(path: Path) -> str:
+    return f"/github/{REPOSITORY}/blob/{REF}/demos/{path.name}"
 
 SECTIONS = [
     (1, 10, "Getting started with the meteo@uniparthenope API",
@@ -46,6 +56,8 @@ def card(path: Path) -> str:
         f'<h3><a href="{href}">{html.escape(title)}</a></h3>'
         f"<p>{html.escape(summary)}</p>"
         f'<span class="nb-file">{html.escape(path.name)}</span>'
+        f'<a class="nb-run" href="{html.escape(server_url(path))}"'
+        f' aria-label="Run {html.escape(title)} on a server runtime">Run on a server</a>'
         "</li>"
     )
 
@@ -127,6 +139,9 @@ section h2 { font-size:1.45rem; letter-spacing:-.02em; margin:0 0 .2rem; }
 .nb-card p { margin:0; color:var(--muted); font-size:.92rem; }
 .nb-num { display:inline-grid; place-items:center; min-width:2rem; height:2rem; border-radius:.55rem; font-weight:800; font-size:.85rem;
   background:color-mix(in srgb,var(--secondary) 18%,transparent); color:var(--ink); }
+.nb-run { position:absolute; right:1rem; bottom:.55rem; z-index:1; font-size:.8rem; font-weight:600; padding:.15rem .5rem;
+  border-radius:.4rem; border:1px solid var(--line); background:var(--surface); text-decoration:none; }
+.nb-run:hover { border-color:var(--secondary); }
 .nb-file { position:absolute; left:1.2rem; bottom:.8rem; font:.75rem ui-monospace,Menlo,Consolas,monospace; color:var(--muted); }
 footer { margin-top:3rem; color:var(--muted); border-top:1px solid var(--line); background:color-mix(in srgb,var(--surface) 92%,var(--primary)); }
 footer .shell { display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem; padding-block:1.5rem; }
@@ -168,8 +183,10 @@ footer a { color:inherit; margin-right:1rem; }
           <li>Choose a notebook below; it opens in the browser lab.</li>
           <li>Run cells with <kbd>Shift</kbd>+<kbd>Enter</kbd>; the first run loads the Python runtime.</li>
           <li>Your edits stay in this browser. Use <em>File → Download</em> to keep a copy.</li>
-          <li>Signed-in members get a persistent JupyterLab server with read-only access to the
-            model archive and the station network.</li>
+          <li>Signed-in members can choose <em>Run on a server</em>: the notebook is copied into a
+            persistent server runtime with read-only access to the model archive and the station network.</li>
+          <li>Any public notebook on GitHub opens the same way: replace
+            <code>github.com</code> with this site's address followed by <code>/github</code>.</li>
         </ol>
       </aside>
     </div>
@@ -192,10 +209,23 @@ footer a { color:inherit; margin-right:1rem; }
 """
 
 
+def catalog(notebook_dir: Path) -> list[dict]:
+    """Machine-readable catalog, used by the Examples tab of the signed-in start page."""
+    entries = []
+    for path in sorted(notebook_dir.glob("[0-9][0-9]_*.ipynb")):
+        title, summary = describe(path)
+        entries.append({"file": path.name, "title": title, "summary": summary,
+                        "browser": f"/services/demos/lab/index.html?path={path.name}",
+                        "server": server_url(path)})
+    return entries
+
+
 def main() -> None:
     if len(sys.argv) != 3:
         raise SystemExit("usage: build_gallery.py <notebook-dir> <output-html>")
-    Path(sys.argv[2]).write_text(build(Path(sys.argv[1])), encoding="utf-8")
+    output = Path(sys.argv[2])
+    output.write_text(build(Path(sys.argv[1])), encoding="utf-8")
+    (output.parent / "catalog.json").write_text(json.dumps(catalog(Path(sys.argv[1])), indent=1), encoding="utf-8")
 
 
 if __name__ == "__main__":

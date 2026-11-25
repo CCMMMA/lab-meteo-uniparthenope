@@ -13,6 +13,7 @@ Legal review by the University's Data Protection Officer remains necessary befor
 | Workspace files | Volume `<prefix>-user-<name>` | Until the user deletes them or the account is erased |
 | Data-subject request register | `jupyterhub-data/lab_privacy_requests.json` (mode 600) | Kept as evidence of compliance |
 | Container logs (IP address, path, time) | Docker `json-file` logs, rotated at 10 MB × 5 | Bounded by rotation |
+| Audit lines for notebook creation, GitHub imports (repository and path), uploads (file name), and runtime restarts | Hub container log | Bounded by rotation |
 
 Lawful basis: Art. 6(1)(e), research and teaching tasks carried out in the public interest by the
 University. No special categories of data are needed; users are told not to store them.
@@ -38,6 +39,14 @@ Directive 2002/58/EC: `jupyterhub-hub-login`, `jupyterhub-session-id`, `jupyterh
 (session and routing, at most `LAB_COOKIE_MAX_AGE_DAYS`), and `_xsrf` (forgery protection). The
 banner is therefore informational. Local storage keeps the theme choice and the notice
 acknowledgement. Cookies are `SameSite=Lax` and become `Secure` when `LAB_PUBLIC_HOST` uses HTTPS.
+
+## Colab-style imports
+
+Opening a notebook through `/github/…` makes the **Hub**, not the user's browser, request the file
+from `raw.githubusercontent.com`; GitHub therefore sees the University server's address, not the
+user's. Recent-file listings are computed on request and not stored. JupyterLab and Notebook 7 are
+configured not to fetch news or update notifications from jupyter.org, in both the server runtime
+and the gallery lab.
 
 ## Public gallery
 

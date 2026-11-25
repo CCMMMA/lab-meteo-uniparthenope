@@ -8,3 +8,7 @@ outputs/
 .secrets/
 __pycache__/
 *.pyc
+
+# Promotional video and its working files (kept out of Git)
+media/
+*.mp4

@@ -5,5 +5,9 @@
   "@jupyterlab/filebrowser-extension:browser": {
     "navigateToCurrentDirectory": true,
     "showLastModifiedColumn": true
+  },
+  "@jupyterlab/apputils-extension:notification": {
+    "fetchNews": "false",
+    "checkForUpdates": false
   }
 }

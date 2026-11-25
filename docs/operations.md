@@ -48,6 +48,21 @@ After intentionally rebuilding `lab-singleuser:latest`, run `scripts/freeze_env.
 diff. The snapshot may contain platform-specific base-image references. The pinned base digest and
 `image/requirements.txt` are the portable build inputs.
 
+## Screenshots and the introduction video
+
+Documentation screenshots live in `docs/images/` and are regenerated from a running deployment with
+test accounts only:
+
+```bash
+LAB_CAPTURE_BASE=http://<host>:<port> python3 scripts/capture_media.py <jar-dir> docs/images media/clips
+```
+
+`scripts/make_video.py` (macOS) then builds `media/lab-meteo-intro.mp4`: 90 seconds, 1920×1080, with
+two English audio tracks — the narration (default) and *English (audio comments)*, which describes
+what is on screen — plus English subtitles. Each track uses a female and a male macOS system voice
+over a synthesized music bed, normalised to −16 LUFS. The `media/` directory and all `.mp4` files are
+ignored by Git; publish the video through the University's channels, not the repository.
+
 ## Upgrading from the earlier variable names
 
 Earlier releases used the `WXHUB_` prefix for environment variables and `wxhub` for the default
@@ -68,6 +83,14 @@ host:
 Performance measurements recorded before the rename keep the old container names as evidence.
 
 ## Troubleshooting
+
+- **`/github/…` returns 502 or "GitHub returned …":** the Hub needs outbound HTTPS to
+  `raw.githubusercontent.com`; test with
+  `docker exec <instance>-jupyterhub python -c "import urllib.request; print(urllib.request.urlopen('https://raw.githubusercontent.com').status)"`.
+  A 404 means the repository is private or the branch, tag, or path is wrong.
+- **Colab shortcuts or autosave defaults are missing:** confirm `LAB_SINGLEUSER_CONFIG_HOST` points
+  to the `singleuser/` directory on the host and restart the user's runtime; defaults are copied only
+  into settings files that do not exist yet.
 
 - **Server does not start:** inspect Hub logs; confirm the user image and `lab-net` exist; verify
   every configured host path exists.

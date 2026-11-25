@@ -18,7 +18,8 @@ and the AgID guidelines. The public statement is served at `/accessibility`. Its
 | 2.4.1 Bypass blocks | "Skip to main content" link on every Hub page and on the gallery |
 | 2.4.7 Focus visible | 3 px focus ring on all interactive elements |
 | 3.3.1, 3.3.2 Errors and labels | Visible labels; login errors are announced and linked with `aria-describedby` |
-| 4.1.2 Name, role, value | Toggle buttons expose `aria-pressed`; icon-only controls have accessible names |
+| 4.1.2 Name, role, value | Toggle buttons expose `aria-pressed`; icon-only controls have accessible names; the start page's *Open notebook* tabs use the WAI-ARIA tab pattern (`tablist`, `tab`, `tabpanel`, `aria-selected`, arrow-key navigation) |
+| 4.1.3 Status messages | Runtime state (*Connected* / *Not connected*) and list updates are exposed through `role="status"` and `aria-live` regions |
 | 2.3.3 / user preferences | `prefers-reduced-motion`, `prefers-color-scheme`, and forced-colours support |
 
 ## Known limitations

@@ -35,6 +35,20 @@ arbitrary code execution on institutional servers — while keeping the editing 
 The signed-in tier provides what the browser cannot: the full scientific stack (Xarray [8], Dask,
 Zarr, Cartopy), persistent storage, and direct read access to the operational archives.
 
+Google Colaboratory made this pattern familiar to a generation of students and researchers by
+combining zero-installation access, free compute, and a single-document editor, at the price of
+proprietary infrastructure and time-limited sessions [23]. lab.meteo@uniparthenope keeps the
+familiar gestures — an *Open notebook* dialog with examples, recent files, GitHub, and upload; the
+`/github/<owner>/<repo>/blob/<ref>/<path>` URL scheme; *Connect*, *Restart runtime*, and
+*Disconnect and delete runtime*; Colab's keyboard shortcuts — but implements them on open-source
+Jupyter components and University infrastructure, so that data stays under institutional control
+and the operational archives are reachable without copying. Studies of notebook practice show that
+notebooks serve both exploration and explanation, and that the two goals pull in different
+directions [24]; that notebooks are widely used as vehicles of open science [25]; and that only a
+minority of published notebooks re-execute with the same results [3]. Opening a notebook from its
+public repository into a runtime with a fixed, versioned scientific stack and the original data
+therefore lowers the cost of re-execution, which is the first step towards reproducibility.
+
 Visual identity mirrors the public meteo@uniparthenope forecast site and sensor-network portal
 (gradient navigation, circular logo, card layout, day/night themes) so that the workspace is
 perceived as part of the same institutional service.
@@ -184,3 +198,14 @@ statement listing the residual limitations of JupyterLab-based content.
     understanding of data science notebook (in)accessibility,” in *Proc. 25th Int. ACM SIGACCESS
     Conf. on Computers and Accessibility (ASSETS ’23)*, 2023, pp. 1–19.
     doi:[10.1145/3597638.3608417](https://doi.org/10.1145/3597638.3608417)
+23. T. Carneiro, R. V. Medeiros Da Nóbrega, T. Nepomuceno, G.-B. Bian, V. H. C. de Albuquerque,
+    and P. P. Rebouças Filho, “Performance analysis of Google Colaboratory as a tool for
+    accelerating deep learning applications,” *IEEE Access*, vol. 6, pp. 61677–61685, 2018.
+    doi:[10.1109/ACCESS.2018.2874767](https://doi.org/10.1109/ACCESS.2018.2874767)
+24. A. Rule, A. Tabard, and J. D. Hollan, “Exploration and explanation in computational notebooks,”
+    in *Proc. 2018 CHI Conference on Human Factors in Computing Systems*, ACM, 2018, pp. 1–12.
+    doi:[10.1145/3173574.3173606](https://doi.org/10.1145/3173574.3173606)
+25. B. M. Randles, I. V. Pasquetto, M. S. Golshan, and C. L. Borgman, “Using the Jupyter notebook as
+    a tool for open science: An empirical study,” in *Proc. 2017 ACM/IEEE Joint Conference on
+    Digital Libraries (JCDL)*, IEEE, 2017, pp. 1–2.
+    doi:[10.1109/JCDL.2017.7991618](https://doi.org/10.1109/JCDL.2017.7991618)

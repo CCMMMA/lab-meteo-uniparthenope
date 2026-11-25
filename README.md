@@ -22,6 +22,27 @@ The repository accompanies the Computer Science bachelor thesis *Development and
 deployment of an interactive environment based on Jupyter Notebook* at the University of Naples
 “Parthenope” (author: Mariano Pio Stora; supervisor: Prof. Raffaele Montella).
 
+![Public notebook gallery](docs/images/gallery.png)
+
+## A Colab-style workspace for weather and marine science
+
+| Run in the browser, no account | Open notebooks like in Colab |
+|---|---|
+| ![A wind-forecast notebook running in the browser runtime](docs/images/browser-runtime.png) | ![Start page with Examples, Recent, GitHub, and Upload tabs](docs/images/start-page.png) |
+| **Full server runtime with the scientific stack** | **Administration and read-only data audit** |
+| ![The same notebook running on a server runtime in Notebook 7](docs/images/server-notebook.png) | ![Platform dashboard](docs/images/dashboard.png) |
+
+- **Open notebook** dialog with *Examples*, *Recent*, *GitHub*, and *Upload*, plus **+ New notebook**.
+- Colab's URL scheme: `/github/<owner>/<repo>/blob/<ref>/<file>.ipynb` opens any public notebook in
+  your runtime, and an *Open in lab.meteo* badge links to it:
+  [![Open in lab.meteo](docs/images/open-in-lab-meteo.svg)](http://193.205.230.6:8290/github/CCMMMA/lab-meteo-uniparthenope/blob/main/demos/05_wind_forecast.ipynb)
+- **Connect**, **Restart runtime**, and **Disconnect and delete runtime**, with the runtime's
+  memory and CPU tier shown as in *Change runtime type*.
+- The Notebook 7 single-document editor, Colab keyboard shortcuts (`Ctrl+M` `B`, `Ctrl+M` `M`,
+  `Ctrl+F9`, …), completion while typing, and frequent autosave.
+
+The full walkthrough is in [Colab-style workflows](docs/colab-workflows.md).
+
 ## What you get
 
 - A public notebook gallery and browser lab that need no account.
@@ -41,11 +62,13 @@ deployment of an interactive environment based on Jupyter Notebook* at the Unive
 
 ## Architecture
 
+![Architecture of lab.meteo@uniparthenope](docs/images/architecture.svg)
+
 ```text
 browser ──► web proxy :LAB_PORT ──► JupyterHub ──► DockerSpawner ──► <instance>-user-<username>
-   clean URLs: /login, /home, /dashboard, /account, /privacy (no /hub/ prefix)
+   clean URLs: /login, /home, /new, /github/…, /dashboard, /account, /privacy (no /hub/ prefix)
                     │                                      │
-                    ├── Hub state, roles, lab_ext pages  ├── persistent ~/work
+                    ├── Hub state, roles, lab_ext pages    ├── persistent ~/work
                     ├── Docker socket                      ├── read-only ~/data/opendap, ~/data/network
                     └── /services/demos/ ──► gallery + browser-based JupyterLite lab
 ```
@@ -120,14 +143,17 @@ Data lineage, checksums, outputs, and limitations are documented in
 | Path | Purpose |
 |---|---|
 | `jupyterhub/` | Hub image, DockerSpawner configuration, templates, and logo |
-| `jupyterhub/lab_ext/` | Hub extension: settings, SSO selection, admin/privacy/account pages, user CLI |
+| `jupyterhub/lab_ext/` | Hub extension: settings, SSO selection, Colab-style workspace routes, admin/privacy/account pages, user CLI |
+| `singleuser/` | Read-only runtime defaults (Colab shortcuts, completion, autosave) for user servers |
+| `proxy/` | Front proxy serving clean URLs |
 | `image/` | Versioned single-user scientific image and environment snapshot |
 | `notebooks/` | Executable WRF analysis and Voilà dashboard |
 | `demos/` | Gallery generator, JupyterLite image, and thirty browser-executed notebooks |
 | `templates/` | Read-only starter notebooks, including local archive access |
 | `scripts/` | Acquisition, validation, execution, and benchmark utilities |
 | `measurements/` | Committed pilot benchmark evidence |
-| `docs/` | Architecture, rationale, deployment, operations, identity, security, privacy, accessibility, and reproducibility |
+| `docs/` | Colab-style workflows, architecture, rationale, deployment, operations, identity, security, privacy, accessibility, and reproducibility; figures and screenshots in `docs/images/` |
+| `scripts/capture_media.py`, `scripts/make_video.py` | Capture screenshots and clips, and build the 90-second introduction video (output in `media/`, kept out of Git) |
 | `.github/workflows/` | Continuous integration configuration |
 
 Pushing a tag such as `v1.0.0` runs the release workflow and publishes versioned images as

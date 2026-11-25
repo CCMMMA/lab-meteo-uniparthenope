@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 600" width="1040" height="600" role="img" aria-labelledby="t d" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="t">lab.meteo@uniparthenope architecture</title>
+  <desc id="d">Browsers reach a single Nginx front proxy. Anonymous visitors use the static gallery and a
+    JupyterLite lab whose Python kernel runs in the browser. Signed-in members reach JupyterHub, which
+    starts one isolated container per user with a persistent workspace and read-only model and station archives.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f4e79"/>
+    </marker>
+    <linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#1f4e79"/><stop offset="1" stop-color="#181c63"/></linearGradient>
+  </defs>
+  <rect width="1040" height="600" fill="#f4f7fa"/>
+  <rect x="0" y="0" width="1040" height="56" fill="url(#g)"/>
+  <text x="24" y="36" fill="#fff" font-size="20" font-weight="700">lab.meteo@uniparthenope — single-host Docker Compose deployment</text>
+
+  <!-- browsers -->
+  <g font-size="14">
+    <rect x="24" y="96" width="190" height="96" rx="14" fill="#fff" stroke="#dbe3ea"/>
+    <text x="40" y="124" font-weight="700" fill="#13283a">Anonymous visitor</text>
+    <text x="40" y="148" fill="#55687a">Gallery + JupyterLite</text>
+    <text x="40" y="168" fill="#55687a">Python runs in the</text>
+    <text x="40" y="186" fill="#55687a">browser (WebAssembly)</text>
+    <rect x="24" y="300" width="190" height="96" rx="14" fill="#fff" stroke="#dbe3ea"/>
+    <text x="40" y="328" font-weight="700" fill="#13283a">Signed-in member</text>
+    <text x="40" y="352" fill="#55687a">Start page, Notebook 7,</text>
+    <text x="40" y="372" fill="#55687a">JupyterLab; local or</text>
+    <text x="40" y="390" fill="#55687a">academic SSO login</text>
+  </g>
+
+  <!-- proxy -->
+  <rect x="270" y="190" width="170" height="120" rx="14" fill="#fff" stroke="#2a91eb" stroke-width="2"/>
+  <text x="286" y="218" font-size="15" font-weight="700" fill="#13283a">web · Nginx</text>
+  <text x="286" y="242" font-size="13" fill="#55687a">only published port</text>
+  <text x="286" y="262" font-size="13" fill="#55687a">clean URLs (no /hub/)</text>
+  <text x="286" y="282" font-size="13" fill="#55687a">Hub cookie stripped</text>
+  <text x="286" y="300" font-size="13" fill="#55687a">for user servers</text>
+  <path d="M214,144 C245,150 250,215 268,225" fill="none" stroke="#1f4e79" stroke-width="2" marker-end="url(#a)"/>
+  <path d="M214,348 C245,340 250,290 268,280" fill="none" stroke="#1f4e79" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- hub -->
+  <rect x="490" y="96" width="250" height="300" rx="14" fill="#fff" stroke="#dbe3ea"/>
+  <text x="506" y="124" font-size="15" font-weight="700" fill="#13283a">JupyterHub 5</text>
+  <g font-size="13" fill="#55687a">
+    <text x="506" y="148">authentication · RBAC roles</text>
+    <text x="506" y="168">configurable-http-proxy</text>
+    <text x="506" y="188">DockerSpawner · idle culler</text>
+  </g>
+  <rect x="506" y="204" width="218" height="88" rx="10" fill="#eef5fc" stroke="#2a91eb"/>
+  <text x="518" y="226" font-size="13" font-weight="700" fill="#13283a">lab_ext (Hub extension)</text>
+  <g font-size="12" fill="#55687a">
+    <text x="518" y="246">/new · /github/… · /upload · /runtime</text>
+    <text x="518" y="264">/dashboard · /account · /privacy</text>
+    <text x="518" y="282">/accessibility</text>
+  </g>
+  <rect x="506" y="306" width="218" height="74" rx="10" fill="#f4f7fa" stroke="#dbe3ea"/>
+  <text x="518" y="328" font-size="13" font-weight="700" fill="#13283a">demos · Nginx (static)</text>
+  <text x="518" y="348" font-size="12" fill="#55687a">gallery, catalog.json,</text>
+  <text x="518" y="366" font-size="12" fill="#55687a">JupyterLite + Pyodide</text>
+  <path d="M440,250 L486,250" fill="none" stroke="#1f4e79" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- user containers -->
+  <rect x="790" y="96" width="226" height="210" rx="14" fill="#fff" stroke="#dbe3ea"/>
+  <text x="806" y="124" font-size="15" font-weight="700" fill="#13283a">User container (one each)</text>
+  <g font-size="13" fill="#55687a">
+    <text x="806" y="148">Jupyter Server · Notebook 7</text>
+    <text x="806" y="168">JupyterLab · ipykernel</text>
+    <text x="806" y="188">Xarray · Dask · Zarr · Cartopy</text>
+    <text x="806" y="208">no capabilities,</text>
+    <text x="806" y="226">no-new-privileges, CPU/RAM tier</text>
+  </g>
+  <rect x="806" y="240" width="194" height="50" rx="8" fill="#e9f7ef" stroke="#2e8b57"/>
+  <text x="818" y="262" font-size="13" font-weight="700" fill="#1d5c3a">~/work (read/write)</text>
+  <text x="818" y="280" font-size="12" fill="#1d5c3a">persistent Docker volume</text>
+  <path d="M740,200 L786,200" fill="none" stroke="#1f4e79" stroke-width="2" marker-end="url(#a)"/>
+  <text x="742" y="190" font-size="11" fill="#55687a">spawn</text>
+
+  <!-- data -->
+  <rect x="490" y="440" width="526" height="132" rx="14" fill="#fff" stroke="#b3261e" stroke-dasharray="6 4"/>
+  <text x="506" y="468" font-size="15" font-weight="700" fill="#13283a">Institutional archives — bound read-only</text>
+  <g font-size="13" fill="#55687a">
+    <text x="506" y="494">~/data/opendap: WRF, ROMS, WaveWatch III, WaComM, AIquam output</text>
+    <text x="506" y="516">~/data/network: weather-station observations</text>
+    <text x="506" y="538">enforced by read-only binds, a spawn-time check, and a live audit</text>
+    <text x="506" y="560">runtime defaults (Colab shortcuts, autosave): /opt/lab-meteo, read-only</text>
+  </g>
+  <path d="M903,306 L903,436" fill="none" stroke="#b3261e" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <text x="910" y="380" font-size="12" fill="#b3261e">ro</text>
+
+  <rect x="24" y="440" width="416" height="132" rx="14" fill="#fff" stroke="#dbe3ea"/>
+  <text x="40" y="468" font-size="15" font-weight="700" fill="#13283a">Outbound calls</text>
+  <g font-size="13" fill="#55687a">
+    <text x="40" y="494">Browser → api.meteo.uniparthenope.it (public forecasts)</text>
+    <text x="40" y="516">Browser → jsDelivr / PyPI (Pyodide runtime, gallery only)</text>
+    <text x="40" y="538">Hub → raw.githubusercontent.com (/github/ imports only)</text>
+    <text x="40" y="560">No analytics, no news or update checks</text>
+  </g>
+</svg>

@@ -27,6 +27,8 @@ services:
       DOCKER_NOTEBOOK_IMAGE: ${LAB_SINGLEUSER_IMAGE:-lab-singleuser:latest}
       LAB_PUBLIC_HOST: ${LAB_PUBLIC_HOST:-http://localhost:8000}
       LAB_TEMPLATES_HOST: ${LAB_TEMPLATES_HOST:-${PWD}/templates}
+      LAB_SINGLEUSER_CONFIG_HOST: ${LAB_SINGLEUSER_CONFIG_HOST:-${PWD}/singleuser}
+      LAB_GITHUB_REPOSITORY: ${LAB_GITHUB_REPOSITORY:-CCMMMA/lab-meteo-uniparthenope}
       LAB_SENSORS_HOST: ${LAB_SENSORS_HOST:-/opt/weather/data/raw/sensors}
       LAB_MODELS_HOST: ${LAB_MODELS_HOST:-/opt/weather/data/raw/models}
       LAB_CURATED_HOST: ${LAB_CURATED_HOST:-/opt/weather/data/curated}

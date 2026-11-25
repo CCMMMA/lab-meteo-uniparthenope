@@ -164,6 +164,11 @@ c.JupyterHub.template_vars = {
     "lab_authenticator": WX.authenticator,
     "lab_https": WX.https,
     "lab_cookie_days": c.JupyterHub.cookie_max_age_days,
+    "lab_idle_minutes": WX.idle_timeout // 60,
+    "lab_github_repository": os.environ.get("LAB_GITHUB_REPOSITORY", "CCMMMA/lab-meteo-uniparthenope"),
+    # JupyterHub evaluates callables with the current user (None when signed out); home.html
+    # uses the result to describe the runtime like Colab's "Change runtime type".
+    "lab_runtime": lambda user: runtime_summary(user),
 }
 
 #------------------------------------------------------------------------------
@@ -176,7 +181,16 @@ c.DockerSpawner.use_internal_ip = True
 c.DockerSpawner.remove = True
 c.DockerSpawner.prefix = WX.container_prefix
 c.Spawner.default_url = "/lab"
-c.Spawner.cmd = ["jupyterhub-singleuser"]
+# Colab-like editor defaults (shortcuts, completion, autosave) are copied from the read-only
+# runtime-config mount into the user's settings without overwriting the user's own choices.
+RUNTIME_CONFIG = "/opt/lab-meteo"
+c.Spawner.cmd = [
+    "sh", "-c",
+    f'mkdir -p "$HOME/.jupyter/lab/user-settings" && '
+    f'cp -Rn {RUNTIME_CONFIG}/user-settings/. "$HOME/.jupyter/lab/user-settings/" 2>/dev/null; '
+    'exec jupyterhub-singleuser "$@"',
+    "jupyterhub-singleuser",
+]
 c.Spawner.http_timeout = 120
 c.Spawner.start_timeout = 300
 
@@ -187,7 +201,10 @@ c.DockerSpawner.notebook_dir = notebook_dir
 # writable mount is the user's own named volume; every shared source is bound read-only.
 c.DockerSpawner.volumes = {f"{WX.volume_prefix}-user-{{username}}": notebook_dir}
 c.DockerSpawner.read_only_volumes = {s.host_path: s.container_path for s in WX.data_sources}
-READ_ONLY_TARGETS = {s.container_path for s in WX.data_sources}
+runtime_config_host = os.environ.get("LAB_SINGLEUSER_CONFIG_HOST", "")
+if runtime_config_host:
+    c.DockerSpawner.read_only_volumes[runtime_config_host] = RUNTIME_CONFIG
+READ_ONLY_TARGETS = {s.container_path for s in WX.data_sources} | {RUNTIME_CONFIG}
 
 # Defence in depth: user containers cannot gain privileges, so a read-only bind cannot be
 # remounted read-write, and process counts are bounded.
@@ -217,6 +234,14 @@ def resource_tier(user) -> str:
     if "students" in groups:
         return "student"
     return "user"
+
+
+def runtime_summary(user) -> dict:
+    if user is None:
+        return {}
+    tier = resource_tier(user)
+    memory, cpus = RESOURCE_TIERS[tier]
+    return {"tier": tier, "memory": memory, "cpus": int(cpus) if float(cpus).is_integer() else cpus}
 
 
 def pre_spawn_hook(spawner):

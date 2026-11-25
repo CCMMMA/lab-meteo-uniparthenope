@@ -16,16 +16,25 @@
 }
 
 #jp-menu-panel,
-#jp-top-bar {
+#jp-top-bar,
+#jp-menu-panel .lm-MenuBar,
+#jp-menu-panel .lm-MenuBar-content {
   background: transparent !important;
   color: #fff !important;
+  border: 0 !important;
+}
+
+#jp-menu-panel {
+  display: flex !important;
+  align-items: center;
 }
 
 #jp-menu-panel::before {
   content: "lab.meteo@uniparthenope";
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
-  min-width: 15rem;
+  min-width: 13rem;
   padding: 0 .8rem;
   color: #fff;
   font-weight: 700;

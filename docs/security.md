@@ -81,6 +81,20 @@ initial passwords live in untracked files (`.env`, `.secrets/`) with mode 600. N
 place them in notebooks, or pass passwords as command-line arguments. Report vulnerabilities
 privately to the repository owner.
 
+## Colab-style imports and uploads
+
+- `/github/…` fetches only `https://raw.githubusercontent.com/<owner>/<repo>/<ref>/<path>`, built
+  from validated components (no `..`, no hidden names, `.ipynb` only) without following redirects,
+  so the route cannot be used to reach internal hosts (server-side request forgery). `/open?url=`
+  accepts only `github.com` and `raw.githubusercontent.com` links.
+- Imported and uploaded files must be JSON notebooks in format 4 or later and at most 25 MB.
+- The Hub writes into a user's server with a token that it creates for that request only, scoped to
+  `access:servers!user=<name>`, valid for at most five minutes, and deleted when the request ends;
+  it never reuses a user's session or reaches another user's server.
+- Imported notebooks are untrusted code. Notebook output is not trusted until the user runs it,
+  and code runs only when the user executes it, inside that user's unprivileged container.
+- Each creation, import, upload, and runtime restart or deletion is written to the audit log.
+
 ## Anonymous notebooks and AI demonstrations
 
 The gallery's notebooks run in the visitor's browser and can reach only public, CORS-enabled
